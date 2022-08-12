@@ -1,0 +1,11 @@
+.switch-row {width: 100%; display: flex;}
+
+.switch-label, .switch-value {width: 50%; display: flex;}
+
+.flex-end {justify-content: flex-end;}
+.flex-start {justify-content: flex-start;}
+.center {justify-content: center;}
+
+.switch-value {font-style: italic;}
+
+.switch-value:hover {color: white;}

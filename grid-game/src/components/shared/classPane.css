@@ -1,0 +1,52 @@
+.class-pane {
+    width: 90%; height: 150px;
+    background-color: #202020;
+    border-radius: 10px;
+    display: flex;
+    margin: 1% 0;
+}
+.class-pane:hover {background-color: #303030; outline: 0.5px solid gray;}
+
+.selected-class {
+    background-color: #303030; color: lightblue; 
+    outline: 0.5px solid lightblue;}
+
+.class-pane-padding {width: 100%; padding: 3%;}
+
+.class-pane-header-row {
+    width: 100%;
+    display: flex; justify-content: space-between;
+}
+
+.class-tooltip:hover {color: dodgerblue;}
+
+.class-pane-body {width: 100%; display: flex;}
+
+.class-pane-attributes {
+    width: 60%;
+    display: flex; flex-direction: column;
+    font-size: 60%;
+}
+.class-pane-attributes > span {margin-left: 2px;}
+
+.class-pane-attacks-powers {
+    width: 40%;
+    display: flex; flex-direction: column;
+    align-items: center;
+    font-size: 60%;
+}
+
+.key-attr-row {text-align: center; border-bottom: 0.5px solid lightgray;}
+
+.list-grouping {
+    display: flex; flex-direction: column;
+    align-items: center;
+}
+
+.list-name {
+    width: 100%; text-align: center;
+    border-bottom: 0.5px solid lightgray;
+}
+
+.list-item {color: #909090;}
+.list-item:hover {color: lightgray;}

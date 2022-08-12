@@ -1,0 +1,59 @@
+.stat-pane {
+    width: 100%; height: 28%;
+    display: flex; justify-content: space-around;
+    background-color: #202020;
+    font-size: 85%;
+    border-radius: 10px;
+    padding: 1% 0;
+}
+
+.left-list, .atk-bonus-list, .ele-bonus-list {
+    display: flex; flex-direction: column;
+    justify-content: space-around;
+}
+
+.left-list {width: 25%;}
+.atk-bonus-list {width: 30%;}
+.ele-bonus-list {width: 30%;}
+
+.list-row {width: 100%; display: flex;}
+
+.list-label {
+    width: 65%;
+    display: flex; 
+    justify-content: flex-end; align-items: center;
+    padding-right: 5%;
+}
+
+.list-value {width: 30%; }
+
+.atk-bonus-pane, .ele-bonus-pane {
+    display: flex;
+    outline: 0.5px solid gray;
+    border-radius: 10px;   
+}
+
+.atk-bonus-pane {height: 30%; width: 80%; font-size: 90%;}
+.ele-bonus-pane {height: 19%; width: 70%; font-size: 75%;}
+
+.atk-bonus-label, .ele-bonus-label {
+    width: 40%;
+    display: flex; 
+    justify-content: center; align-items: center;
+}
+
+.atk-bonus-values, .ele-bonus-values {
+    width: 60%;
+    display: flex; flex-direction: column;
+    justify-content: space-around; align-items: flex-start;
+    background-color: #303030;
+    padding-left: 5%;
+}
+
+.ele-bonus-values > span {margin: -1px 0;}
+
+.fire {color: crimson;}
+.wind {color: lightblue;}
+.earth {color: darkgoldenrod;}
+.shadow {color: purple;}
+.water {color: dodgerblue;}

@@ -1,0 +1,21 @@
+.dropdown-container {
+    width: 100%;
+    display: flex;
+}
+
+.dropdown-label, .dropdown-select-container {
+    display: flex; width: 50%;
+}
+
+.dropdown-label {justify-content: flex-end;}
+.dropdown-select-container {justify-content: center;}
+
+.dropdown-selector {
+    width: 70%;
+    background-color: #303030;
+    text-align: center;
+}
+.dropdown-selector:hover {color: white;}
+
+.full-width {width: 100%;}
+.shorter-width {width: 60%;}

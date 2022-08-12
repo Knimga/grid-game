@@ -1,0 +1,59 @@
+.board {
+    display: flex; flex-wrap: wrap;
+    width: 40%;
+    align-content: flex-start;
+}
+
+.square {
+    display: flex; flex-direction: column;
+    justify-content: flex-end;
+    outline: 0.1px solid gray;
+    cursor: pointer;
+}
+
+.wall {background-color: #303030;}
+
+
+.char-hover:hover {outline: 0.5px solid white; color: white;}
+
+.char-square-top, .char-square-bottom {
+    width: 100%;
+    display: flex; flex-direction: column;
+    align-items: center;
+}
+.char-square-top {height: 20%;}
+.char-square-bottom {height: 80%; justify-content: flex-end;}
+
+.char-square-effects-row {
+    width: 100%; height: 100%;
+    display: flex; align-items: center;
+}
+
+.char-square-effect {
+    width: 20%; height: 90%;
+    display: flex; 
+    justify-content: center; align-items: center;
+    background-color: #303030;
+}
+
+.move-range {background-color: #505050;}
+.move-range:hover {background-color: #606060;}
+
+.offense-range {background-color: #966262;}
+.defense-range {background-color: #517d9e;}
+
+.off-aoe-range {background-color: #d44e4e;}
+.def-aoe-range {background-color: #3991d4;}
+
+.charbar-container {
+    width: 100%; height: 25%;
+    display: flex; flex-direction: column;
+    background-color: #303030;
+}
+
+.hpbar {height: 65%; background-color: darkred;}
+
+.mpbar {height: 35%; background-color: dodgerblue;}
+
+.square-char-name {font-size: 55%; text-align: center;}
+

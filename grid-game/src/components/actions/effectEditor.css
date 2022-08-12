@@ -1,0 +1,35 @@
+.effect-edit-pane {
+    width: 90%;
+    display: flex; flex-direction: column;
+    align-items: center;
+    outline: 0.5px solid gray;
+    border-radius: 10px;
+    padding: 2%;
+}
+
+.delete-effect-button {align-self: flex-start;}
+.delete-effect-button:hover {color: white;}
+
+.effect-editor-field-row {
+    width: 100%;
+    display: flex;
+}
+
+.effect-editor-field-label, .effect-editor-field-value {
+    width: 50%;
+    display: flex; align-items: center;
+}
+
+.effect-editor-field-label {justify-content: flex-end;}
+.effect-editor-field-value {justify-content: center;}
+
+.effect-dmg-editor {
+    width: 80%;
+    display: flex; flex-direction: column;
+    background-color: #101010;
+    border-radius: 10px;
+}
+
+.roll-editor-container {
+    width: 100%; display: flex; flex-direction: column;
+}

@@ -1,0 +1,22 @@
+.char-tool-container {
+    width: 60%; height: 10%;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: space-between;
+}
+
+.num-stepper-container {width: 100%;}
+
+.name-container {
+    width: 30%;
+    display: flex; justify-content: flex-end;
+    white-space: nowrap;
+}
+
+.char-tool-stepper {width: 100%;}
+
+.button-group {width: 25px;}
+
+.char-brush-name {
+    margin-right: 5px;
+    font-size: 70%; white-space: wrap;
+}

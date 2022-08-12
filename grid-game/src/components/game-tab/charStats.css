@@ -1,0 +1,97 @@
+.char-stats {
+    width: 90%; height: 35%;
+    margin: 2%;
+    display: flex; flex-direction: column;
+    align-items: center;
+    background-color: #303030;
+    outline: 5px solid #202020;
+    border-radius: 10px;
+    font-size: 80%;
+}
+
+.char-stats-padding {
+    width: 100%; height: 100%;
+    display: flex; flex-direction: column;
+    align-items: center;
+}
+
+.top-section {
+    width: 100%;
+    display: flex; flex-direction: column;
+    align-items: center;
+}
+.top-section > strong {margin-bottom: 2%;}
+
+.char-stats-name-bar {
+    width: 100%;
+    display: flex; justify-content: space-around;
+    align-items: center;
+    margin-bottom: 3%;
+}
+.char-stats-name-bar > strong {font-size: 120%;}
+
+.char-stats-hp-bar-container, .char-stats-mp-bar-container {
+    width: 90%; 
+    display: flex;
+    background-color: #202020;
+    border-radius: 10px;
+}
+.char-stats-hp-bar-container {height: 10px;}
+.char-stats-mp-bar-container {height: 5px;}
+
+.char-stats-hp-bar {
+    height: 100%;
+    background-color: darkred;
+    border-radius: 10px;
+}
+.char-stats-mp-bar {
+    height: 100%;
+    background-color: dodgerblue;
+    border-radius: 10px;
+}
+
+.char-stats-block {
+    width: 90%; height: 70%;
+    display: flex;
+    background-color: #202020;
+    border-radius: 10px;
+    font-size: 85%;
+}
+
+.char-stats-block-column {
+    width: 50%; height: 100%;
+    display: flex; flex-direction: column;
+    justify-content: space-around; align-items: center;
+}
+
+.char-stats-block-row {
+    width: 100%; display: flex; justify-content: space-between;
+}
+
+.char-stat-label {width: 65%; text-align: right; white-space: nowrap;}
+.char-stat-value {width: 30%;}
+
+.atk-bonus-pane {
+    display: flex;
+    outline: 0.5px solid gray;
+    border-radius: 10px;   
+}
+
+.atk-bonus-pane {height: 25%; width: 80%; font-size: 90%;}
+
+.atk-bonus-label {
+    width: 40%;
+    display: flex; 
+    justify-content: center; align-items: center;
+}
+
+.atk-bonus-values {
+    width: 60%;
+    display: flex; flex-direction: column;
+    justify-content: space-around; align-items: flex-start;
+    background-color: #303030;
+    padding-left: 5%;
+}
+
+.buffed {color: green;}
+.debuffed {color: red;}

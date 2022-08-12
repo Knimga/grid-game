@@ -1,0 +1,89 @@
+.class-builder-container {
+    width: 50%; height: 100%;
+    outline: 0.5px solid gray;
+    display: flex; flex-direction: column;
+}
+
+.class-builder-main-edit {
+    width: 100%; height: 25%;
+    display: flex; align-items: center;
+}
+
+.class-builder-save-button {
+    align-self: flex-start;
+    margin: 5px 0 0 5px;
+    color: lightgray;
+}
+.class-builder-save-button:hover {color: lightblue;}
+.not-saved {color: pink;}
+
+.class-builder-column {
+    width: 50%; height: 100%;
+    display: flex; flex-direction: column;
+    justify-content: space-around; align-items: center;
+}
+.class-builder-column > * {margin-bottom: 3%;}
+
+.class-builder-attr-column {
+    width: 75%; height: 100%;
+    align-self: flex-start;
+    display: flex; flex-direction: column;
+    justify-content: center; align-items: center;
+}
+.class-builder-attr-column > small {margin-top: 3%; color: gray;}
+
+.class-builder-actions-armors {
+    width: 100%; height: 75%;
+    display: flex;
+}
+
+.class-builder-attr-row {
+    width: 100%;
+    display: flex;
+}
+
+.class-builder-attr-label {
+    width: 50%; 
+    display: flex; justify-content: flex-end;
+    align-items: center;
+}
+
+.class-builder-actions, .class-builder-armor {
+    width: 100%;
+    display: flex; flex-direction: column;
+    justify-content: space-around; align-items: center;
+}
+.class-builder-actions {height: 70%;}
+.class-builder-armor {height: 30%;}
+
+.class-builder-list {width: 90%; display: flex; flex-direction: column;}
+
+.weapons-list {height: 35%;}
+.abilities-list {height: 55%;}
+.armor-list {height: 70%;}
+.action-list {height: 95%;}
+
+.class-builder-list-header {
+    width: 90%; text-align: left;
+}
+
+.class-builder-list-box {
+    width: 100%; height: 90%;
+    display: flex; flex-direction: column;
+    overflow-y: scroll;
+    background-color: #202020;
+    border-radius: 10px;
+}
+.class-builder-list-box > * {margin: 2%;}
+
+.class-builder-list-box-row {
+    width: 95%;
+    display: flex; 
+    justify-content: space-between; align-items: center;
+}
+
+.arrow-icons {
+    font-size: 125%;
+    color: gray;
+}
+.arrow-icons:hover {color: lightgray;}

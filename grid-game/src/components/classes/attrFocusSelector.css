@@ -1,0 +1,28 @@
+.attr-focus-selector-container, .attr-focus-selector-label, 
+.attr-focus-select-column, .attr-focus-select-box {display: flex;}
+
+.attr-focus-selector-container {width: 100%;}
+
+.attr-focus-selector-label {
+    width: 50%;
+    justify-content: flex-end;
+    align-items: center;
+}
+
+.attr-focus-select-column {
+    width: 50%;
+    flex-direction: column;
+    align-items: center;
+    font-size: 90%;
+}
+
+.attr-focus-select-box {
+    width: 50%;
+    flex-direction: column; align-items: center;
+    background-color: #202020; border-radius: 10px;
+}
+
+.attr-focus-item {cursor: pointer; margin-bottom: -2%;}
+.attr-focus-item:hover {color: white;}
+
+.gray {color: gray;}

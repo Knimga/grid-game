@@ -1,0 +1,24 @@
+.attribute-bars-container {
+    width: 120px; height: 80px;
+    display: flex; flex-direction: column;
+}
+
+.attribute-bars-row {width: 100%; display: flex; align-items: center;}
+
+.attribute-bars-label {
+    width: 40%; 
+    text-align: right;
+    margin-right: 3px;
+}
+.attribute-bars-label:hover {color: white;}
+
+.attribute-bar-container {
+    width: 60%; height: 100%;
+    display: flex; align-items: center;
+    border-left: 0.5px solid lightgray;
+}
+
+.attribute-bar {
+    height: 60%;
+    background-color: lightgray;
+}

@@ -1,0 +1,15 @@
+.board-pane {
+    width: 70%; height: 80px;
+    display: flex; flex-direction: column;
+    justify-content: space-between;
+    background-color: #202020;
+    border-radius: 10px;
+    margin: 2% 0; padding: 4%;
+    font-size: 75%;
+}
+
+.board-pane:hover {background-color: #252525; outline: 0.5px solid gray;}
+
+.board-char-list {text-overflow: ellipsis;}
+
+.selected {background-color: #303030; color: lightblue; outline: 0.5px solid lightblue;}

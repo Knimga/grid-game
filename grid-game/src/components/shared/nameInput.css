@@ -1,0 +1,22 @@
+.name-input-row {width: 85%; display: flex;}
+
+.name-change-confirm-button {background-color: #303030; color: lightgray;}
+
+.name-change-confirm-button:hover {background-color: #404040; color: white;}
+
+.name-display, .name-input {
+    width: 85%;
+    font-size: 125%; font-weight: bold;
+    display: flex; justify-content: center;
+}
+.name-display:hover {color: white;}
+
+.name-input {
+    text-align: center; font-size: 110%;
+    background-color: transparent; color: lightgray;
+}
+
+.name-wrapper {
+    width: 100%; height: 30px;
+    display: flex; justify-content: center; align-items: center;
+}
