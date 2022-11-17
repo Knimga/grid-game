@@ -1,8 +1,6 @@
 import * as React from 'react';
 import './App.css';
 
-import { useState, useEffect } from 'react';
-
 import Typography from '@mui/material/Typography';
 import {Box, Tabs, Tab } from '@mui/material';
 
@@ -11,10 +9,7 @@ import CharactersTab from './components/characters/CharactersTab';
 import BoardsTab from './components/boards/BoardsTab';
 import ClassTab from './components/classes/ClassTab';
 import ActionsTab from './components/actions/ActionsTab';
-
-import urls from './urls';
-
-import {Character, Class, Action, Armor} from './types';
+import PartiesTab from './components/parties/PartiesTab';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -47,24 +42,9 @@ function a11yProps(index: number) {
 
 function App() {
   const [value, setValue] = React.useState(0);
-  const [chars, setChars] = useState<Character[]>([]);
-  const [classes, setClasses] = useState<Class[]>([]);
-  const [actions, setActions] = useState<Action[]>([]);
-  const [armors, setArmors] = useState<Armor[]>([]);
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
     setValue(newValue);
   };
-
-  useEffect(() => {
-    fetch(urls.localRoot+urls.gameData.bulk)
-        .then(res => res.json())
-        .then((data) => {
-            setChars(data.characters);
-            setClasses(data.classes);
-            setActions(data.actions);
-            setArmors(data.armors);
-        }).catch((err) => console.log(err));
-},[]);
 
   return (
     <Box sx={{ width: '100%' }}>
@@ -82,6 +62,7 @@ function App() {
           <Tab label="Characters" {...a11yProps(2)} />
           <Tab label="Classes" {...a11yProps(3)} />
           <Tab label="Actions" {...a11yProps(4)} />
+          <Tab label="Parties" {...a11yProps(5)} />
         </Tabs>
       </Box>
       <TabPanel value={value} index={0}>
@@ -98,6 +79,9 @@ function App() {
       </TabPanel>
       <TabPanel value={value} index={4}>
         <ActionsTab />
+      </TabPanel>
+      <TabPanel value={value} index={5}>
+        <PartiesTab />
       </TabPanel>
     </Box>
   );

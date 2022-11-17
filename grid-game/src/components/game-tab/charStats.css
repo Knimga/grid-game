@@ -61,8 +61,10 @@
 .char-stats-block-column {
     width: 50%; height: 100%;
     display: flex; flex-direction: column;
-    justify-content: space-around; align-items: center;
+    align-items: center;
 }
+.char-stats-block-column > * {margin-top: 5%;}
+
 
 .char-stats-block-row {
     width: 100%; display: flex; justify-content: space-between;
@@ -77,7 +79,7 @@
     border-radius: 10px;   
 }
 
-.atk-bonus-pane {height: 25%; width: 80%; font-size: 90%;}
+.atk-bonus-pane {height: 18%; width: 80%; font-size: 90%;}
 
 .atk-bonus-label {
     width: 40%;
@@ -88,10 +90,22 @@
 .atk-bonus-values {
     width: 60%;
     display: flex; flex-direction: column;
-    justify-content: space-around; align-items: flex-start;
+    justify-content: center; align-items: flex-start;
     background-color: #303030;
     padding-left: 5%;
 }
 
 .buffed {color: green;}
 .debuffed {color: red;}
+
+.char-stats-affinities-container {
+    width: 100%; 
+    display: flex; flex-direction: column;
+    align-items: center;
+}
+
+/*.char-stats-affinities-column {
+    width: 50%; height: 95%;
+    display: flex; flex-direction: column;
+    justify-content: space-around; align-items: center;
+}*/

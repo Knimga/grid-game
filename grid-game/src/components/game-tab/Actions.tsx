@@ -125,14 +125,13 @@ export default function Actions({char, gameIsActive, actionFunctions}: ActionsIn
     }
 
     function endTurn(): void {
-        actionFunctions.toggleDash(false);
         setSelectedId(null);
         actionFunctions.endTurn();
     }
 
   return (
     <div className="actions">
-        <strong>{char && gameIsActive ? char.name : 'Actions'}</strong>
+        <strong>{(char && char.type === CharType.player && gameIsActive) ? char.name : ''}</strong>
         {enemyTurnDisplay()}
         {playerTurnDisplay()}
     </div>

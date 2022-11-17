@@ -22,16 +22,16 @@ export default function CharactersTab() {
     }
 
     useEffect(() => {
-        fetch(urls.localRoot+urls.characters.getAll)
+        fetch(urls.localRoot + urls.characters.getAll)
             .then(res => res.json())
             .then((data) => setChars(data.sort((a: Character, b: Character) => a.name > b.name ? 1 : -1)))
             .catch((err) => console.log(err))
     },[]);
 
     useEffect(() => {
-        fetch(urls.localRoot+urls.classes.getAll)
+        fetch(urls.localRoot + urls.classes.getAll)
             .then(res => res.json())
-            .then((data) => setClasses(data))
+            .then((data) => setClasses(data.sort((a: Class,b: Class) => a.name > b.name ? 1 : -1)))
             .catch((err) => console.log(err))
     },[]);
 

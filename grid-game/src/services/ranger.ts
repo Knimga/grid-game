@@ -1,4 +1,4 @@
-import {GameBoard, Action} from '../types';
+import {GameBoard, Board, Action} from '../types';
 import {RangeType} from '../uiTypes';
 
 type Coord = [number, number];
@@ -11,38 +11,60 @@ export function getInRangeIndices(
 ): number[] {
     if(range === 0) return [position];
 
-    const grid: number[][] = makeGrid(gameBoard);
-    const actorCoord: Coord = indexToCoord(position, gameBoard.gridWidth);
-    const inRangeIndices: number[] = [];
-
-    for (let row = 0; row < gameBoard.gridHeight; row++) {
-        for (let col = 0; col < gameBoard.gridWidth; col++) {
-            if(coordDistance(actorCoord, [row, col]) <= range) {
-                const lineCoords: Coord[] = getLine(actorCoord[0], actorCoord[1], row, col);
-                //const reverseLine: Coord[] = getLine(row, col, actorCoord[0], actorCoord[1]);
-
-                if(lineCoords.every(coord => grid[coord[0]][coord[1]] !== 2)) {
-                    lineCoords.forEach(coord => {
-                        const index: number = coordToIndex(coord, gameBoard.gridWidth);
-                        grid[coord[0]][coord[1]] = 1;
-                        if(!inRangeIndices.includes(index)) inRangeIndices.push(index);
-                    })
-                }
-            }
-        }
-    }
+    let inRangeIndices: number[] = getSeenIndices(gameBoard, position, range);
 
     if(rangeType === RangeType.mvt) {
-        const indicesWithChars: number[] = gameBoard.chars.map(char => char.game.positionIndex);
-        for (let i = 0; i < indicesWithChars.length; i++) {
-            if(inRangeIndices.includes(indicesWithChars[i])) {
-                const targetIndex: number = inRangeIndices.indexOf(indicesWithChars[i]);
-                inRangeIndices.splice(targetIndex, 1);
-            }
+        const charPositions: number[] = gameBoard.chars.map(char => char.game.positionIndex);
+        inRangeIndices = inRangeIndices.filter(index => {
+            const charIsHere: boolean = charPositions.includes(index);
+            const portalIsHere: boolean = gameBoard.portal ? index === gameBoard.portal : false;
+            return !charIsHere && !portalIsHere;   
+        });
+    }
+
+    if(rangeType === RangeType.atk) inRangeIndices.splice(inRangeIndices.indexOf(position), 1);
+
+    return inRangeIndices;
+}
+
+export function getSpawnArea(board: GameBoard | Board, startIndex: number, charPositions: number[]): number[] {
+    return getSeenIndices(board, startIndex, 2)
+        .filter(index => !charPositions.includes(index) && index !== startIndex)
+}
+
+export function getSeenIndices(board: GameBoard | Board, startIndex: number, range: number): number[] {
+    const startCoord: Coord = indexToCoord(startIndex, board.gridWidth);
+    const circleCoords: Coord[] = drawCircle(board, startCoord, range);
+    const seenIndices: number[] = [];
+
+    for (let i = 0; i < circleCoords.length; i++) {
+        const lineCoords: Coord[] = getLine(startCoord[0], startCoord[1], circleCoords[i][0], circleCoords[i][1]);
+        const lineIndices: number[] = lineCoords.map(coord => coordToIndex(coord, board.gridWidth));
+
+        if(lineIndices.every(index => !board.walls.includes(index))) {
+            seenIndices.push(coordToIndex(circleCoords[i], board.gridWidth))
         }
     }
 
-    return inRangeIndices;
+    return seenIndices;
+}
+
+export function drawCircle(board: GameBoard | Board, centerCoord: Coord, radius: number): Coord[] {
+    const startX: number = centerCoord[0], startY: number = centerCoord[1];
+    const coords: Coord[] = [];
+
+    for (let x = startX - radius; x <= startX + radius; x++) {
+        for (let y = startY - radius; y <= startY + radius; y++) coords.push([x,y])
+    }
+
+    return coords.filter(coord => {
+        const x = coord[0], y = coord[1];
+        const index: number = coordToIndex(coord, board.gridWidth);
+        const tests: boolean[] = [
+            x >= 0, y >= 0, x <= board.gridHeight - 1, y <= board.gridWidth - 1, !board.walls.includes(index)
+        ];
+        return tests.every(t => t);
+    });
 }
 
 export function getAdjacentCoords(coord: Coord, gridWidth: number, gridHeight: number): Coord[] {
@@ -66,24 +88,10 @@ export function getAdjacentCoords(coord: Coord, gridWidth: number, gridHeight: n
     return adjCoords;
 }
 
-/*function coordLog(coords: Coord[]): string {
-    if(!coords.length) return 'none!';
-    let log = '  ';
-    coords.forEach((coord) => log += coord.toString() + '   ')
-    return log;
-}*/
-
-function makeGrid(gameBoard: GameBoard): number[][] {
-    const squareCount: number = gameBoard.gridHeight * gameBoard.gridWidth;
-    const newGrid: number[][] = [];
-
-    for (let i = 0; i < squareCount; i++) {
-        const currentRow: number = Math.floor(i / gameBoard.gridWidth);
-        if(!newGrid[currentRow]) newGrid.push([]);
-        newGrid[currentRow].push(gameBoard.walls.includes(i) ? 2 : 0);
-    }
-
-    return newGrid;
+export function getAdjacentIndices(index: number, gridWidth: number, gridHeight: number): number[] {
+    const coord: Coord = indexToCoord(index, gridWidth);
+    const adjCoords: Coord[] = getAdjacentCoords(coord, gridWidth, gridHeight);
+    return adjCoords.map(c => coordToIndex(c, gridWidth));
 }
 
 export function distance(index1: number, index2: number, gridWidth: number): number {

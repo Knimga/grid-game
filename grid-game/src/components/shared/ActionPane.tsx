@@ -55,7 +55,7 @@ export default function ActionPane({action, stats, isSelected, onClick, index}: 
                         key={Math.random()}
                         style={effectRowStyle(effect)}
                     >
-                        <div className="effect-damage">{effectDamageString(effect, stats)}</div>
+                        <div className="effect-damage">{effectDamageString(effect, stats, action.isWeapon, action.hands ?? 1)}</div>
                         <div className="effect-damage-detail">
                             <span className="effect-dmg-desc">{effectDmgDesc(effect)}</span>
                             <div className="effect-duration">{effectDurationString(effect)}</div>
@@ -64,7 +64,7 @@ export default function ActionPane({action, stats, isSelected, onClick, index}: 
                 })}
             </div>
             <div className="action-pane-detail-list">
-                {stats && action.type === 'offense' ? <small>{`Attack: ${atkBonus()}`}</small> : ''}
+                {stats && action.intent === 'offense' ? <small>{`Attack: ${atkBonus()}`}</small> : ''}
                 {targetString() === 'Self' ? '' : <small>{`Range: ${action.range}`}</small>}
             </div>
         </div>

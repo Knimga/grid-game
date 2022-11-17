@@ -7,7 +7,9 @@ export const logger = {
     beginGame: beginGame,
     newRound: newRound,
     newTurn: newTurn,
+    newUnseenTurn: newUnseenTurn,
     move: move,
+    unseenMove: unseenMove,
     action: action,
     charDies: charDies,
     victory: victory
@@ -25,8 +27,16 @@ function newTurn(turnCharName: string): TurnLog {
     return {header: `${turnCharName}'s Turn`, actions: []}
 }
 
+function newUnseenTurn(): TurnLog {
+    return {header: 'Enemies are acting...', actions: []}
+}
+
 function move(moverName: string, distanceMoved: number): string {
     return `${moverName} moved ${distanceMoved} spaces`
+}
+
+function unseenMove(moverName: string): string {
+    return `${moverName} is acting...`
 }
 
 function action(actorName: string, actionResults: ActionResult[]): string[] {
@@ -53,10 +63,12 @@ function action(actorName: string, actionResults: ActionResult[]): string[] {
             for (let e = 0; e < actionResults[r].effectResults.length; e++) {
                 const effectResult = actionResults[r].effectResults[e];            
                 const amount: number = effectResult.effectiveAmount;
+                const atkRollString: string | undefined = actionResults[r].atkRollResult?.summary;
+                const dmgRollString: string | undefined = actionResults[r].dmgRollResult?.summary;
     
                 switch(effectResult.effect.type) {
-                    case 'healing': string += ` healed for ${amount}`; break;
-                    case 'damage': string += ` takes ${amount} ${effectResult.effect.dmgType} damage to ${effectTargetStatString(effectResult.effect.targetStat)}`; break;
+                    case 'healing': string += ` healed for ${amount + (atkRollString ? ` (${atkRollString})` : '')}`; break;
+                    case 'damage': string += ` takes ${amount + (dmgRollString ? ` (${dmgRollString})` : '')} ${effectResult.effect.dmgType} damage to ${effectTargetStatString(effectResult.effect.targetStat)}`; break;
                     case 'buff': string += ` gets +${amount} to ${effectTargetStatString(effectResult.effect.targetStat)} for ${effectResult.effect.duration} rounds`; 
                         break;
                     case 'debuff': string += ` gets ${amount} to ${effectTargetStatString(effectResult.effect.targetStat)} for ${effectResult.effect.duration} rounds`; 

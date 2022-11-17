@@ -1,6 +1,6 @@
 import './effectEditor.css';
 
-import { Effect, EffectType, DamageType, OffenseOrDefense, EffectTargetStat, DamageTypeDarkColor } from '../../types';
+import { Effect, EffectType, DamageType, Intent, EffectTargetStat, DamageTypeDarkColor } from '../../types';
 import {InputOption} from '../../uiTypes';
 
 import { FaTrashAlt } from "react-icons/fa";
@@ -14,7 +14,7 @@ import {makeInputOptions} from '../../services/detailStrings';
 interface EffectEditorInput {
     effect: Effect,
     index: number,
-    currentActionIntent: OffenseOrDefense,
+    currentActionIntent: Intent,
     backgroundColor: DamageTypeDarkColor,
     update: Function,
     remove: Function
@@ -29,7 +29,7 @@ export default function EffectEditor(
     const durationMax: number = hasDuration ? 5 : 0;
     const flatAmountMin: number = isOverTime ? effect.duration : 0;
 
-    const allowedEffectTypes = currentActionIntent === OffenseOrDefense.offense ? 
+    const allowedEffectTypes = currentActionIntent === Intent.offense ? 
         ['damage','debuff','dot'] : ['healing', 'buff', 'hot'];
 
     const allowedTargetStats: string[] = ['buff','debuff'].includes(effect.type) ? 

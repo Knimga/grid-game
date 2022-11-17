@@ -19,9 +19,9 @@ export function armorDetailString(armor: Armor): string {
     return `AC ${armor.ac}, MAC ${armor.mac}`
 }
 
-export function effectDamageString(effect: Effect, stats: Stats | null): string {
-    if(effect.roll) return rollString(effect, stats);
-    return flatAmountString(effect, stats);
+export function effectDamageString(effect: Effect, stats: Stats | null, isWeapon: boolean, hands: number): string {
+    if(effect.roll) return rollString(effect, stats, hands, isWeapon);
+    return flatAmountString(effect, stats, hands, isWeapon);
 }
 
 export function effectDmgDesc(effect: Effect): string {
@@ -41,7 +41,7 @@ export function actionDetailString(action: Action, stats: Stats | null): string 
 
     for (let e = 0; e < effects.length; e++) {
         switch(effects[e].type) {
-            case EffectType.damage: strings.push(dmgString(effects[e], stats)); break;
+            case EffectType.damage: strings.push(dmgString(effects[e], stats, action.hands ?? 1)); break;
             case EffectType.healing: strings.push(healString(effects[e], stats)); break;
             case EffectType.buff: strings.push(buffOrDebuffString(effects[e], stats)); break;
             case EffectType.debuff: strings.push(buffOrDebuffString(effects[e], stats)); break;
@@ -71,9 +71,10 @@ function aoeStringEnding(action: Action): string {
     } else {return ''}
 }
 
-function dmgString(effect: Effect, stats: Stats | null): string {
+function dmgString(effect: Effect, stats: Stats | null, hands: number, isWeapon?: boolean): string {
     if(effect.type === 'damage') {
-        const amount: string = effect.roll ? rollString(effect, stats) : flatAmountString(effect, stats);
+        const amount: string = effect.roll ? 
+            rollString(effect, stats, hands, isWeapon ?? false) : flatAmountString(effect, stats, hands);
         return `deals ${amount} ${effect.dmgType} damage`;
     } else {return ''}
 }
@@ -81,7 +82,7 @@ function dmgString(effect: Effect, stats: Stats | null): string {
 function healString(effect: Effect, stats: Stats | null): string {
     if(effect.type === 'healing') {
         const targetStat: string = effectTargetStatString(effect.targetStat);
-        const amount: string = effect.roll ? rollString(effect, stats) : flatAmountString(effect, stats);
+        const amount: string = effect.roll ? rollString(effect, stats, 1) : flatAmountString(effect, stats, 1);
         return `restores ${amount} ${targetStat}`;
     } else {return ''}
 }
@@ -89,51 +90,40 @@ function healString(effect: Effect, stats: Stats | null): string {
 function buffOrDebuffString(effect: Effect, stats: Stats | null): string {
     const qualifierWord: string = effect.type === 'buff' ? 'Increases' : 'decreases';
     const targetStat: string = effectTargetStatString(effect.targetStat);
-    const amount: string = effect.roll ? rollString(effect, stats) : flatAmountString(effect, stats);
+    const amount: string = effect.roll ? rollString(effect, stats, 1) : flatAmountString(effect, stats, 1);
     return `${qualifierWord} ${targetStat} by ${amount} for ${effect.duration} rounds`;
 }
 
 function hotString(effect: Effect, stats: Stats | null): string {
     if(effect.type === 'hot') {
         const targetStat: string = effectTargetStatString(effect.targetStat);
-        const amount: string = effect.roll ? rollString(effect, stats) : flatAmountString(effect, stats);
+        const amount: string = effect.roll ? rollString(effect, stats, 1) : flatAmountString(effect, stats, 1);
         return `restores ${amount} ${targetStat} over ${effect.duration} rounds`
     } else {return ''}
 }
 
 function dotString(effect: Effect, stats: Stats | null): string {
     if(effect.type === 'dot') {
-        const amount: string = effect.roll ? rollString(effect, stats) : flatAmountString(effect, stats);
+        const amount: string = effect.roll ? rollString(effect, stats, 1) : flatAmountString(effect, stats, 1);
         return `deals ${amount} ${effect.dmgType} damage over ${effect.duration} rounds`;
     } else {return ''}
 }
 
-function rollString(effect: Effect, stats: Stats | null): string {
+function rollString(effect: Effect, stats: Stats | null, hands: number, isWeapon?: boolean): string {
     if(effect.roll) {
+        const bonus: number = (stats) ? getBonus(stats, effect, isWeapon ?? false, hands ?? 1) : 0;
         const baseRollString: string = `${effect.roll.numDie}d${effect.roll.dieSides}`;
-        const bonus: number = (stats ? getBonus(stats, effect) : 0) + effect.roll.mod;
-        return `${baseRollString}${bonus ? `+${bonus}` : ''}`
+        const totalBonus: number = bonus + effect.roll.mod;
+        return `${baseRollString}${totalBonus ? `+${totalBonus}` : ''}`
     } else {return ''}
 }
 
-function flatAmountString(effect: Effect, stats: Stats | null): string {
+function flatAmountString(effect: Effect, stats: Stats | null,hands: number, isWeapon?: boolean): string {
     if(effect.flatAmount !== undefined) {
-        const bonus: number = stats ? getBonus(stats, effect) : 0;
+        const bonus: number = stats ? getBonus(stats, effect, isWeapon ?? false, hands ?? 1) : 0;
         return `${effect.flatAmount + bonus}`
     } else {return ''}
 }
-
-/*function effectBonus(effect: Effect, stats: Stats): number {
-    switch(effect.type) {
-        case EffectType.damage: return getDmgBonus(stats, effect.dmgType);
-        case EffectType.healing: return getHealingBonus(stats, effect.dmgType); 
-        case EffectType.buff: return getBuffDebuffBonus(stats, effect.dmgType);
-        case EffectType.debuff: return getBuffDebuffBonus(stats, effect.dmgType);
-        case EffectType.hot: return getHealingBonus(stats, effect.dmgType);
-        case EffectType.dot: return getDmgBonus(stats, effect.dmgType);
-        default: return 0;
-    }
-}*/
 
 export function effectTargetStatString(targetStat: EffectTargetStat | string): string {
     switch(targetStat) {

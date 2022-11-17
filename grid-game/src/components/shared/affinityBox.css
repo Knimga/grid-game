@@ -1,0 +1,12 @@
+.affinity-box {
+    width: 30px;
+    display: flex; flex-direction: column;
+    align-items: center;
+    border-radius: 10px;
+}
+
+.affinity-box-row {
+    width: 100%;
+    display: flex; justify-content: center;
+    align-items: center;
+}

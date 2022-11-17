@@ -22,7 +22,7 @@ export default function ClassTab() {
     useEffect(() => {
         fetch(urls.localRoot+urls.classes.getAll)
             .then(res => res.json())
-            .then((data) => setClasses(data))
+            .then((data) => setClasses(data.sort((a: Class, b: Class) => a.name > b.name ? 1 : -1)))
             .catch((err) => console.log(err))
     },[]);
 

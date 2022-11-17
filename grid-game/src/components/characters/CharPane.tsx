@@ -22,7 +22,7 @@ export default function CharPane({char, isSelected, selectChar}: CharPaneInput) 
                 <FaCircle style={nameStyle} /><strong className="char-name">{char.name}</strong>
             </div>
             <div className="char-details">
-                <small className="gray-italic">{`${char.class.name} - Lvl ${char.level}`}</small>
+                <small className="gray-italic">{`${char.class.name} - Level ${char.level}`}</small>
                 <small className="gray-italic">{cap(char.type)}</small>
             </div>
         </div>

@@ -25,15 +25,15 @@
     padding-right: 5%;
 }
 
-.list-value {width: 30%; }
+.list-value {width: 30%;}
 
-.atk-bonus-pane, .ele-bonus-pane {
+.stat-pane-atk-bonus-pane, .ele-bonus-pane {
     display: flex;
     outline: 0.5px solid gray;
     border-radius: 10px;   
 }
 
-.atk-bonus-pane {height: 30%; width: 80%; font-size: 90%;}
+.stat-pane-atk-bonus-pane {height: 25%; width: 80%; font-size: 90%;}
 .ele-bonus-pane {height: 19%; width: 70%; font-size: 75%;}
 
 .atk-bonus-label, .ele-bonus-label {

@@ -191,7 +191,7 @@ function getNewQuadrant(currentQuadrant: Coord): Coord {
 }
 
 function randomEdgeQuadrant(): Coord {
-    let newCoord: Coord = [-1, -1];
+    let newCoord: Coord = [1, 1];
     while(newCoord[0] === 1 && newCoord[1] === 1) {
       newCoord = [Math.floor(Math.random() * 3), Math.floor(Math.random() * 3)]
     }

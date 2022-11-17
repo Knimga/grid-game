@@ -1,7 +1,9 @@
 import {
     Character, Class, ClassRole, CharType, Stats, DamageType, 
-    Attributes, Armor, Effect, EffectType
+    Attributes, Affinities, Armor, Effect, EffectType
 } from '../types';
+
+function fl(n: number): number {return Math.floor(n)}
 
 export function statCalc(character: Character): Character {
     const char: Character = {...character};
@@ -30,69 +32,93 @@ export function createAttributes(pointBuy: Attributes, charClass: Class, level: 
     return attributes;
 }
 
-export function createStats(attributes: Attributes, armorACBonus: number, armorMACBonus: number, level: number): Stats {
-    function fl(n: number): number {return Math.floor(n)}
+export function createStats(
+    attributes: Attributes, armorACBonus: number, armorMACBonus: number, level: number
+): Stats {
+
+    const str = attributes.strength, fin = attributes.finesse, tns = attributes.toughness;
+    const min = attributes.mind, spt = attributes.spirit;
+       
+    const affinities: Affinities = {
+        fire: fl(str / 4),
+        wind: fl(fin / 4),
+        earth: fl(tns / 4),
+        shadow: fl(min / 4),
+        water: fl(spt / 4),
+        holy: fl((spt + str) / 6),
+        poison: fl((tns + fin) / 6)
+    }
+
     return {
-        hp: 10 + fl(1.5 * attributes.toughness) + fl(0.25 * attributes.strength) + fl(1.5 * level),
-        hpRegen: 1 + fl(attributes.spirit / 6),
-        mp: 10 + attributes.mind + fl(1.5 * level),
-        mpRegen: 1 + fl(0.25 * attributes.spirit),
-        ac: 10 + fl(0.25 * attributes.finesse) + armorACBonus,
-        mac: 10 + fl(attributes.spirit / 3) + fl(0.25 * attributes.mind) + fl(0.25 * attributes.finesse) + armorMACBonus,
-        ini: fl(0.5 * attributes.finesse) + fl(0.5 * attributes.mind),
-        mvt: 3 + fl(0.25 * attributes.strength) + fl(0.25 * attributes.finesse),
-        bonusHealingDone: fl(attributes.spirit / 3),
-        bonusHealingRcvd: fl(attributes.spirit / 3),
+        hp: 10 + fl(1.5 * tns) + fl(str / 4) + fl(1.5 * level),
+        hpRegen: 1 + fl(spt / 6),
+        mp: 10 + min + fl(1.5 * level),
+        mpRegen: 1 + fl(spt / 4),
+        ac: 10 + fl(fin / 4) + armorACBonus,
+        mac: 10 + fl(spt / 3) + fl(min / 4) + fl(fin / 4) + armorMACBonus,
+        ini: fl(fin / 2) + fl(min / 2),
+        mvt: 3 + fl(str / 6) + fl(fin / 6),
+        bonusHealingDone: fl(spt / 5),
+        bonusHealingRcvd: fl(spt / 3),
+        affinities: {
+            fire: fl(str / 4),
+            wind: fl(fin / 4),
+            earth: fl(tns / 4),
+            shadow: fl(min / 4),
+            water: fl(spt / 4),
+            holy: fl(spt / 6) + fl(str / 6),
+            poison: fl(tns / 6) + fl(fin / 6)
+        },
         dmgTypes: {
             melee: {
-                atk: fl(0.75 * attributes.strength) + fl(0.5 * attributes.finesse),
-                dmg: fl(attributes.strength / 3),
-                dr: fl(0.25 * attributes.toughness)
-             },
-             ranged: {
-                 atk: fl(0.5 * attributes.finesse),
-                 dmg: fl(attributes.finesse / 3),
-                 dr: fl(0.25 * attributes.toughness)
-             },
-             magic: {
-                 atk: fl(0.25 * attributes.finesse) + fl(0.5 * attributes.mind),
-                 dmg: fl(0.25 * attributes.mind),
-                 dr: fl(0.25 * attributes.spirit)
-             },
-             fire: {
-                 atk: fl(0.25 * attributes.strength),
-                 dmg: fl(0.25 * attributes.strength),
-                 dr: fl(0.25 * attributes.strength)
-             },
-             wind: {
-                 atk: fl(0.25 * attributes.finesse),
-                 dmg: fl(0.25 * attributes.finesse),
-                 dr: fl(0.25 * attributes.finesse)
-             },
-             earth: {
-                 atk: fl(0.25 * attributes.toughness),
-                 dmg: fl(0.25 * attributes.toughness),
-                 dr: fl(0.25 * attributes.toughness)
-             },
-             shadow: {
-                 atk: fl(0.25 * attributes.mind),
-                 dmg: fl(0.25 * attributes.mind),
-                 dr: fl(0.25 * attributes.mind)
-             },
-             water: {
-                 atk: fl(0.25 * attributes.spirit),
-                 dmg: fl(0.25 * attributes.spirit),
-                 dr: fl(0.25 * attributes.spirit)
-             },
-             holy: {
-                atk: fl(attributes.spirit / 6) + fl(attributes.strength / 6),
-                dmg: fl(attributes.spirit / 6) + fl(attributes.strength / 6),
-                dr: fl(attributes.spirit / 6) + fl(attributes.strength / 6)
+                atk: fl(0.75 * str) + fl(fin / 2),
+                dmg: fl(str / 3),
+                dr: fl(tns / 5)
+            },
+            ranged: {
+                atk: fl(fin / 2.5),
+                dmg: fl(fin / 3),
+                dr: fl((tns + fin) / 8)
+            },
+            magic: {
+                atk: fl(fin / 4) + fl(min / 2),
+                dmg: fl(min / 4),
+                dr: fl(spt / 5)
+            },
+            fire: {
+                atk: affinities.fire,
+                dmg: affinities.fire,
+                dr: fl(affinities.fire / 2)
+            },
+            wind: {
+                atk: affinities.wind,
+                dmg: affinities.wind,
+                dr: fl(affinities.wind / 2)
+            },
+            earth: {
+                atk: affinities.earth,
+                dmg: affinities.earth,
+                dr: fl(affinities.earth / 2)
+            },
+            shadow: {
+                atk: affinities.shadow,
+                dmg: affinities.shadow,
+                dr: fl(affinities.shadow / 2)
+            },
+            water: {
+                atk: affinities.water,
+                dmg: affinities.water,
+                dr: fl(affinities.water / 2)
+            },
+            holy: {
+            atk: affinities.holy,
+            dmg: affinities.holy,
+            dr: fl(affinities.holy / 2)
             },
             poison: {
-                atk: fl(attributes.toughness / 6) + fl(attributes.finesse / 6),
-                dmg: fl(attributes.toughness / 6) + fl(attributes.finesse / 6),
-                dr: fl(attributes.toughness / 6) + fl(attributes.finesse / 6)
+                atk: affinities.poison,
+                dmg: affinities.poison,
+                dr: fl(affinities.poison / 2)
             }
         }
     }
@@ -110,22 +136,23 @@ export function getMACBonus(armor: Armor[]): number {
     return armorMACBonus;
 }
 
-export function getBonus(stats: Stats, effect: Effect): number {
+export function getBonus(stats: Stats, effect: Effect, isWeapon: boolean, hands: number): number {
     switch(effect.type) {
-        case EffectType.damage: return getDmgBonus(stats, effect.dmgType);
+        case EffectType.damage: return getDmgBonus(stats, effect.dmgType, isWeapon, hands ?? 1);
         case EffectType.healing: return getHealingBonus(stats, effect.dmgType);
         case EffectType.buff: return getBuffDebuffBonus(stats, effect.dmgType);
         case EffectType.debuff: return getBuffDebuffBonus(stats, effect.dmgType);
-        case EffectType.dot: return getDmgBonus(stats, effect.dmgType);
+        case EffectType.dot: return getDmgBonus(stats, effect.dmgType, isWeapon, hands ?? 1);
         case EffectType.hot: return getHealingBonus(stats, effect.dmgType);
         default: console.log('no effect type!'); return 0;
     }
 }
 
-export function getDmgBonus(stats: Stats, dmgType: DamageType): number {
+export function getDmgBonus(stats: Stats, dmgType: DamageType, isWeapon: boolean, hands: number): number {
+    const handsMultiplier: number = (hands && hands > 1) ? 1.5 : 1;
     const typeDmgBonus: number = stats.dmgTypes[dmgType].dmg;
-    const magicDmgBonus: number = isElemental(dmgType) ? stats.dmgTypes.magic.dmg : 0;
-    return typeDmgBonus + magicDmgBonus;
+    const magicDmgBonus: number = (!isWeapon && isElemental(dmgType)) ? stats.dmgTypes.magic.dmg : 0;
+    return fl((typeDmgBonus + magicDmgBonus) * handsMultiplier);
 }
 
 export function getAtkBonus(stats: Stats, dmgType: DamageType): number {

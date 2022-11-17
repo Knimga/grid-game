@@ -11,11 +11,11 @@ import {BoardCharSelection, ToolType, InputOption} from '../../uiTypes';
 interface CharToolInput {
     toolIsActive: boolean;
     chars: BoardCharSelection[];
-    setSelectedTool: Function;
+    selectTool: Function;
     setSelectedBrush: Function;
 }
 
-export default function CharTool({toolIsActive, chars, setSelectedTool, setSelectedBrush}: CharToolInput) {
+export default function CharTool({toolIsActive, chars, selectTool, setSelectedBrush}: CharToolInput) {
     const [selectedIndex, setSelectedIndex] = useState<number>(0);
     const style = {backgroundColor: chars.length ? chars[selectedIndex].color : ''};
     const sortedChars: BoardCharSelection[] = chars.sort(
@@ -27,15 +27,16 @@ export default function CharTool({toolIsActive, chars, setSelectedTool, setSelec
     function toggleActive(): void {
         toolIsActive = !toolIsActive;
         if(toolIsActive) {
-            setSelectedTool(ToolType.character);
+            selectTool(ToolType.character);
             setSelectedBrush(chars[selectedIndex]);
-        } else {setSelectedTool(ToolType.none)}
+        } else {selectTool(ToolType.none)}
     }
 
     function update(newId: string): void {
         const newChar: BoardCharSelection | undefined = chars.find(char => char._id === newId);
         if(newChar) {
             const index = chars.indexOf(newChar);
+            selectTool(ToolType.character);
             setSelectedIndex(index);
             setSelectedBrush(chars[index]);
         }   

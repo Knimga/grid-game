@@ -26,6 +26,7 @@ interface GameCharInfo {
         actionTaken: boolean;
     },
     isVisible: boolean;
+    hasBeenSeen: boolean;
     destinationIndex?: number; //for enemies only
     activeEffects: ActiveEffect[]
 }
@@ -36,6 +37,16 @@ export interface Attributes {
     toughness: number;
     mind: number;
     spirit: number;
+}
+
+export interface Affinities {
+    fire: number,
+    wind: number,
+    earth: number,
+    shadow: number,
+    water: number,
+    holy: number,
+    poison: number
 }
 
 export interface DamageTypes {
@@ -62,6 +73,7 @@ export interface Stats { //all calculated from attributes
     mvt: number,
     bonusHealingDone: number,
     bonusHealingRcvd: number,
+    affinities: Affinities,
     dmgTypes: DamageTypes
 }
 
@@ -78,14 +90,15 @@ export interface Class {
 export interface Action {
     _id: string,
     name: string,
-    type: OffenseOrDefense,
+    intent: Intent,
     range: number,
     isWeapon: boolean,
     mpCost: number,
     effects: Effect[],
     dmgType: DamageType,
     target: TargetingType,
-    burstRadius?: number
+    burstRadius?: number,
+    hands?: number
 }
 
 export interface Effect {
@@ -100,7 +113,13 @@ export interface Effect {
 export interface ActiveEffect extends Effect {
     durationElapsed: number,
     effectiveAmount: number,
-    castById: string
+    castById: string,
+    actionName: string
+}
+
+export interface PassiveEffect {
+    name: string;
+    effects: {targetStat: EffectTargetStat; amount: number;}[]
 }
 
 export interface Armor {
@@ -137,6 +156,7 @@ export interface ActionResult {
     success: boolean;
     atkRollResult?: RollResult;
     dmgRollResult?: RollResult;
+    flatDmgResult?: number;
     charDiedThisTurn?: boolean;
 }
 
@@ -146,14 +166,29 @@ export interface EffectResult {
     castById: string
 }
 
+export interface AiPlan {
+    newDest: number | null;
+    target: GameChar | null;
+    chosenAction: Action | null;
+}
+
 export interface Board {
     _id?: string;
     name: string;
     gridWidth: number;
     gridHeight: number;
+    portal?: number;
+    //doors: Door[];
     walls: number[];
     chars: BoardChar[];
 }
+
+/*interface Door {
+    id: string;
+    name: string;
+    position: number;
+    leadsTo: {mapId: string; doorName: string;}
+}*/
 
 export interface BoardChar {
     _id: string; 
@@ -163,11 +198,27 @@ export interface BoardChar {
 }
 
 export interface GameBoard {
+    _id?: string;
     name: string;
     gridWidth: number;
     gridHeight: number;
+    portal?: number;
+    //doors: Door[];
     walls: number[];
     chars: GameChar[];
+}
+
+export interface Party {
+    _id: string;
+    members: PartyMember[]
+}
+
+export interface PartyMember {
+    _id: string;
+    name: string;
+    color: string;
+    class: string;
+    level: number;
 }
 
 export enum CharType {
@@ -238,6 +289,11 @@ export enum DamageTypeDarkColor {
     magic = 'darkslategray'
 }
 
+export enum Intent {
+    offense = 'offense',
+    defense = 'defense'
+}
+
 export enum TargetingType {
     single = 'single',
     burst = 'burst',
@@ -252,11 +308,6 @@ export enum EffectType {
     damage = 'damage',
     hot = 'hot',
     dot = 'dot'
-}
-
-export enum OffenseOrDefense {
-    offense = 'offense',
-    defense = 'defense'
 }
 
 export enum EffectTargetStat {

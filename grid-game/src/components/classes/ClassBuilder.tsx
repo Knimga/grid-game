@@ -55,7 +55,11 @@ export default function ClassBuilder({charClass, actions, armors, update, save}:
         }
     }
 
-    function addAction(action: Action): void {charClass.actions.push(action); updateClass({...charClass});}
+    function addAction(action: Action): void {
+        if(!charClass.actions.map(a => a._id).includes(action._id)) {
+            charClass.actions.push(action); updateClass({...charClass})
+        }
+    }
 
     function removeArmor(armorId: string): void {
         const targetArmor: Armor | undefined = charClass.armor.find(armor => armor._id === armorId);
@@ -66,7 +70,11 @@ export default function ClassBuilder({charClass, actions, armors, update, save}:
         }
     }
 
-    function addArmor(armor: Armor): void {charClass.armor.push(armor); updateClass({...charClass});}
+    function addArmor(armor: Armor): void {
+        if(!charClass.armor.map(a => a._id).includes(armor._id)) {
+            charClass.armor.push(armor); updateClass({...charClass})
+        }
+    }
 
     function pbTotal(attrObj: Attributes): number {
         let total: number = 0;

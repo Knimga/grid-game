@@ -20,6 +20,11 @@ export interface DbCharacter {
     pointBuy: Attributes;
 }
 
+export interface DbParty {
+    _id?: string;
+    members: string[];
+}
+
 interface DbBoard {
     _id?: string;
     name: string;

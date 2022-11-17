@@ -10,6 +10,7 @@ import NameInput from '../shared/NameInput';
 import DimensionEdit from './DimensionEdit';
 import TerrainTool from './TerrainTool';
 import CharTool from './CharTool';
+import PortalTool from './PortalTool';
 
 import {blankBoard, blankEditorBoard} from '../../services/boards';
 import urls from '../../urls';
@@ -42,7 +43,7 @@ export default function BoardsTab() {
             setSelectedBoard(boards[0]);
         }
         const loadBoardChars = async () => {
-            const res = await fetch(urls.localRoot+urls.characters.getBoardChars);
+            const res = await fetch(urls.localRoot + urls.characters.getBoardChars);
             const boardChars: BoardCharSelection[] = await res.json();
             setBoardCharSelections(boardChars);
         }
@@ -81,8 +82,7 @@ export default function BoardsTab() {
 
     function updateBoardHeight(newHeight: number): void {
         let newBoard: Board = {...selectedBoard};
-        const preservedProps = newBoard._id ? 
-            {name: newBoard.name, _id: newBoard._id} : {name: newBoard.name};
+        const preservedProps = newBoard._id ? {name: newBoard.name, _id: newBoard._id} : {name: newBoard.name};
         newBoard = {
             ...blankBoard(newBoard.gridWidth, newHeight), 
             ...preservedProps
@@ -97,8 +97,15 @@ export default function BoardsTab() {
             .then(data => {return data as Board})
     }
 
-    function newBoard(): void {
-        setSelectedBoard(blankEditorBoard());
+    function newBoard(): void {setSelectedBoard(blankEditorBoard())}
+
+    function selectBoard(board: Board): void {
+        setSelectedBoard(board);
+        setSelectedTool(ToolType.none);
+    }
+
+    function selectTool(toolType: ToolType): void {
+        setSelectedTool(toolType);
     }
 
     async function saveBoard(board: Board) {
@@ -124,6 +131,7 @@ export default function BoardsTab() {
     function isSaved(): boolean {return updatesSaved[boardList.indexOf(selectedBoard)]}
 
     function clickSquare(index: number): void {
+        console.log(index);
         if(selectedTool !== ToolType.none) {
             const newBoard = {...selectedBoard};
             const newBoards: Board[] = [...boardList];
@@ -133,9 +141,8 @@ export default function BoardsTab() {
                     if(newBoard.walls.includes(index)) {
                         const indexToRemove: number = newBoard.walls.indexOf(index);
                         newBoard.walls.splice(indexToRemove, 1);
-                    } else {
-                        newBoard.walls.push(index)
-                    }
+                    } else {newBoard.walls.push(index)}
+
                     newBoards[boardIndex] = newBoard;
                     updatesSaved[boardIndex] = false;
                     setUpdatesSaved(updatesSaved);
@@ -162,7 +169,13 @@ export default function BoardsTab() {
                     setSelectedBoard(newBoard);
                     setBoardList(newBoards);
                 }
-
+            } else if(selectedTool === ToolType.portal) {
+                newBoard.portal = index;
+                newBoards[boardIndex] = newBoard;
+                updatesSaved[boardIndex] = false;
+                setUpdatesSaved(updatesSaved);
+                setSelectedBoard(newBoard);
+                setBoardList(newBoards);
             }
         }
     }
@@ -183,12 +196,15 @@ export default function BoardsTab() {
                         board={board}
                         key={board._id}
                         isSelected={selectedBoard._id === board._id}
-                        clickPane={setSelectedBoard} 
+                        clickPane={selectBoard} 
                     />)
                 }
             </div>
             <div className="board-container">
-                <BoardEdit board={selectedBoard} clickSquare={clickSquare} />
+                <BoardEdit 
+                    board={selectedBoard}
+                    clickSquare={clickSquare}
+                />
             </div>
             <div className="board-edit-tools">
                 <FaSave 
@@ -204,17 +220,20 @@ export default function BoardsTab() {
                 />
                 <TerrainTool 
                     toolIsActive={selectedTool === ToolType.terrain}
-                    setSelectedTool={setSelectedTool} 
+                    selectTool={selectTool} 
                     setSelectedBrush={setSelectedBrush}
                 />
                 <CharTool
                     toolIsActive={selectedTool === ToolType.character}
                     chars={boardCharSelections.length ?  boardCharSelections : []}
-                    setSelectedTool={setSelectedTool} 
+                    selectTool={selectTool} 
                     setSelectedBrush={setSelectedBrush}
                 />
+                <PortalTool
+                    toolIsActive={selectedTool === ToolType.portal}
+                    selectTool={selectTool}
+                />
             </div>
-            
         </div>
     </div>
   )

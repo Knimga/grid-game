@@ -1,7 +1,7 @@
 import express from 'express';
 
-import {Character, Class, Action, Armor, Attributes} from '../grid-game/src/types';
-import { DbCharacter, DbClass } from '../dbTypes';
+import {Character, GameChar, Class, Action, Armor, Attributes, Party, PartyMember} from '../grid-game/src/types';
+import { DbCharacter, DbClass, DbParty } from '../dbTypes';
 
 import { createStats, createAttributes, getACBonus, getMACBonus } from '../grid-game/src/services/charCalc';
 
@@ -30,24 +30,20 @@ router.route('/test').get(async (req,res) => {
     ArmorModel.find().lean()
     .then(data => res.status(200).send(data))
     .catch((err) => {res.status(400).send(err)});
-})
+});
 
-//function getCollection(Model: any) {return Model.find().lean()}
 
 export async function createOneClass(dbClass: DbClass): Promise<Class> {
     const actions: Action[] = await ActionsModel.find({_id: {$in: dbClass.actions}}).lean();
     const armor: Armor[] = await ArmorModel.find({_id: {$in: dbClass.armor}}).lean();
 
-    return {
-        ...dbClass,
-        actions: actions,
-        armor: armor
-    }
+    return {...dbClass, actions: actions, armor: armor}
 }
 
 export async function createClasses(): Promise<Class[]> {
     const dbClasses: DbClass[] = await ClassModel.find().lean();
     const classes: Class[] = [];
+
     for (let i = 0; i < dbClasses.length; i++) {
         const completedClass: Class = await createOneClass(dbClasses[i]);
         classes.push(completedClass);
@@ -109,6 +105,59 @@ export async function createOneCharacter(dbChar: DbCharacter): Promise<Character
     }
 }
 
+export async function dbCharsToGameChars(dbChars: DbCharacter[]): Promise<GameChar[]> {
+    const gameChars: GameChar[] = [];
 
+    for (let i = 0; i < dbChars.length; i++) {
+        const char: Character = await createOneCharacter(dbChars[i]);
+        gameChars.push({
+            ...char,
+            game: {
+                gameId: Math.random().toString().substring(2),
+                positionIndex: -1,
+                iniRoll: 0,
+                isTurn: false,
+                attributes: char.attributes,
+                stats: char.stats,
+                round: {
+                    movementTaken: 0,
+                    actionTaken: false
+                },
+                isVisible: false,
+                hasBeenSeen: false,
+                activeEffects: []
+            }
+        });
+    }
+
+    return gameChars;
+}
+
+export async function dbPartiesToParties(dbParties: DbParty[]): Promise<Party[]> {
+    const parties: Party[] = [];
+    for (let i = 0; i < dbParties.length; i++) {
+        const party = await dbPartyToParty(dbParties[i]);
+        parties.push(party);
+    }
+    return parties;
+}
+
+export async function dbPartyToParty(dbParty: DbParty): Promise<Party> {
+    const chars: DbCharacter[] = await CharactersModel.find({_id: {$in: dbParty.members}}).lean();
+    const members: PartyMember[] = [];
+
+    for (let i = 0; i < chars.length; i++) {
+        const className = (await ClassModel.findOne({_id: chars[i].class})).name;
+        members.push({
+            _id: chars[i]._id,
+            name: chars[i].name,
+            color: chars[i].color,
+            level: chars[i].level,
+            class: className
+        });
+    }
+
+    return {_id: dbParty._id, members: members}
+}
 
 export default router;

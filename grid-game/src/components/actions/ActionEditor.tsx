@@ -13,7 +13,7 @@ import EffectEditor from './EffectEditor';
 import { makeInputOptions } from '../../services/detailStrings';
 import { blankEffect } from '../../services/actions';
 
-import { Action, OffenseOrDefense, DamageType, TargetingType, Effect, DamageTypeDarkColor } from '../../types';
+import { Action, Intent, DamageType, TargetingType, Effect, DamageTypeDarkColor } from '../../types';
 import {InputOption} from '../../uiTypes';
 
 interface ActionEditorInput {
@@ -26,11 +26,11 @@ export default function ActionEditor({action, update, save}: ActionEditorInput) 
     const [updatesSaved, setUpdatesSaved] = useState<boolean>(true);
 
     const minRange: number = [TargetingType.self,TargetingType.burst].includes(action.target) ? 0 : 1;
-    const maxRange: number = action.isWeapon ? 2 : 10;
+    const maxRange: number = (action.isWeapon && action.dmgType !== DamageType.ranged) ? 2 : 10;
     const minMpCost: number = action.isWeapon ? 0 : 1;
 
     const dmgTypeOptions: InputOption[] = makeInputOptions(Object.values(DamageType));
-    const offDefOptions: InputOption[] = makeInputOptions(Object.keys(OffenseOrDefense));
+    const offDefOptions: InputOption[] = makeInputOptions(Object.keys(Intent));
     const isWeaponOptions: InputOption[] = makeInputOptions(['weapon','ability']);
 
     const targetingTypeOptions: InputOption[] = makeInputOptions(
@@ -57,16 +57,16 @@ export default function ActionEditor({action, update, save}: ActionEditorInput) 
 
     function updateIsWeapon(weaponOrAbility: string): void {
         if(!action.isWeapon) {
-            action.type = OffenseOrDefense.offense;
+            action.intent = Intent.offense;
             action.target = TargetingType.single;
             action.mpCost = 0;
         } else {action.mpCost = 1}
         updateAction({...action, isWeapon: !action.isWeapon})
     }
 
-    function updateOffDef(newIntent: OffenseOrDefense): void {
+    function updateOffDef(newIntent: Intent): void {
         if(!action.isWeapon) {
-            updateAction({...action, type: newIntent});
+            updateAction({...action, intent: newIntent});
         }
     }
 
@@ -132,7 +132,7 @@ export default function ActionEditor({action, update, save}: ActionEditorInput) 
             />           
             <ClickSwitch
                 label={'Intent'}
-                currentValue={action.type}
+                currentValue={action.intent}
                 options={offDefOptions}
                 update={updateOffDef}
             />
@@ -179,7 +179,7 @@ export default function ActionEditor({action, update, save}: ActionEditorInput) 
                                 effect={effect}
                                 index={index}
                                 key={Math.random()}
-                                currentActionIntent={action.type}
+                                currentActionIntent={action.intent}
                                 backgroundColor={DamageTypeDarkColor[effect.dmgType]}
                                 update={updateEffect}
                                 remove={deleteEffect}

@@ -32,25 +32,25 @@ export default function CharSquare({char, style, index, onClick, onMouseOver}: C
     
   return (
     <div 
-        className="square char-hover"
+        className="char-square char-hover"
         style={squareStyle}
         onClick={() => onClick(index)} 
         onMouseOver={() => onMouseOver(index)}
     >
         <div className="char-square-top">
             <div className="char-square-effects-row">
-                {char.game.activeEffects.map(effect => 
+                {char.game.activeEffects.map(ae => 
                     <div 
                         className="char-square-effect"
-                        style={dmgTypeStyle(effect.dmgType)}
-                        title={``}
+                        style={dmgTypeStyle(ae.dmgType)}
+                        title={`${ae.actionName}`}
                         key={Math.random()}
-                    ><small>{effectInnerText(effect)}</small></div>
+                    ><small>{effectInnerText(ae)}</small></div>
                 )}
             </div>
         </div>
         <div className="char-square-bottom">
-            <span className="square-char-name">{char.name}</span>
+            <span className="char-square-name">{char.name}</span>
             <HealthBar 
                 currentHp={char.game.stats.hp} 
                 totalHp={char.stats.hp}

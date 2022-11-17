@@ -45,9 +45,10 @@ router.route('/getGameBoard/:_id').get(async (req,res) => {
     const allDbChars: DbCharacter[] = charIds.map(id => dbChars.find(char => char._id == id));
     const gameChars: GameChar[] = [];
 
+    //replace this with dbCharsToGameChars() after party dropdown functionality completely working
     for (let i = 0; i < allDbChars.length; i++) {
         const char: Character = await createOneCharacter(allDbChars[i]);
-        const boardChar: BoardChar = board.chars[i]
+        const boardChar: BoardChar = board.chars[i];
         if(!boardChar) console.log(`Could not find boardChar in db, charId: ${char._id}`);
 
         gameChars.push({
@@ -64,13 +65,14 @@ router.route('/getGameBoard/:_id').get(async (req,res) => {
                     actionTaken: false
                 },
                 isVisible: false,
+                hasBeenSeen: false,
                 activeEffects: []
             }
         });
     }
 
     const gameBoard: GameBoard = {...board, chars: gameChars}
-    gameBoard.chars = setVisibility(gameBoard);
+    gameBoard.chars = setVisibility(gameBoard, true).chars;
 
     res.status(200).send(gameBoard);
 });

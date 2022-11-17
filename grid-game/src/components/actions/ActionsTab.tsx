@@ -65,7 +65,7 @@ export default function ActionsTab() {
             <div className="sort-by-container">
                 <strong>Sort by:</strong>
                 <button className="sort-button" onClick={() => sortByName()}>Name</button>
-                <button className="sort-button" onClick={() => sortByDmgType()}>Type</button>
+                <button className="sort-button" onClick={() => sortByDmgType()}>Dmg Type</button>
             </div>
             {actions.map((action, index) => 
                 <ActionPane

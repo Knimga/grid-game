@@ -1,12 +1,13 @@
 import {GameSquare, EditorSquare, TerrainType, Style} from '../uiTypes';
 import {GameBoard, Board} from '../types';
+import { distance, getSpawnArea } from './ranger';
 
 interface BoardStyles {
     square: Style,
     board: Style
 }
 
-const boardSize: Style = {width: 700, height: 700};
+const boardSize: Style = {width: 900, height: 900};
 
 export function getBoardStyles(board: Board | GameBoard): BoardStyles {
     const squareSize: number = getSquareSize(board.gridWidth, board.gridHeight);
@@ -23,7 +24,7 @@ export function createEditorGrid(board: Board): EditorSquare[]  {
     const grid: EditorSquare[] = [];
     const gridLength: number = board.gridWidth * board.gridHeight;
 
-    for (let i = 0; i < gridLength; i++) grid[i] = {type: TerrainType.empty};
+    for (let i = 0; i < gridLength; i++) grid[i] = {type: TerrainType.floor};
     for (let w = 0; w < board.walls.length; w++) grid[board.walls[w]] = {type: TerrainType.wall};
     for (let c = 0; c < board.chars.length; c++) {
         if(board.chars[c].index > -1) grid[board.chars[c].index].char = board.chars[c]
@@ -36,7 +37,7 @@ export function createGameGrid(board: GameBoard): GameSquare[] {
     const grid: GameSquare[] = [];
     const gridLength: number = board.gridWidth * board.gridHeight;
 
-    for (let i = 0; i < gridLength; i++) grid[i] = {type: TerrainType.empty}
+    for (let i = 0; i < gridLength; i++) grid[i] = {type: TerrainType.floor}
     for (let w = 0; w < board.walls.length; w++) grid[board.walls[w]] = {type: TerrainType.wall}
     for (let c = 0; c < board.chars.length; c++) {
         if(board.chars[c].game.positionIndex > -1) {
@@ -53,11 +54,21 @@ function getSquareSize(gridWidth: number, gridHeight: number): number {
     return heightDivided <= widthDivided ? heightDivided : widthDivided;
 }
 
+export function getSpawningIndices(board: GameBoard, spawnLocation: number, partySize: number): number[] {
+    const charPositions: number[] = board.chars.map(char => char.game.positionIndex);
+    const spawningArea: number[] = getSpawnArea(board, spawnLocation, charPositions);
+    const sortedByClosest: number[] = spawningArea.sort((a,b) => 
+        distance(spawnLocation, a, board.gridWidth) > distance(spawnLocation, b, board.gridWidth) ? 1 : -1
+    );
+    return sortedByClosest.slice(0, partySize);
+}
+
 export function blankBoard(width: number, height: number) {
     return {
         name: 'Blank board',
             gridWidth: width,
             gridHeight: height,
+            entrySquare: 0,
             walls: [],
             chars: []
     }

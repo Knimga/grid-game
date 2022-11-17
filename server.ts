@@ -10,6 +10,7 @@ import GameData from './routes/gameData';
 import ActionsRoute from './routes/Actions';
 import ClassesRoute from './routes/Classes';
 import ArmorRoute from './routes/Armors';
+import PartiesRoute from './routes/Parties';
 
 const port: number = Number(process.env.PORT) || 4000;
 const dbUrl: string = config.db;
@@ -24,6 +25,7 @@ app.use('/gameData', GameData);
 app.use('/actions', ActionsRoute);
 app.use('/classes', ClassesRoute);
 app.use('/armors', ArmorRoute);
+app.use('/parties', PartiesRoute);
 
 mongoose.connect(dbUrl).then(
     () => {console.log('Connected to Mongo!')},
@@ -34,5 +36,5 @@ app.get( "/", ( req, res ) => {res.send( "Invalid endpoint" )});
 
 app.listen( port, () => {
     // tslint:disable-next-line:no-console
-    console.log( `server started at http://localhost:${ port }` );
+    console.log( `server started at http://localhost:${port}` );
 } );

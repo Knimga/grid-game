@@ -43,7 +43,6 @@
     align-self: flex-start;
     margin: 5px 0 0 5px;
     color: lightgray;
-    line-height: 7;
 }
 
 .char-save-button:hover {color: lightblue;}

@@ -1,9 +1,9 @@
 .boardstab-container {
-    width: 1300px; height: 900px;
+    width: 1500px; height: 1000px;
     display: flex; flex-direction: column;
 }
 
-.board-container {min-width: 700px;}
+.board-container {min-width: 900px;}
 
 .board-list, .board-edit-tools {
     width: 30%; height: 100%;
@@ -19,4 +19,13 @@
 
 .not-saved {color: pink;}
 
+.brush-box {
+    width: 60px; height: 60px;
+    display: flex; justify-content: center; align-items: center;
+}
+
+
+
 .wall {background-color: #303030;}
+
+.entry-square-range {background-color: #5089cc;}

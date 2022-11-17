@@ -14,7 +14,7 @@ router.route('/getAll').get(async (req,res) => {
 });
 
 router.route('/getBoardChars').get((req,res) => {
-    CharacterModel.find().lean().then(chars => {
+    CharacterModel.find({type: {$ne: 'player'}}).lean().then(chars => {
         const boardChars: BoardChar[] = chars.map(char => {
             return {_id: char._id, name: char.name, color: char.color, index: -1}
         });

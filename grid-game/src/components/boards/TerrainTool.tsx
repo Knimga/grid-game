@@ -6,12 +6,11 @@ import { TerrainType, TerrainTypeColors, ToolType } from '../../uiTypes';
 
 interface TerrainToolInput {
     toolIsActive: boolean;
-    setSelectedTool: Function;
+    selectTool: Function;
     setSelectedBrush: Function;
 } 
 
-export default function TerrainTool({toolIsActive, setSelectedTool, setSelectedBrush}: TerrainToolInput) {
-    //let [toolIsActive, setToolIsActive] = useState<boolean>(false);
+export default function TerrainTool({toolIsActive, selectTool, setSelectedBrush}: TerrainToolInput) {
     let [selectedTerrainType] = useState<TerrainType>(TerrainType.wall);
 
     const style = {backgroundColor: TerrainTypeColors[selectedTerrainType]};
@@ -19,10 +18,9 @@ export default function TerrainTool({toolIsActive, setSelectedTool, setSelectedB
     function toggleActive(): void {
         toolIsActive = !toolIsActive;
         if(toolIsActive) {
-            setSelectedTool(ToolType.terrain);
+            selectTool(ToolType.terrain);
             setSelectedBrush({name: "wall", color: "#303030"});
-        } else {setSelectedTool(ToolType.none)}
-        //setToolIsActive(toolIsActive);
+        } else {selectTool(ToolType.none)}
     }
 
   return (

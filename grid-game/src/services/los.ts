@@ -1,7 +1,7 @@
 
 import { GameBoard, GameChar, CharType } from "../types";
 import { RangeType } from "../uiTypes";
-import { getInRangeIndices } from "./ranger";
+import { getInRangeIndices, getAdjacentIndices } from "./ranger";
 
 export function getLos(board: GameBoard, fromPositions: number[]): number[] {
     const losIndices: number[] = [];
@@ -24,7 +24,9 @@ export function canSeePlayers(board: GameBoard, fromPosition: number): boolean {
     return los.some(i => playerPositions.includes(i));
 }
 
-export function setVisibility(board: GameBoard): GameChar[] {
+export function setVisibility(board: GameBoard, pregameSetup?: boolean): {
+    chars: GameChar[], visualLos: number[]
+} {
     const enemies: GameChar[] = board.chars.filter(char => char.type !== CharType.player && char.game.positionIndex > -1);
     const players: GameChar[] = board.chars.filter(char => char.type === CharType.player && char.game.positionIndex > -1);
     const enemyPositions: number[] = enemies.map(char => char.game.positionIndex);
@@ -42,8 +44,26 @@ export function setVisibility(board: GameBoard): GameChar[] {
 
     const newChars = [...board.chars];
     for (let i = 0; i < newChars.length; i++) {
-        newChars[i].game.isVisible = visibleIds.includes(newChars[i].game.gameId) ? true : false
+        newChars[i].game.isVisible = visibleIds.includes(newChars[i].game.gameId) ? true : false;
+        if(pregameSetup) {
+            newChars[i].game.hasBeenSeen = newChars[i].type === CharType.player ? 
+                true : newChars[i].game.isVisible
+        }
+        if(!newChars[i].game.hasBeenSeen) newChars[i].game.hasBeenSeen = newChars[i].game.isVisible;
     }
     
-    return newChars;
+    return {chars: newChars, visualLos: getVisualLos(board, playerLos)};
+}
+
+function getVisualLos(board: GameBoard, los: number[]): number[] {
+    const edgeOfLos: number[] = [];
+
+    for (let i = 0; i < los.length; i++) {
+        const adjIndices: number[] = getAdjacentIndices(los[i], board.gridWidth, board.gridHeight);
+        for (let a = 0; a < adjIndices.length; a++) {
+            if(!los.includes(adjIndices[a])) edgeOfLos.push(adjIndices[a])
+        }
+    }
+
+    return [...los, ...edgeOfLos.filter(i => board.walls.includes(i))];
 }

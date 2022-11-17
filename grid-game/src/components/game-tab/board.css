@@ -6,15 +6,30 @@
 
 .square {
     display: flex; flex-direction: column;
-    justify-content: flex-end;
-    outline: 0.1px solid gray;
+    justify-content: center; align-items: center;
     cursor: pointer;
 }
 
-.wall {background-color: #303030;}
+.char-square {
+    display: flex; flex-direction: column;
+    justify-content: flex-end; align-items: center;
+    cursor: pointer;
+}
 
-
+.char-hover {outline: 0.1px solid gray;}
 .char-hover:hover {outline: 0.5px solid white; color: white;}
+
+.portal-icon {font-size: 200%; color: lightblue;}
+
+.editor-square {outline: 0.1px solid gray;}
+
+.unseen {background-color: black;}
+
+.seen {outline: 0.1px solid gray;}
+
+.darken {filter: brightness(0.7);}
+
+.wall {background-color: #202020;}
 
 .char-square-top, .char-square-bottom {
     width: 100%;
@@ -35,6 +50,14 @@
     justify-content: center; align-items: center;
     background-color: #303030;
 }
+.char-square-effect:hover {outline: 0.5px solid white;}
+
+.char-square-name {
+    width: 100%;
+    font-size: 55%; text-align: center;
+    overflow-wrap: break-word;
+    text-overflow: ellipsis;
+}
 
 .move-range {background-color: #505050;}
 .move-range:hover {background-color: #606060;}
@@ -54,6 +77,4 @@
 .hpbar {height: 65%; background-color: darkred;}
 
 .mpbar {height: 35%; background-color: dodgerblue;}
-
-.square-char-name {font-size: 55%; text-align: center;}
 

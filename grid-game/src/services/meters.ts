@@ -53,7 +53,7 @@ export function resetThreat(meters: MetersEntry[], charGameId: string): MetersEn
 }
 
 function threatCalc(meterEntry: MetersEntry): number {
-    return Math.floor(meterEntry.meters.dmgDone * 0.5) + Math.floor(meterEntry.meters.healingDone * 0.5)
+    return fl(meterEntry.meters.dmgDone * 0.4) + fl(meterEntry.meters.healingDone * 0.6)
 }
 
 export function createMeters(chars: GameChar[]): MetersEntry[] {

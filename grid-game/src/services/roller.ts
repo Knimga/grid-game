@@ -1,6 +1,6 @@
 import {Roll, RollResult } from '../types';
 
-function rand(max: number): number {return Math.floor(Math.random() * max) + 1}
+export function rand(max: number): number {return Math.floor(Math.random() * max) + 1}
 
 export function rollDie({numDie, dieSides, mod}: Roll): RollResult {
     let result: number = 0, stringComponents: string[] = [];

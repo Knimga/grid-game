@@ -1,8 +1,9 @@
 import './board.css';
 
+import { GiMagicPortal } from 'react-icons/gi';
+
 import {createGameGrid, getBoardStyles} from '../../services/boards';
 
-import HealthBar from './HealthBar';
 import CharSquare from './CharSquare';
 
 import {GameBoard, GameChar, Action} from '../../types';
@@ -12,13 +13,15 @@ interface BoardInput {
     board: GameBoard,
     mvtHighlight: number[],
     actionHighlight: number[],
-    selectedAction: Action | null | undefined,
     aoeHighlight: number[],
+    los: number[],
+    hasBeenSeen: number[],
+    selectedAction: Action | null | undefined,
     boardFunctions: any
 }
 
 export default function BoardComponent({
-    board, mvtHighlight, actionHighlight, aoeHighlight, boardFunctions, selectedAction
+    board, mvtHighlight, actionHighlight, aoeHighlight, los, hasBeenSeen, boardFunctions, selectedAction
 }: BoardInput) {
     const grid: GameSquare[] = createGameGrid(board);
     const boardStyles = getBoardStyles(board);
@@ -30,17 +33,24 @@ export default function BoardComponent({
 
     function squareClassNames(index: number): string {
         const square: GameSquare = grid[index];
-        let classNames: string = `square ${square.type}`;
-        if(grid[index].char) classNames += ' char';
-        if(mvtHighlight.includes(index)) classNames += ' move-range';
-        if(selectedAction) {
-            if(actionHighlight.includes(index)) {
-                classNames += selectedAction.type === 'offense' ? ' offense-range' : ' defense-range';
-            }
-            if(aoeHighlight.includes(index)) {
-                classNames += selectedAction.type === 'offense' ? ' off-aoe-range' : ' def-aoe-range';
+        let classNames: string = 'square';
+        if(!hasBeenSeen.includes(index)) {
+            classNames += ' unseen'
+        } else {
+            classNames += ` seen ${square.type}`;
+            if(!los.includes(index)) classNames += ' darken';
+            if(grid[index].char) classNames += ' char';
+            if(mvtHighlight.includes(index)) classNames += ' move-range';
+            if(selectedAction) {
+                if(actionHighlight.includes(index)) {
+                    classNames += selectedAction.intent === 'offense' ? ' offense-range' : ' defense-range';
+                }
+                if(aoeHighlight.includes(index)) {
+                    classNames += selectedAction.intent === 'offense' ? ' off-aoe-range' : ' def-aoe-range';
+                }
             }
         }
+        
         
         return classNames;
     }
@@ -71,6 +81,7 @@ export default function BoardComponent({
         <div className="board" style={boardStyles.board}>
             {
                 grid.map((square, index) => {
+                    const isPortal: boolean = board.portal ? index === board.portal : false;
                     let thisSquareStyle: Style = boardStyles.square;
                     let showChar: boolean = false;
                 
@@ -95,7 +106,9 @@ export default function BoardComponent({
                             style={thisSquareStyle}
                             onClick={() => clickSquare(index)}
                             onMouseOver={() => mouseOver(index)}
-                        ></div>
+                        >
+                            {isPortal && hasBeenSeen.includes(index) ? <GiMagicPortal className="portal-icon"/> : ''}
+                        </div>
                     })
             }
 

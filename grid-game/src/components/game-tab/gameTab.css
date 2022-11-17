@@ -1,5 +1,5 @@
 .gametab-container {
-    width: 1300px; height: 900px;
+    width: 1500px; height: 1000px;
     display: flex; flex-direction: column;
 }
 
@@ -16,5 +16,5 @@
 .right-side-panel, .left-side-panel {
     display: flex; flex-direction: column;
     justify-content: space-around; align-items: center;
-    width: 30%; height: 100%;
+    width: 325px; height: 100%;
 }

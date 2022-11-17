@@ -12,35 +12,35 @@ import CharStats from './CharStats';
 import Meters from './Meters';
 
 import { rollD20 } from '../../services/roller';
-import { blankGameBoard } from '../../services/boards';
-import { resolveAction, getTargetTypes, setNewRound } from '../../services/actions';
+import { blankGameBoard, getSpawningIndices } from '../../services/boards';
+import { aiPlan } from '../../services/aiPlan';
+import { resolveAction, getTargetTypes, setNewRound, effectAlreadyApplied } from '../../services/actions';
 import { getInRangeIndices, getAoeLineIndices, distance } from '../../services/ranger';
 import { logger } from '../../services/logger';
 import { createMeters, dmgDoneAndTaken, healingDone, statEffectsDone, resetThreat } from '../../services/meters';
-import { setVisibility, visiblePlayers, canSeePlayers } from '../../services/los';
+import { setVisibility } from '../../services/los';
 
-import { 
-    getAdjacencyMatrix, newExploreDestination, getInRangeDest, getRemainingMvt, 
-    moveTowardsDest, randomMoveToIndex
-} from '../../services/aiMove';
+import { getAdjacencyMatrix, getRemainingMvt, moveTowardsDest } from '../../services/aiMove';
 
-import { 
-    hasHealSpellAndMana, whoNeedsHealing, selectOffensiveAction, selectHeal, selectTarget, hasBuff, selectBuff,
-    findBestBurstPlacement, getNearestPlayer
-} from '../../services/aiAct';
+import { findBestBurstPlacement} from '../../services/aiAct';
 
-import { GameBoard, GameChar, Action, ActionResult, CharType } from '../../types';
+import { GameBoard, GameChar, Action, ActionResult, CharType, AiPlan, Party } from '../../types';
 
 import {BoardSelection, TurnLog, RangeType, MetersEntry } from '../../uiTypes';
 
 export default function GameTab() {
     const [boardSelections, setBoardSelections] = useState<BoardSelection[]>([]);
+    const [parties, setParties] = useState<Party[]>([]);
+
     const [board, setBoard] = useState<GameBoard>(blankGameBoard());
+    const [partyChars, setPartyChars] = useState<GameChar[]>([]);
     const [chars, setChars] = useState<GameChar[]>([]);
 
     const [mvtHighlight, setMvtHighlight] = useState<number[]>([]);
     const [actionHighlight, setActionHighlight] = useState<number[]>([]);
     const [aoeHighlight, setAoeHighlight] = useState<number[]>([]);
+    const [los, setLos] = useState<number[]>([]);
+    const [hasBeenSeen, setHasBeenSeen] = useState<number[]>([]);
 
     const [selectedAction, setSelectedAction] = useState<Action | null>(null);
 
@@ -54,37 +54,69 @@ export default function GameTab() {
     const [charStatPaneChar, setCharStatPaneChar] = useState<GameChar | null>(null);
 
     let adjMatrix: number[][] = getAdjacencyMatrix(board);
-    const sleepMs: number = 2000;
 
     useEffect(() => {
-        const loadBoardSelections = async () => {
-            const res = await fetch(urls.localRoot+urls.boards.getSelections);
-            const selections: BoardSelection[] = await res.json();
-            setBoardSelections(selections);
-        }
-        loadBoardSelections();
+        fetch(urls.localRoot + urls.boards.getSelections)
+            .then(res => res.json())
+            .then((data) => setBoardSelections(data))
+            .catch((err) => console.log(err));
+
+        fetch(urls.localRoot + urls.parties.getAll)
+            .then(res => res.json())
+            .then((data) => setParties(data))
+            .catch((err) => console.log(err));
     },[]);
 
-    
     useEffect(() => {
         if(chars.length && chars[turnIndex].type !== CharType.player) aiTurn(chars[turnIndex])
     }, [turnIndex]);
 
     async function selectBoard(_id: string) {
-        const res = await fetch(urls.localRoot+urls.boards.getGameBoardById(_id));
+        const res = await fetch(urls.localRoot + urls.boards.getGameBoardById(_id));
         const newBoard: GameBoard = await res.json();
-        let newChars: GameChar[] = setVisibility(newBoard);
-        newChars = rollInitiative(newChars);
-        setBoard(newBoard);
-        setChars(newChars);
-        setMeters(createMeters(newChars));
-        setGameIsActive(false);
+        if(partyChars.length && newBoard.portal) {
+            assembleBoard(newBoard, newBoard.portal, partyChars)
+        } else {setBoard(newBoard)}
+    }
+
+    async function selectParty(_id: string) {
+        const res = await fetch(urls.localRoot + urls.parties.partyChars(_id));
+        const partyChars: GameChar[] = await res.json();
+        board.chars = board.chars.filter(char => char.type !== CharType.player);
+        setPartyChars(partyChars);
+        if(board._id && board.portal) assembleBoard(board, board.portal, partyChars);
+    }
+
+    function assembleBoard(currentBoard: GameBoard, spawnLocation: number, currentParty: GameChar[]): void {
+        if(currentBoard._id && currentParty.length) {
+            const newBoard: GameBoard = {...currentBoard};
+            const spawnIndices: number[] = getSpawningIndices(newBoard, spawnLocation, currentParty.length);
+
+            for (let i = 0; i < spawnIndices.length; i++) {
+                const positionedChar: GameChar = currentParty[i];
+                positionedChar.game.positionIndex = spawnIndices[i];
+                newBoard.chars.push(positionedChar);
+            }
+
+            const visibilityData = setVisibility(newBoard);
+            let newChars: GameChar[] = visibilityData.chars;
+            newChars = rollInitiative(newChars);
+
+            setBoard(newBoard);
+            setChars(newChars);
+            setLos(visibilityData.visualLos);
+            setHasBeenSeen(visibilityData.visualLos);
+            setMeters(createMeters(newChars));
+            setGameIsActive(false);
+        }
     }
 
     function startGame(): void {
         turnLog.unshift(logger.beginGame());
         turnLog.unshift(logger.newRound(1));
-        turnLog.unshift(logger.newTurn(chars[0].name));
+        if(chars[0].type === CharType.player || chars[0].game.hasBeenSeen) {
+            turnLog.unshift(logger.newTurn(chars[0].name))
+        }
         setGameIsActive(true);
         setTurnLog(turnLog);
         
@@ -119,7 +151,10 @@ export default function GameTab() {
 
         newChars.forEach(char => char.game.isTurn = false);
         newChars[newTurnIndex].game.isTurn = true;
-        turnLog.unshift(logger.newTurn(newChars[newTurnIndex].name));
+
+        if(newChars[newTurnIndex].game.hasBeenSeen) {
+            turnLog.unshift(logger.newTurn(newChars[newTurnIndex].name))
+        } else if(turnLog[0].header !== 'Enemies are acting...') {turnLog.unshift(logger.newUnseenTurn())}
 
         setTurnIndex(newTurnIndex);
         setChars(newChars);
@@ -133,75 +168,35 @@ export default function GameTab() {
 
     async function aiTurn(char: GameChar) {
         if(char.type !== CharType.player) {
-            const isBeast: boolean = char.type === CharType.beast;
-            const exploreMode: boolean = isBeast ? !canSeePlayers(board, char.game.positionIndex) 
-                : (visiblePlayers(chars).length ? false : true);
-            const needsHealing: GameChar | null = whoNeedsHealing(board);
-            const sleepLength: number = chars[turnIndex].game.isVisible ? 2000 : 500;
-            let newDest: number | null = null;
-            let target: GameChar | null = null;
-            let chosenAction: Action | null = null;
-    
-            if(hasHealSpellAndMana(char) && needsHealing) {
-                chosenAction = selectHeal(char);
-                target = needsHealing;
-                //console.log(`${char.name} selected ${chosenAction.name}, targeting ${target.name}`);
-                newDest = getInRangeDest(board, char, chosenAction, target.game.positionIndex, adjMatrix);
-                setCharDest(char, newDest);
-            } else if(!exploreMode) {
-                target = selectTarget(board, char, meters);
-                const targetIsAdjacent: boolean = distance(
-                    char.game.positionIndex, target.game.positionIndex, board.gridWidth
-                ) === 1;
-                chosenAction = selectOffensiveAction(char, targetIsAdjacent);
-                //console.log(`${char.name} selected ${chosenAction.name}, targeting ${target.name}`);
-                newDest = getInRangeDest(board, char, chosenAction, target.game.positionIndex, adjMatrix);
-                if(!newDest) {
-                    target = getNearestPlayer(board, char.game.positionIndex, adjMatrix)
-                    newDest = getInRangeDest(board, char, chosenAction, target.game.positionIndex, adjMatrix);
-                }
-                setCharDest(char, newDest);                   
-            } else {
-                if(roundNumber === 1 && hasBuff(char)) {
-                    chosenAction = selectBuff(char);
-                    target = char;
-                }
-                if((!char.game.destinationIndex || char.game.positionIndex === char.game.destinationIndex)
-                    && !isBeast) {
-                    const newExploreDest: number = newExploreDestination(board, char.game.positionIndex);
-                    newDest = newExploreDest;
-                    setCharDest(char, newDest);
-                }
-                if(isBeast) {
-                    newDest = randomMoveToIndex(board, char);
-                    setCharDest(char, newDest);
-                }
-            }
+            const plan: AiPlan = aiPlan(chars, char, board, meters, adjMatrix, roundNumber);
+            const sleepLength: number = char.game.isVisible ? 1000 : 500;
         
+            if(plan.newDest) setCharDest(char, plan.newDest);
+
             await sleep(sleepLength);
             
-            if(char.game.destinationIndex) await moveCycle(char.game.destinationIndex);
+            if(char.game.destinationIndex) await moveCycle(char);
 
-            if(chosenAction && target && newDest === char.game.positionIndex) {
-                selectAction(chosenAction);
-
+            if(plan.chosenAction && plan.target && plan.newDest === char.game.positionIndex) {
+                selectAction(plan.chosenAction);
                 await sleep(sleepLength);
 
-                if(['burst','line'].includes(chosenAction.target)) {
-                    let aoeTargetIndex: number = target.game.positionIndex;
+                if(['burst','line'].includes(plan.chosenAction.target)) {
+                    let aoeTargetIndex: number = plan.target.game.positionIndex;
 
-                    if(chosenAction.hasOwnProperty('burstRadius')) {
-                        aoeTargetIndex = chosenAction.range === 0  ? 
-                        char.game.positionIndex : findBestBurstPlacement(
-                            board, chosenAction, char.game.gameId, target.game.positionIndex, adjMatrix
-                        );
+                    if(plan.chosenAction.hasOwnProperty('burstRadius')) {
+                        aoeTargetIndex = plan.chosenAction.range === 0  ? 
+                            char.game.positionIndex : findBestBurstPlacement(
+                                board, plan.chosenAction, char.game.gameId, 
+                                plan.target.game.positionIndex, adjMatrix
+                            );
                     }
                     
-                    const aoeEffectIndices: number[] = aoeRange(aoeTargetIndex, chosenAction);
+                    const aoeEffectIndices: number[] = aoeRange(aoeTargetIndex, plan.chosenAction);
                     setAoeHighlight(aoeEffectIndices);
                     await sleep(sleepLength);
-                    performAction(aoeEffectIndices, chosenAction);
-                } else {performAction([target.game.positionIndex], chosenAction)}
+                    performAction(aoeEffectIndices, plan.chosenAction);
+                } else {performAction([plan.target.game.positionIndex], plan.chosenAction)}
                 
                 await sleep(sleepLength);
             }
@@ -211,24 +206,23 @@ export default function GameTab() {
         } else {console.log(`${char.name} is not enemy/beast`)}
     }
 
-    async function moveCycle(destIndex: number) {
-        if(chars[turnIndex].game.destinationIndex) {
-            //console.log(`moveCycle destination: ${chars[turnIndex].game.destinationIndex}`);
-            const sleepLength: number = chars[turnIndex].game.isVisible ? 2000 : 500;
+    async function moveCycle(char: GameChar) {
+        if(char.game.destinationIndex) {
+            const destIndex: number = char.game.destinationIndex;
+            const sleepLength: number = char.game.isVisible ? 1000 : 500;
 
-            while(getRemainingMvt(chars[turnIndex]) > 0 && destIndex !== chars[turnIndex].game.positionIndex) {
-                const currentChar: GameChar = chars[turnIndex];
+            while(getRemainingMvt(char) > 0 && destIndex !== char.game.positionIndex) {
 
-                if(currentChar.game.isVisible) {
+                if(char.game.isVisible) {
                     const mvtRangeIndices = getInRangeIndices(
-                        board, currentChar.game.positionIndex, getRemainingMvt(currentChar), RangeType.mvt
+                        board, char.game.positionIndex, getRemainingMvt(char), RangeType.mvt
                     );
                     setMvtHighlight(mvtRangeIndices);
                 }
                 await sleep(sleepLength);
     
-                const moveToIndex: number = moveTowardsDest(board, currentChar, destIndex, adjMatrix);
-                //console.log(moveToIndex);
+                const moveToIndex: number = moveTowardsDest(board, char, destIndex, adjMatrix);
+
                 moveTo(moveToIndex);
                 
                 await sleep(sleepLength);
@@ -249,8 +243,6 @@ export default function GameTab() {
         }
     }
 
-    function sleep(ms: number) {return new Promise(resolve => setTimeout(resolve, ms))}
-
     function clearHighlights(): void {
         if(mvtHighlight.length) setMvtHighlight([]);
         if(actionHighlight.length) setActionHighlight([]);
@@ -262,7 +254,7 @@ export default function GameTab() {
             setMvtHighlight([])
         } else {
             const mover: GameChar = chars[turnIndex];
-            const mvtRemaining: number = mover.game.stats.mvt - mover.game.round.movementTaken;
+            const mvtRemaining: number = getRemainingMvt(mover);
             if(board) {
                 const mvtIndices: number[] = getInRangeIndices(
                     board, mover.game.positionIndex, mvtRemaining, RangeType.mvt
@@ -281,16 +273,16 @@ export default function GameTab() {
         } else {
             setSelectedAction(action);
             if(chars[turnIndex].game.isVisible || chars[turnIndex].type === 'player') {
-                toggleRange(action.range, RangeType.atk)
+                toggleRange(action, action.intent === 'offense' ? RangeType.atk : RangeType.def)
             }
         }
     }
 
-    function toggleRange(range: number, rangeType: RangeType): void {
-        const attacker: GameChar = chars[turnIndex];
-        const povIndex: number = attacker.game.positionIndex;
+    function toggleRange(action: Action, rangeType: RangeType): void {
+        const actor: GameChar = chars[turnIndex];
+        const povIndex: number = actor.game.positionIndex;
         if(board) {
-            const indices: number[] = getInRangeIndices(board, povIndex, range, rangeType);
+            const indices: number[] = getInRangeIndices(board, povIndex, action.range, rangeType);
             if(mvtHighlight.length) setMvtHighlight([]);
             setActionHighlight(indices);
         } 
@@ -309,6 +301,14 @@ export default function GameTab() {
         } else {console.log('null action!'); return []}
     }
 
+    function updateHasBeenSeen(newLos: number[]): void {
+        const newHasBeenSeen: number[] = [...hasBeenSeen];
+        for (let i = 0; i < newLos.length; i++) {
+            if(!newHasBeenSeen.includes(newLos[i])) newHasBeenSeen.push(newLos[i])
+        }
+        setHasBeenSeen(newHasBeenSeen);
+    }
+
     function moveTo(index: number): void {
         if(board && Number(index)) {
             const movingChar: GameChar = chars[turnIndex];
@@ -322,12 +322,21 @@ export default function GameTab() {
             newChars[turnIndex].game.round.movementTaken += distanceMoved;
             newGameBoard.chars = newChars;
 
-            turnLog[0].actions.push(logger.move(movingChar.name, distanceMoved));
+            if(newChars[turnIndex].type === CharType.player || newChars[turnIndex].game.isVisible) {
+                turnLog[0].actions.push(logger.move(movingChar.name, distanceMoved));
+            } else if(newChars[turnIndex].game.hasBeenSeen) {
+                turnLog[0].actions.push(logger.unseenMove(movingChar.name))
+            }
+
+            const visibilityData = setVisibility(newGameBoard);
+
             adjMatrix = getAdjacencyMatrix(newGameBoard);
             setTurnLog(turnLog);
             setMvtHighlight([]);
-            setChars(setVisibility(newGameBoard));
+            setChars(visibilityData.chars);
             setBoard(newGameBoard);
+            setLos(visibilityData.visualLos);
+            updateHasBeenSeen(visibilityData.visualLos);
         } else {console.log(`moveTo error: ${index}`)}
     }
     
@@ -337,12 +346,14 @@ export default function GameTab() {
 
         if(action && !actor.game.round.actionTaken && actor.game.stats.mp >= action.mpCost) {
             const newChars: GameChar[] = [...chars];
-            const targetCharTypes: CharType[] = getTargetTypes(action.type, actor.type);
+            const targetCharTypes: CharType[] = getTargetTypes(action.intent, actor.type);
             const affectedChars: GameChar[] = newChars.filter(char => 
                 affectedIndices.includes(char.game.positionIndex) && targetCharTypes.includes(char.type)
             ); 
 
-            if(affectedChars.length) {
+            if(affectedChars.length && affectedChars.some(char => 
+                !effectAlreadyApplied(char.game.activeEffects, actor.game.gameId, action.name)
+            )) {
                 const results: ActionResult[] = resolveAction(actor, affectedChars, action);
                 
                 for (let r = 0; r < results.length; r++) {
@@ -350,7 +361,6 @@ export default function GameTab() {
                     if(thisChar) {
                         const targetIndex: number = chars.indexOf(thisChar);
                         chars[targetIndex] = results[r].newChar;
-                        //if(results[r].charDiedThisTurn) charDies(thisChar.game.gameId);
 
                         let newMeters: MetersEntry[] = [...meters];
 
@@ -392,20 +402,6 @@ export default function GameTab() {
         }
     }
 
-    function toggleDash(dashOn: boolean): void {
-        const newChars: GameChar[] = [...chars];
-        if(dashOn) {
-            newChars[turnIndex].game.stats.mvt += newChars[turnIndex].stats.mvt;
-            newChars[turnIndex].game.round.actionTaken = true;
-        } else {
-            if(chars[turnIndex].game.stats.mvt !== chars[turnIndex].stats.mvt) {
-                newChars[turnIndex].game.stats.mvt -= newChars[turnIndex].stats.mvt;
-                newChars[turnIndex].game.round.actionTaken = false;
-            }
-        }
-        setChars(newChars);
-    }
-
     function charDies(charId: string | undefined): void {
         if(board && charId) {
             const newChars: GameChar[] = [...chars];
@@ -442,11 +438,12 @@ export default function GameTab() {
         }
     }
 
+    function sleep(ms: number) {return new Promise(resolve => setTimeout(resolve, ms))}
+
     const actionFunctions = {
         endTurn: endTurn,
         showMovement: showMovement,
-        selectAction: selectAction,
-        toggleDash: toggleDash
+        selectAction: selectAction
     }
 
     const boardFunctions = {
@@ -458,11 +455,23 @@ export default function GameTab() {
     }
 
     function logChars(): void {console.log(chars)}
-    function logMeters(): void {console.log(meters)}
+    function logMeters(): void {console.log(actionHighlight)}
 
     return (
         <div className="gametab-container">
             <div className="top-bar">
+                <select
+                    onChange={(e) => selectParty(e.target.options[e.target.selectedIndex].value)}
+                >
+                    <option hidden={true}>Select a party...</option>
+                    {
+                        parties.map((party: Party) =>
+                            <option key={party._id} value={party._id}>
+                                {party.members.map(m => m.name).join(', ')}
+                            </option>
+                        )
+                    }
+                </select>
                 <select
                     onChange={(e) => selectBoard(e.target.options[e.target.selectedIndex].value)}
                 >
@@ -497,6 +506,8 @@ export default function GameTab() {
                             actionHighlight={actionHighlight}
                             selectedAction={selectedAction}
                             aoeHighlight={aoeHighlight}
+                            los={los}
+                            hasBeenSeen={hasBeenSeen}
                             boardFunctions={boardFunctions}
                         />
                     </div>
@@ -505,7 +516,6 @@ export default function GameTab() {
                 <div className="right-side-panel">
                     <Combatants 
                         chars={chars} 
-                        turnIndex={turnIndex} 
                         gameIsActive={gameIsActive}
                         roundNumber={roundNumber}
                     />

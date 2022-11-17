@@ -20,12 +20,12 @@ export interface Terrain {
 
 export enum TerrainType {
     wall = 'wall',
-    empty = 'empty'
+    floor = 'floor'
 }
 
 export enum TerrainTypeColors {
     wall = "#303030",
-    empty = ""
+    floor = ""
 }
 
 export interface Style {
@@ -38,6 +38,8 @@ export interface Style {
 export enum ToolType {
     terrain = "terrain",
     character = "char",
+    portal = "portal",
+    door = "door",
     none = ""
 }
 
@@ -62,8 +64,8 @@ export interface BoardCharSelection {
 
 export enum RangeType {
     atk = 'atk',
+    def = 'def',
     mvt = 'mvt',
-    pwr = 'pwr',
     los = 'los'
 }
 

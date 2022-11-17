@@ -5,6 +5,7 @@ const schema = new Schema<Board>({
     name: String,
     gridWidth: Number,
     gridHeight: Number,
+    portal: {required: false, type: Number},
     walls: Array,
     chars: Array
 });

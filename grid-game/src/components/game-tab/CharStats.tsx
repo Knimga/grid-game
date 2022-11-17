@@ -1,8 +1,11 @@
 import './charStats.css';
 
 import AttributeBars from '../shared/AttributeBars';
+import AffinityBox from '../shared/AffinityBox';
 
-import { GameChar, DamageTypes } from '../../types';
+import { cap } from '../../services/detailStrings';
+
+import { GameChar, DamageTypes, Affinities } from '../../types';
 
 interface CharStatsInput {char: GameChar | null}
 
@@ -11,6 +14,8 @@ export default function CharStats({char}: CharStatsInput) {
     const mpBarStyle: Object = char ? {width: `${(char.game.stats.mp / char.stats.mp) * 100}%`} : {}
 
     const charNameColor: Object = char ? {backgroundColor: char.color} : {};
+
+    const elements: (keyof Affinities)[] = ['fire','wind','earth','shadow','water','holy','poison'];
 
     function topSection(): JSX.Element {
         if(char) {
@@ -37,8 +42,8 @@ export default function CharStats({char}: CharStatsInput) {
         return {color: 'red'}
     }
 
-    function statsBlockRow(label: string, gameStatValue: number, statValue: number): JSX.Element {
-        return <div className="char-stats-block-row">
+    function statsBlockRow(label: string, gameStatValue: number, statValue: number, style?: Object): JSX.Element {
+        return <div className="char-stats-block-row" style={style ?? {}}>
             <div className="char-stat-label">{label}</div>
             <div className="char-stat-value" style={diffStyle(gameStatValue - statValue)}>
                 {gameStatValue}
@@ -108,9 +113,15 @@ export default function CharStats({char}: CharStatsInput) {
                         >{`DR: ${gameDmgTypes.magic.dr}`}</span>
                     </div>
                 </div>
+                <div className="char-stats-affinities-container">
+                   
+                       
+                </div>
             </div>
         } else {return <></>}
     }
+
+
 
   return (
     <div className="char-stats">

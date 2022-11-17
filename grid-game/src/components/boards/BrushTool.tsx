@@ -1,5 +1,3 @@
-import './BrushTool.css';
-
 import {useState} from 'react';
 
 import { TerrainType, TerrainTypeColors, ToolType } from '../../uiTypes';
@@ -7,7 +5,7 @@ import { TerrainType, TerrainTypeColors, ToolType } from '../../uiTypes';
 interface BrushToolInput {
     brushes: any[];
     toolType: ToolType;
-    setSelectedTool: Function;
+    selectTool: Function;
     setSelectedBrush: Function;
 }
 
@@ -15,7 +13,7 @@ interface BrushToolInput {
 tooltype = terrain or char
 */
 
-export default function BrushTool({brushes, toolType, setSelectedTool, setSelectedBrush}: BrushToolInput) {
+export default function BrushTool({brushes, toolType, selectTool, setSelectedBrush}: BrushToolInput) {
     let [toolIsActive, setToolIsActive] = useState<boolean>(false);
     let [selectedBrush] = useState<TerrainType>(TerrainType.wall);
 
@@ -24,9 +22,9 @@ export default function BrushTool({brushes, toolType, setSelectedTool, setSelect
     function toggleActive(): void {
         toolIsActive = !toolIsActive;
         if(toolIsActive) {
-            setSelectedTool(ToolType.terrain);
+            selectTool(ToolType.terrain);
             setSelectedBrush(selectedBrush);
-        } else {setSelectedTool(ToolType.none)}
+        } else {selectTool(ToolType.none)}
         setToolIsActive(toolIsActive);
     }
 

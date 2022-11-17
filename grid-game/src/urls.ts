@@ -1,12 +1,12 @@
 const urls = {
     root: process.env.PUBLIC_URL,
     localRoot: 'http://localhost:4000/',
-    post: (payload: Object) => {
+    post: (payload: any) => {
         return {
             method: 'POST',
             headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json'
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
             },
             body: JSON.stringify(payload)
         }
@@ -41,6 +41,13 @@ const urls = {
         getAll: 'armors/getAll',
         save: 'armors/save',
         create: 'armors/create'
+    },
+    parties: {
+        getAll: 'parties/getAll',
+        partiesTabData: 'parties/partiesTabData',
+        partyChars: (_id: string) => {return `parties/partyChars/${_id}`},
+        save: 'parties/save',
+        delete: (_id: string) => {return `parties/delete/${_id}`}
     }
 }
 

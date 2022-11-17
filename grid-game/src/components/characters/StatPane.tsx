@@ -48,7 +48,7 @@ export default function StatPane({stats}: StatPaneInput) {
             </div>
         </div>
         <div className="atk-bonus-list">
-            <div className="atk-bonus-pane">
+            <div className="stat-pane-atk-bonus-pane">
                 <div className="atk-bonus-label">Melee</div>
                 <div className="atk-bonus-values">
                     <span>{`Attack: ${stats.dmgTypes.melee.atk}`}</span>
@@ -56,7 +56,7 @@ export default function StatPane({stats}: StatPaneInput) {
                     <span>{`DR: ${stats.dmgTypes.melee.dr}`}</span>
                 </div>
             </div>
-            <div className="atk-bonus-pane">
+            <div className="stat-pane-atk-bonus-pane">
                 <div className="atk-bonus-label">Ranged</div>
                 <div className="atk-bonus-values">
                     <span>{`Attack: ${stats.dmgTypes.ranged.atk}`}</span>
@@ -64,7 +64,7 @@ export default function StatPane({stats}: StatPaneInput) {
                     <span>{`DR: ${stats.dmgTypes.ranged.dr}`}</span>
                 </div>
             </div>
-            <div className="atk-bonus-pane">
+            <div className="stat-pane-atk-bonus-pane">
                 <div className="atk-bonus-label">Magic</div>
                 <div className="atk-bonus-values">
                     <span>{`Attack: ${stats.dmgTypes.magic.atk}`}</span>

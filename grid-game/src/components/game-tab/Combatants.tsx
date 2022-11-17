@@ -4,18 +4,17 @@ import { GameChar } from '../../types';
 
 interface CombatantsInput {
   chars: GameChar[];
-  turnIndex: number;
   gameIsActive: boolean;
   roundNumber: number;
 }
 
-export default function Combatants({chars, turnIndex, gameIsActive, roundNumber}: CombatantsInput) {
-  //const sortedChars: GameChar[] = chars.sort((a,b) => {return b.game.iniRoll - a.game.iniRoll});
+export default function Combatants({chars, gameIsActive, roundNumber}: CombatantsInput) {
+  const knownChars: GameChar[] = chars.filter(c => c.game.hasBeenSeen);
 
-  function combatantClasses(listIndex: number): string {
+  function combatantClasses(char: GameChar): string {
     let string: string = '';
-    if(gameIsActive && turnIndex === listIndex) string += 'is-turn';
-    if(chars[listIndex].game.stats.hp <= 0) string += ' dead-char';
+    if(gameIsActive && char.game.isTurn) string += 'is-turn';
+    if(char.game.stats.hp <= 0) string += ' dead-char';
     return string;
   }
 
@@ -23,8 +22,8 @@ export default function Combatants({chars, turnIndex, gameIsActive, roundNumber}
     <div className="combatants">
       <strong>{`Round ${roundNumber}`}</strong>
       {
-        chars.map((char: GameChar, index: number) => 
-          <div className={'combatant '+ combatantClasses(index)} key={char.game.gameId}>
+        knownChars.map(char => 
+          <div className={'combatant '+ combatantClasses(char)} key={char.game.gameId}>
             <span className="combatant-name">{char.name}</span>
             <span className="combatant-ini-value">{char.game.iniRoll}</span>
           </div>
