@@ -24,9 +24,7 @@ export function canSeePlayers(board: GameBoard, fromPosition: number): boolean {
     return los.some(i => playerPositions.includes(i));
 }
 
-export function setVisibility(board: GameBoard, pregameSetup?: boolean): {
-    chars: GameChar[], visualLos: number[]
-} {
+export function setCharVisibility(board: GameBoard, pregameSetup?: boolean): GameChar[] {
     const enemies: GameChar[] = board.chars.filter(char => char.type !== CharType.player && char.game.positionIndex > -1);
     const players: GameChar[] = board.chars.filter(char => char.type === CharType.player && char.game.positionIndex > -1);
     const enemyPositions: number[] = enemies.map(char => char.game.positionIndex);
@@ -52,18 +50,21 @@ export function setVisibility(board: GameBoard, pregameSetup?: boolean): {
         if(!newChars[i].game.hasBeenSeen) newChars[i].game.hasBeenSeen = newChars[i].game.isVisible;
     }
     
-    return {chars: newChars, visualLos: getVisualLos(board, playerLos)};
+    return newChars;
 }
 
-function getVisualLos(board: GameBoard, los: number[]): number[] {
+export function getPlayerLos(board: GameBoard): number[] {
+    const players: GameChar[] = board.chars.filter(char => char.type === CharType.player && char.game.positionIndex > -1);
+    const playerPositions: number[] = players.map(char => char.game.positionIndex);
+    const playerLos: number[] = getLos(board, playerPositions);
     const edgeOfLos: number[] = [];
 
-    for (let i = 0; i < los.length; i++) {
-        const adjIndices: number[] = getAdjacentIndices(los[i], board.gridWidth, board.gridHeight);
+    for (let i = 0; i < playerLos.length; i++) {
+        const adjIndices: number[] = getAdjacentIndices(playerLos[i], board.gridWidth, board.gridHeight);
         for (let a = 0; a < adjIndices.length; a++) {
-            if(!los.includes(adjIndices[a])) edgeOfLos.push(adjIndices[a])
+            if(!playerLos.includes(adjIndices[a])) edgeOfLos.push(adjIndices[a])
         }
     }
 
-    return [...los, ...edgeOfLos.filter(i => board.walls.includes(i))];
+    return [...playerLos, ...edgeOfLos.filter(i => board.walls.includes(i))];
 }

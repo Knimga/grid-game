@@ -66,11 +66,11 @@ export function getSpawningIndices(board: GameBoard, spawnLocation: number, part
 export function blankBoard(width: number, height: number) {
     return {
         name: 'Blank board',
-            gridWidth: width,
-            gridHeight: height,
-            entrySquare: 0,
-            walls: [],
-            chars: []
+        gridWidth: width,
+        gridHeight: height,
+        doors: [],
+        walls: [],
+        chars: []
     }
 }
 

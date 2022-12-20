@@ -5,6 +5,7 @@ import Typography from '@mui/material/Typography';
 import {Box, Tabs, Tab } from '@mui/material';
 
 import GameTab from './components/game-tab/GameTab';
+import GameController from './components/game-tab/GameController';
 import CharactersTab from './components/characters/CharactersTab';
 import BoardsTab from './components/boards/BoardsTab';
 import ClassTab from './components/classes/ClassTab';
@@ -66,7 +67,7 @@ function App() {
         </Tabs>
       </Box>
       <TabPanel value={value} index={0}>
-        <GameTab />
+        <GameController />
       </TabPanel>
       <TabPanel value={value} index={1}>
         <BoardsTab />

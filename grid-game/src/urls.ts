@@ -24,6 +24,13 @@ const urls = {
         getAllBoards: 'boards/getAllBoards',
         save: 'boards/save'
     },
+    parties: {
+        getAll: 'parties/getAll',
+        partiesTabData: 'parties/partiesTabData',
+        partyCharsById: (_id: string) => {return `parties/partyCharsById/${_id}`},
+        save: 'parties/save',
+        delete: (_id: string) => {return `parties/delete/${_id}`}
+    },
     gameData: {
         bulk: 'gameData/bulk'
     },
@@ -41,13 +48,6 @@ const urls = {
         getAll: 'armors/getAll',
         save: 'armors/save',
         create: 'armors/create'
-    },
-    parties: {
-        getAll: 'parties/getAll',
-        partiesTabData: 'parties/partiesTabData',
-        partyChars: (_id: string) => {return `parties/partyChars/${_id}`},
-        save: 'parties/save',
-        delete: (_id: string) => {return `parties/delete/${_id}`}
     }
 }
 

@@ -43,7 +43,7 @@ router.route('/partiesTabData').get(async (req,res) => {
     res.status(200).send({parties: parties, members: allPartyMembers});
 });
 
-router.route('/partyChars/:partyId').get(async (req,res) => {
+router.route('/partyCharsById/:partyId').get(async (req,res) => {
     const partyId: string = req.params.partyId;
     const memberIds = (await PartiesModel.findById(partyId).lean()).members;
     const dbChars = await CharactersModel.find({_id: {$in: memberIds}}).lean();

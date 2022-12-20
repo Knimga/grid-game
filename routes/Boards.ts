@@ -5,7 +5,6 @@ import {BoardSelection} from '../grid-game/src/uiTypes';
 import { DbCharacter } from '../dbTypes';
 
 import { createOneCharacter } from './gameData';
-import { setVisibility } from '../grid-game/src/services/los';
 
 import BoardModel from '../models/Boards.model';
 import Characters from '../models/Characters.model';
@@ -24,10 +23,12 @@ router.route('/save').post(async (req,res) => {
 
 router.route('/boardSelections').get((req,res) => {
     BoardModel.find().lean().then((savedBoards) => {
-        const boardNames: BoardSelection[] = savedBoards.map((board) => {
-            return {_id: board._id, name: board.name}
+        const boardSelections: BoardSelection[] = savedBoards.map((board) => {
+            const entryIds: string[] = board.doors.map(d => d.id);
+            if(board.portal) entryIds.unshift('portal');
+            return {_id: board._id, name: board.name, entryPointIds: entryIds}
         });
-        res.status(200).send(boardNames);
+        res.status(200).send(boardSelections);
     }).catch((err) => {res.status(400).send(err)})
 });
 
@@ -72,7 +73,6 @@ router.route('/getGameBoard/:_id').get(async (req,res) => {
     }
 
     const gameBoard: GameBoard = {...board, chars: gameChars}
-    gameBoard.chars = setVisibility(gameBoard, true).chars;
 
     res.status(200).send(gameBoard);
 });

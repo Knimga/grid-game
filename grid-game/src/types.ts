@@ -1,3 +1,31 @@
+export interface Board {
+    _id?: string;
+    name: string;
+    gridWidth: number;
+    gridHeight: number;
+    portal?: number;
+    doors: Door[];
+    walls: number[];
+    chars: BoardChar[];
+}
+
+export interface GameBoard extends Omit<Board, 'chars'> {
+    chars: GameChar[];
+}
+
+export interface Door {
+    id: string;
+    position: number;
+    leadsTo: {mapId: string; doorId: string;}
+}
+
+export interface BoardChar {
+    _id: string; 
+    index: number;
+    name: string;
+    color: string;
+}
+
 export interface Character {
     _id: string;
     color: string;
@@ -39,6 +67,31 @@ export interface Attributes {
     spirit: number;
 }
 
+export interface Class {
+    _id?: string;
+    name: string;
+    role: ClassRole;
+    attributes: Attributes,
+    attributeFocus: AttributeFocus,
+    armor: Armor[],
+    actions: Action[]
+}
+
+export interface Stats { //all calculated from attributes
+    hp: number,
+    hpRegen: number,
+    mp: number,
+    mpRegen: number,
+    ac: number,
+    mac: number,
+    ini: number,
+    mvt: number,
+    bonusHealingDone: number,
+    bonusHealingRcvd: number,
+    affinities: Affinities,
+    dmgTypes: DamageTypes
+}
+
 export interface Affinities {
     fire: number,
     wind: number,
@@ -60,31 +113,6 @@ export interface DamageTypes {
     melee: Bonuses,
     ranged: Bonuses,
     magic: Bonuses
-}
-
-export interface Stats { //all calculated from attributes
-    hp: number,
-    hpRegen: number,
-    mp: number,
-    mpRegen: number,
-    ac: number,
-    mac: number,
-    ini: number,
-    mvt: number,
-    bonusHealingDone: number,
-    bonusHealingRcvd: number,
-    affinities: Affinities,
-    dmgTypes: DamageTypes
-}
-
-export interface Class {
-    _id?: string;
-    name: string;
-    role: ClassRole;
-    attributes: Attributes,
-    attributeFocus: AttributeFocus,
-    armor: Armor[],
-    actions: Action[]
 }
 
 export interface Action {
@@ -133,7 +161,6 @@ export interface Bonuses {atk: number; dmg: number; dr: number;}
 
 export type AttributeFocus = [keyof Attributes, keyof Attributes];
 
-
 export interface Roll {
     name?: string;
     numDie: number; 
@@ -170,42 +197,6 @@ export interface AiPlan {
     newDest: number | null;
     target: GameChar | null;
     chosenAction: Action | null;
-}
-
-export interface Board {
-    _id?: string;
-    name: string;
-    gridWidth: number;
-    gridHeight: number;
-    portal?: number;
-    //doors: Door[];
-    walls: number[];
-    chars: BoardChar[];
-}
-
-/*interface Door {
-    id: string;
-    name: string;
-    position: number;
-    leadsTo: {mapId: string; doorName: string;}
-}*/
-
-export interface BoardChar {
-    _id: string; 
-    index: number;
-    name: string;
-    color: string;
-}
-
-export interface GameBoard {
-    _id?: string;
-    name: string;
-    gridWidth: number;
-    gridHeight: number;
-    portal?: number;
-    //doors: Door[];
-    walls: number[];
-    chars: GameChar[];
 }
 
 export interface Party {

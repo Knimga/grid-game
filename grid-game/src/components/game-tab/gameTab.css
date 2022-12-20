@@ -3,6 +3,14 @@
     display: flex; flex-direction: column;
 }
 
+.game-setup-container {
+    width: 75%; height: 15%;
+    justify-self: center; align-self: center;
+    display: flex; justify-content: space-around;
+    align-items: center;
+}
+.game-setup-container > select {height: 30px;}
+
 .top-bar {
     width: 100%; height: 6%;
     display: flex; justify-content: space-between; 

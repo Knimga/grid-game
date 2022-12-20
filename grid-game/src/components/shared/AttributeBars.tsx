@@ -22,8 +22,6 @@ export default function AttributeBars({attributes, isClassDisplay}: AttributeBar
         return `${attrAbbrev} ${valueString}`;
     }
 
-
-
     function barStyle(attr: keyof Attributes): Object {
         const highestAttrValue: number = isClassDisplay ? 4 : Math.max(
             attributes.strength, attributes.finesse, attributes.toughness, 
@@ -31,7 +29,6 @@ export default function AttributeBars({attributes, isClassDisplay}: AttributeBar
         );
         return {width: `${(attributes[attr] / highestAttrValue) * 100}%`}
     }
-  
 
     function attributeRow(attr: keyof Attributes): JSX.Element {
         return <div className="attribute-bars-row">

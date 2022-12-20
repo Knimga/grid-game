@@ -1,7 +1,7 @@
-import { ActionResult,  CharType } from "../types";
-import {TurnLog} from '../uiTypes';
+import { ActionResult,  CharType, GameChar } from "../types";
+import { TurnLog } from '../uiTypes';
 
-import {effectTargetStatString} from './detailStrings';
+import { effectTargetStatString } from './detailStrings';
 
 export const logger = {
     beginGame: beginGame,
@@ -13,6 +13,16 @@ export const logger = {
     action: action,
     charDies: charDies,
     victory: victory
+}
+
+export function newTurnLog(firstTurnChar: GameChar): TurnLog[] {
+    const newLog: TurnLog[] = [newRound(1), beginGame()];
+    
+    if(firstTurnChar.type === CharType.player || firstTurnChar.game.hasBeenSeen) {
+        newLog.unshift(newTurn(firstTurnChar.name))
+    }
+
+    return newLog;
 }
 
 function beginGame(): TurnLog {

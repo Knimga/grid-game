@@ -54,7 +54,11 @@ export enum LogType {
     charDies = 'charDies'
 }
 
-export interface BoardSelection {_id: string; name: string}
+export interface BoardSelection {
+    _id: string; 
+    name: string; 
+    entryPointIds: string[];
+}
 
 export interface BoardCharSelection {
     _id: string; 
