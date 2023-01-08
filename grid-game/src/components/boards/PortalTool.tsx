@@ -13,9 +13,7 @@ export default function PortalTool({toolIsActive, selectTool}: PortalToolInput) 
 
     function toggleActive(): void {
         toolIsActive = !toolIsActive;
-        if(toolIsActive) {
-            selectTool(ToolType.portal);
-        } else {selectTool(ToolType.none)}
+        selectTool(toolIsActive ? ToolType.portal : ToolType.none); 
     }
 
   return (

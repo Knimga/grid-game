@@ -28,15 +28,22 @@ export enum TerrainTypeColors {
     floor = ""
 }
 
+export interface BoardCharSelection {
+    _id: string;
+    name: string;
+    color: string;
+}
+
 export interface Style {
     width: number;
     height: number;
     backgroundColor?: string;
     color?: string;
+    filter?: string;
 }
 
 export enum ToolType {
-    terrain = "terrain",
+    wall = "wall",
     character = "char",
     portal = "portal",
     door = "door",
@@ -55,7 +62,7 @@ export enum LogType {
 }
 
 export interface BoardSelection {
-    _id: string; 
+    id: string; 
     name: string; 
     entryPointIds: string[];
 }
@@ -89,3 +96,10 @@ export interface MeterTypes {
 }
 
 export interface InputOption {enumValue: string, displayValue: string}
+
+export interface DoorToBoardMap {
+    doorId: string;
+    boardId: string;
+    doorIndex: number;
+    boardIndex: number;
+}

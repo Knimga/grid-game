@@ -114,6 +114,22 @@ export default function StatPane({stats}: StatPaneInput) {
                     <span>{`DR: ${stats.dmgTypes.water.dr}`}</span>
                 </div>
             </div>
+            <div className="ele-bonus-pane">
+                <div className="ele-bonus-label holy">Holy</div>
+                <div className="ele-bonus-values">
+                    <span>{`Attack: ${stats.dmgTypes.holy.atk}`}</span>
+                    <span>{`Damage: ${stats.dmgTypes.holy.dmg}`}</span>
+                    <span>{`DR: ${stats.dmgTypes.holy.dr}`}</span>
+                </div>
+            </div>
+            <div className="ele-bonus-pane">
+                <div className="ele-bonus-label poison">Poison</div>
+                <div className="ele-bonus-values">
+                    <span>{`Attack: ${stats.dmgTypes.poison.atk}`}</span>
+                    <span>{`Damage: ${stats.dmgTypes.poison.dmg}`}</span>
+                    <span>{`DR: ${stats.dmgTypes.poison.dr}`}</span>
+                </div>
+            </div>
         </div>
     </div>
   )

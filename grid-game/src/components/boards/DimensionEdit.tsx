@@ -9,17 +9,16 @@ import NumStepper from '../shared/NumStepper';
 interface DimensionEditInput {
     width: number,
     height: number,
-    updateWidth: Function,
-    updateHeight: Function
+    updateSize: Function
 }
 
-export default function DimensionEdit({width, height, updateWidth, updateHeight}: DimensionEditInput) {
+export default function DimensionEdit({width, height, updateSize}: DimensionEditInput) {
     let [editModeOn, setEditModeOn] = useState<boolean>(false);
 
-    function toggleEdit(): void {
-        editModeOn = !editModeOn;
-        setEditModeOn(editModeOn);
-    }
+    function toggleEdit(): void {setEditModeOn(!editModeOn)}
+
+    function updateWidth(newWidth: number): void {updateSize(newWidth, height)}
+    function updateHeight(newHeight: number): void {updateSize(width, newHeight)}
 
   return (
     <div className="dimension-edit-container">

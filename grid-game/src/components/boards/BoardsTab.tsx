@@ -69,24 +69,10 @@ export default function BoardsTab() {
         updateBoard(newBoard);
     }
 
-    function updateBoardWidth(newWidth: number): void {
+    function updateBoardSize(newWidth: number, newHeight: number): void {
         let newBoard: Board = {...selectedBoard};
-        const preservedProps = newBoard._id ? 
-            {name: newBoard.name, _id: newBoard._id} : {name: newBoard.name};
-        newBoard = {
-            ...blankBoard(newWidth, newBoard.gridHeight), 
-            ...preservedProps
-        }
-        updateBoard(newBoard);
-    }
-
-    function updateBoardHeight(newHeight: number): void {
-        let newBoard: Board = {...selectedBoard};
-        const preservedProps = newBoard._id ? {name: newBoard.name, _id: newBoard._id} : {name: newBoard.name};
-        newBoard = {
-            ...blankBoard(newBoard.gridWidth, newHeight), 
-            ...preservedProps
-        }
+        const preservedProps = {name: newBoard.name, id: newBoard.id};
+        newBoard = {...blankBoard(newWidth, newHeight), ...preservedProps}
         updateBoard(newBoard);
     }
 
@@ -136,7 +122,7 @@ export default function BoardsTab() {
             const newBoard = {...selectedBoard};
             const newBoards: Board[] = [...boardList];
             const boardIndex = boardList.indexOf(selectedBoard);
-            if(selectedTool === ToolType.terrain) {
+            if(selectedTool === ToolType.wall) {
                 if(selectedBrush.name === 'wall') {
                     if(newBoard.walls.includes(index)) {
                         const indexToRemove: number = newBoard.walls.indexOf(index);
@@ -179,23 +165,26 @@ export default function BoardsTab() {
             }
         }
     }
+
+    function log(): void {console.log(selectedBoard)}
     
   return (
-    <div className="boardstab-container">
+    <div className="tab-container">
         <div className="top-bar">
             <Button 
                 variant="contained"
                 onClick={() => newBoard()}
             >+ New Board</Button>
+            <button onClick={() => log()}>Log</button>
         </div>
-        <div className="middle">        
-            <div className="board-list">
+        <div className="main-section">        
+            <div className="pane-list">
                 <span>Boards</span>
                 {boardList.map(board => 
                     <BoardPane 
                         board={board}
-                        key={board._id}
-                        isSelected={selectedBoard._id === board._id}
+                        key={board.id}
+                        isSelected={selectedBoard.id === board.id}
                         clickPane={selectBoard} 
                     />)
                 }
@@ -203,6 +192,8 @@ export default function BoardsTab() {
             <div className="board-container">
                 <BoardEdit 
                     board={selectedBoard}
+                    wallColor={'#202020'}
+                    floorColor={'#252b57'}
                     clickSquare={clickSquare}
                 />
             </div>
@@ -215,11 +206,10 @@ export default function BoardsTab() {
                 <DimensionEdit 
                     width={selectedBoard.gridWidth} 
                     height={selectedBoard.gridHeight}
-                    updateWidth={updateBoardWidth}
-                    updateHeight={updateBoardHeight}
+                    updateSize={updateBoardSize}
                 />
                 <TerrainTool 
-                    toolIsActive={selectedTool === ToolType.terrain}
+                    toolIsActive={selectedTool === ToolType.wall}
                     selectTool={selectTool} 
                     setSelectedBrush={setSelectedBrush}
                 />
@@ -227,7 +217,7 @@ export default function BoardsTab() {
                     toolIsActive={selectedTool === ToolType.character}
                     chars={boardCharSelections.length ?  boardCharSelections : []}
                     selectTool={selectTool} 
-                    setSelectedBrush={setSelectedBrush}
+                    setSelectedChar={setSelectedBrush}
                 />
                 <PortalTool
                     toolIsActive={selectedTool === ToolType.portal}

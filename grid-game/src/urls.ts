@@ -15,21 +15,25 @@ const urls = {
         getAll: 'characters/getAll',
         create: 'characters/create',
         save: 'characters/save',
-        delete: (_id: string) => {return `characters/delete/${_id}`},
+        delete: (_id: string) => `characters/delete/${_id}`,
         getBoardChars: 'characters/getBoardChars'
-    },
-    boards: {
-        getSelections: 'boards/boardSelections',
-        getGameBoardById: (_id: string) => {return`boards/getGameBoard/${_id}`},
-        getAllBoards: 'boards/getAllBoards',
-        save: 'boards/save'
     },
     parties: {
         getAll: 'parties/getAll',
         partiesTabData: 'parties/partiesTabData',
-        partyCharsById: (_id: string) => {return `parties/partyCharsById/${_id}`},
+        partyCharsById: (_id: string) => `parties/partyCharsById/${_id}`,
         save: 'parties/save',
-        delete: (_id: string) => {return `parties/delete/${_id}`}
+        delete: (_id: string) => `parties/delete/${_id}`
+    },
+    dungeons: {
+        getAll: 'dungeons/getAll',
+        save: 'dungeons/save'
+    },
+    boards: {
+        getSelections: 'boards/boardSelections',
+        getGameBoardById: (_id: string) => `boards/getGameBoard/${_id}`,
+        getAllBoards: 'boards/getAllBoards',
+        save: 'boards/save'
     },
     gameData: {
         bulk: 'gameData/bulk'

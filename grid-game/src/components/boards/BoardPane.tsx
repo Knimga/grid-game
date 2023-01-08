@@ -17,7 +17,7 @@ export default function BoardPane({board, isSelected, clickPane}: BoardPaneInput
     }
 
   return (
-    <div className={`board-pane ${isSelected ? 'selected' : ''}`} onClick={() => click()}>
+    <div className={`pane board-pane ${isSelected ? 'selected' : ''}`} onClick={() => click()}>
         <strong>{board.name}</strong>
         <small>{`${board.gridWidth}x${board.gridHeight}`}</small>
         <small className="board-char-list">

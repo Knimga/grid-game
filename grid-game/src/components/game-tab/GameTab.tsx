@@ -380,7 +380,7 @@ export default function GameTab({startingBoard}: GameTabInput) {
     function logMeters(): void {console.log(actionHighlight)}
 
     return (
-        <div className="gametab-container">
+        <div className="tab-container">
             <div className="top-bar">
                 <button onClick={() => logChars()}>Log Chars</button>
                 <button onClick={() => logMeters()}>Log Meters</button>

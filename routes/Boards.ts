@@ -11,7 +11,7 @@ import Characters from '../models/Characters.model';
 
 const router = express.Router();
 
-router.route('/save').post(async (req,res) => {
+/*router.route('/save').post(async (req,res) => {
     const board: Board = new BoardModel(req.body);
     
     BoardModel.findOneAndUpdate({_id: board._id}, board, {upsert: true, new: true}, 
@@ -19,14 +19,14 @@ router.route('/save').post(async (req,res) => {
             if(err) return res.status(500).send(err);
             return res.status(200).send(savedBoard);
     }).lean();
-});
+});*/
 
 router.route('/boardSelections').get((req,res) => {
     BoardModel.find().lean().then((savedBoards) => {
         const boardSelections: BoardSelection[] = savedBoards.map((board) => {
-            const entryIds: string[] = board.doors.map(d => d.id);
-            if(board.portal) entryIds.unshift('portal');
-            return {_id: board._id, name: board.name, entryPointIds: entryIds}
+            const entryNames: string[] = board.doors.map(d => d.name[2]);
+            if(board.portal) entryNames.unshift('portal');
+            return {id: board.id, name: board.name, entryPointIds: entryNames}
         });
         res.status(200).send(boardSelections);
     }).catch((err) => {res.status(400).send(err)})

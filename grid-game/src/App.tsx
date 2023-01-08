@@ -4,7 +4,7 @@ import './App.css';
 import Typography from '@mui/material/Typography';
 import {Box, Tabs, Tab } from '@mui/material';
 
-import GameTab from './components/game-tab/GameTab';
+import DungeonsTab from './components/dungeons/DungeonsTab';
 import GameController from './components/game-tab/GameController';
 import CharactersTab from './components/characters/CharactersTab';
 import BoardsTab from './components/boards/BoardsTab';
@@ -64,6 +64,7 @@ function App() {
           <Tab label="Classes" {...a11yProps(3)} />
           <Tab label="Actions" {...a11yProps(4)} />
           <Tab label="Parties" {...a11yProps(5)} />
+          <Tab label="Dungeons" {...a11yProps(6)} />
         </Tabs>
       </Box>
       <TabPanel value={value} index={0}>
@@ -83,6 +84,9 @@ function App() {
       </TabPanel>
       <TabPanel value={value} index={5}>
         <PartiesTab />
+      </TabPanel>
+      <TabPanel value={value} index={6}>
+        <DungeonsTab />
       </TabPanel>
     </Box>
   );

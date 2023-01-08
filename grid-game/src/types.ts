@@ -1,5 +1,13 @@
-export interface Board {
+export interface Dungeon {
     _id?: string;
+    name: string;
+    floorColor: string;
+    wallColor: string;
+    boards: Board[];
+}
+
+export interface Board {
+    id: string;
     name: string;
     gridWidth: number;
     gridHeight: number;
@@ -15,9 +23,12 @@ export interface GameBoard extends Omit<Board, 'chars'> {
 
 export interface Door {
     id: string;
+    name: DoorName;
     position: number;
-    leadsTo: {mapId: string; doorId: string;}
+    leadsTo: {boardId: string; doorId: string;}
 }
+
+export type DoorName = [string, string, string];
 
 export interface BoardChar {
     _id: string; 

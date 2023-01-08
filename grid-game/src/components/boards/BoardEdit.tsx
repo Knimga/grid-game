@@ -2,38 +2,39 @@ import '../game-tab/board.css';
 import './boardsTab.css';
 
 import { GiMagicPortal } from 'react-icons/gi';
+import { GiWoodenDoor } from 'react-icons/gi';
 
 import {createEditorGrid, getBoardStyles} from '../../services/boards';
 import { getSpawnArea } from '../../services/ranger';
+import { randId } from '../../services/detailStrings';
 
-import {Board} from '../../types';
-import { EditorSquare, Style } from '../../uiTypes';
+import {Board, DoorName} from '../../types';
+import { EditorSquare, Style, TerrainType } from '../../uiTypes';
 
 interface BoardEditInput {
-    board: Board,
-    clickSquare: Function
+    board: Board;
+    wallColor: string;
+    floorColor: string;
+    clickSquare: Function;
 }
 
-export default function BoardEdit({board, clickSquare}: BoardEditInput) {
+export default function BoardEdit({board, wallColor, floorColor, clickSquare}: BoardEditInput) {
     const grid: EditorSquare[] = createEditorGrid(board);
     const boardStyles = getBoardStyles(board);
     const spawnAreas: number[] = getSpawnAreas();
+    const doorPositions: number[] = board.doors.map(d => d.position);
 
     function getSpawnAreas(): number[] {
-        let indices: number[] = [];
+        let spawningPoints: number[] = [];
         const charPositions: number[] = board.chars.map(char => char.index);
-        if(board.portal) indices = [...indices, ...getSpawnArea(board, board.portal, charPositions)];
-        return indices;
+        if(board.portal) spawningPoints.push(board.portal);
+        if(board.doors.length) spawningPoints = [...spawningPoints, ...board.doors.map(d => d.position)];
+        return spawningPoints.map(i => getSpawnArea(board, i, charPositions)).flat(1);
     }
 
-    function rand(): string {return Math.random().toString()}
-
-    function squareClassNames(index: number): string {
-        let classNames: string = `square editor-square ${grid[index].type}`;
-
-        if(spawnAreas.includes(index)) classNames += ' entry-square-range';
-        
-        return classNames;
+    function getDoorName(position: number): string {
+        const doorName: DoorName | undefined = board.doors.find(d => d.position === position)?.name;
+        return doorName ? doorName[2] : '';
     }
 
   return (
@@ -41,20 +42,28 @@ export default function BoardEdit({board, clickSquare}: BoardEditInput) {
             {
                 grid.map((square, index) => {
                     const isPortal: boolean = board.portal ? index === board.portal : false;
-                    let thisSquareStyle: Style = boardStyles.square;
+                    const isDoor: boolean = doorPositions.includes(index);
+                    const doorName: string = isDoor ? getDoorName(index) : '';
+                    const terrainColor: string = square.type === TerrainType.wall ? wallColor : floorColor;
+                    const thisSquareStyle: Style = {...boardStyles.square, backgroundColor: terrainColor}
 
-                    if(square.char) {
-                        thisSquareStyle = {...thisSquareStyle, backgroundColor: square.char.color}
-                    }
+                    if(spawnAreas.includes(index)) thisSquareStyle.filter = 'brightness(1.5)';
+                    if(square.char) thisSquareStyle.backgroundColor = square.char.color;
                     
                     return <div
-                        key={rand()}
-                        className={squareClassNames(index)}
+                        key={randId()}
+                        className='square editor-square'
                         style={thisSquareStyle}
                         onClick={() => clickSquare(index)}
                     >
                         {square.char ? <span className="char-square-name">{square.char.name}</span> : ''}
                         {isPortal ? <GiMagicPortal className="portal-icon"/> : ''}
+                        {isDoor ? 
+                            <div className="door-square-container">
+                                <GiWoodenDoor className="door-icon"/>
+                                <small>{doorName}</small>
+                            </div>
+                        : ''}
                     </div>
                 })
             }

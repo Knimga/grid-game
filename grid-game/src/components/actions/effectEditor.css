@@ -12,7 +12,7 @@
 
 .effect-editor-field-row {
     width: 100%;
-    display: flex;
+    display: flex; align-items: center;
 }
 
 .effect-editor-field-label, .effect-editor-field-value {

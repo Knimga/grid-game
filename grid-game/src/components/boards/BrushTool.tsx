@@ -22,7 +22,7 @@ export default function BrushTool({brushes, toolType, selectTool, setSelectedBru
     function toggleActive(): void {
         toolIsActive = !toolIsActive;
         if(toolIsActive) {
-            selectTool(ToolType.terrain);
+            selectTool(ToolType.wall);
             setSelectedBrush(selectedBrush);
         } else {selectTool(ToolType.none)}
         setToolIsActive(toolIsActive);

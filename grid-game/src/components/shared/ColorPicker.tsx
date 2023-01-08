@@ -1,14 +1,15 @@
 import {useState} from 'react';
 import { FaCheck } from "react-icons/fa";
 
-import './attributesEditor.css';
+import './colorPicker.css';
 
 interface ColorPickerInput {
+    label: string,
     color: string,
     update: Function
 }
 
-export default function ColorPicker({color, update}: ColorPickerInput) {
+export default function ColorPicker({label, color, update}: ColorPickerInput) {
     const [editModeOn, setEditModeOn] = useState<boolean>(false);
     let currentColor: string = color;
     const displayStyle = {backgroundColor: currentColor};
@@ -41,7 +42,7 @@ export default function ColorPicker({color, update}: ColorPickerInput) {
 
   return (
     <div className="color-picker-container">
-        <span className="color-input-header">Token Color</span>
+        <span className="color-input-header">{label}</span>
         <div className="color-display" style={displayStyle}></div>
         {colorInput()}
     </div>

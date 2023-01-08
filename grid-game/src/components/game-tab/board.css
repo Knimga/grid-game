@@ -20,6 +20,7 @@
 .char-hover:hover {outline: 0.5px solid white; color: white;}
 
 .portal-icon {font-size: 200%; color: lightblue;}
+.door-icon {font-size: 200%; color: lightgray;}
 
 .editor-square {outline: 0.1px solid gray;}
 
@@ -28,8 +29,6 @@
 .seen {outline: 0.1px solid gray;}
 
 .darken {filter: brightness(0.7);}
-
-.wall {background-color: #202020;}
 
 .char-square-top, .char-square-bottom {
     width: 100%;

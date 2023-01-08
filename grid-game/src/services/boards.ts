@@ -1,16 +1,25 @@
-import {GameSquare, EditorSquare, TerrainType, Style} from '../uiTypes';
-import {GameBoard, Board} from '../types';
 import { distance, getSpawnArea } from './ranger';
+import { randId } from './detailStrings';
+
+import {GameSquare, EditorSquare, TerrainType, Style, DoorToBoardMap} from '../uiTypes';
+import {GameBoard, Dungeon, Board, Door, DoorName} from '../types';
 
 interface BoardStyles {
     square: Style,
     board: Style
 }
 
-const boardSize: Style = {width: 900, height: 900};
+const staticBoardSize: Style = {width: 900, height: 900};
 
-export function getBoardStyles(board: Board | GameBoard): BoardStyles {
-    const squareSize: number = getSquareSize(board.gridWidth, board.gridHeight);
+export function getBoardStyles(board: Board | GameBoard, customBoardSize?: Style): BoardStyles {
+    let squareSize: number;
+    
+    if(customBoardSize) {
+        squareSize = getSquareSize(board.gridWidth, board.gridHeight, customBoardSize)
+    } else {
+        squareSize = getSquareSize(board.gridWidth, board.gridHeight)
+    }
+
     return {
         square: {width: squareSize, height: squareSize},
         board: {
@@ -48,7 +57,8 @@ export function createGameGrid(board: GameBoard): GameSquare[] {
     return grid;
 }
 
-function getSquareSize(gridWidth: number, gridHeight: number): number {
+function getSquareSize(gridWidth: number, gridHeight: number, customBoardSize?: Style): number {
+    const boardSize: Style = customBoardSize ?? staticBoardSize;
     const heightDivided: number = boardSize.height / gridHeight;
     const widthDivided: number = boardSize.width / gridWidth;
     return heightDivided <= widthDivided ? heightDivided : widthDivided;
@@ -65,6 +75,7 @@ export function getSpawningIndices(board: GameBoard, spawnLocation: number, part
 
 export function blankBoard(width: number, height: number) {
     return {
+        id: randId(),
         name: 'Blank board',
         gridWidth: width,
         gridHeight: height,
@@ -76,3 +87,32 @@ export function blankBoard(width: number, height: number) {
 
 export function blankEditorBoard(): Board {return blankBoard(15,15)}
 export function blankGameBoard(): GameBoard {return blankBoard(15,15)}
+
+export function newDoor(dungeonName: string, boardName: string, position: number): Door {
+    return {
+        id: randId(),
+        name: [doorNameFormat(dungeonName), doorNameFormat(boardName), "newdoor"],
+        position: position,
+        leadsTo: {boardId: '', doorId: ''}
+    }
+}
+
+export function doorNameString(doorName: DoorName): string {
+    return `${doorName[0]}-${doorName[1]}-${doorName[2]}`
+}
+
+export function doorNameFormat(str: string): string {return str.replaceAll(' ', '').toLowerCase()}
+
+export function doorToBoardMap(dungeon: Dungeon): DoorToBoardMap[] {
+    const doorsByBoard: DoorToBoardMap[][] = dungeon.boards.map((board, bIndex) => {
+        return board.doors.map((door, dIndex) => {
+            return {
+                boardId: board.id, 
+                doorId: door.id,
+                boardIndex: bIndex,
+                doorIndex: dIndex
+            }
+        })
+    });
+    return doorsByBoard.flat(1);
+}

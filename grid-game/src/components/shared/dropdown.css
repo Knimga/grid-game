@@ -5,6 +5,7 @@
 
 .dropdown-label, .dropdown-select-container {
     display: flex; width: 50%;
+    align-items: center;
 }
 
 .dropdown-label {justify-content: flex-end;}

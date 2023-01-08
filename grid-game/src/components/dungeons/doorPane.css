@@ -1,0 +1,10 @@
+.door-pane {
+    flex-direction: column;
+    justify-content: center; align-items: center;
+    padding: 2%;
+}
+
+.door-pane > small {
+    align-self: flex-start;
+    font-size: 65%;
+}

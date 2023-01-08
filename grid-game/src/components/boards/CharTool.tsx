@@ -12,10 +12,10 @@ interface CharToolInput {
     toolIsActive: boolean;
     chars: BoardCharSelection[];
     selectTool: Function;
-    setSelectedBrush: Function;
+    setSelectedChar: Function;
 }
 
-export default function CharTool({toolIsActive, chars, selectTool, setSelectedBrush}: CharToolInput) {
+export default function CharTool({toolIsActive, chars, selectTool, setSelectedChar}: CharToolInput) {
     const [selectedIndex, setSelectedIndex] = useState<number>(0);
     const style = {backgroundColor: chars.length ? chars[selectedIndex].color : ''};
     const sortedChars: BoardCharSelection[] = chars.sort(
@@ -26,10 +26,7 @@ export default function CharTool({toolIsActive, chars, selectTool, setSelectedBr
 
     function toggleActive(): void {
         toolIsActive = !toolIsActive;
-        if(toolIsActive) {
-            selectTool(ToolType.character);
-            setSelectedBrush(chars[selectedIndex]);
-        } else {selectTool(ToolType.none)}
+        selectTool(toolIsActive ? ToolType.character : ToolType.none); 
     }
 
     function update(newId: string): void {
@@ -38,7 +35,7 @@ export default function CharTool({toolIsActive, chars, selectTool, setSelectedBr
             const index = chars.indexOf(newChar);
             selectTool(ToolType.character);
             setSelectedIndex(index);
-            setSelectedBrush(chars[index]);
+            setSelectedChar(chars[index]);
         }   
     }
 

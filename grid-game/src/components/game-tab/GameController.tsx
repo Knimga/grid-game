@@ -46,14 +46,14 @@ export default function GameController() {
         setBoard(populateBoard(gameBoard, entryId, partyChars));
     }
 
-    function populateBoard(board: GameBoard, entryPointId: string, currentParty: GameChar[]): GameBoard {
+    function populateBoard(board: GameBoard, entryPointName: string, currentParty: GameChar[]): GameBoard {
         const newBoard: GameBoard = {...board};
         let spawnIndex: number = 0;
 
-        if(entryPointId === 'portal' && board.portal) {
+        if(entryPointName === 'portal' && board.portal) {
             spawnIndex = board.portal
         } else {
-            spawnIndex = board.doors.find(d => d.id === entryPointId)?.position || 0;
+            spawnIndex = board.doors.find(d => d.name[2] === entryPointName)?.position || 0;
         }
 
         const spawnIndices: number[] = getSpawningIndices(newBoard, spawnIndex, currentParty.length);
@@ -70,10 +70,10 @@ export default function GameController() {
         return newBoard;  
     }
 
-    function selectBoard(_id: string): void {
-        const boardSelection: BoardSelection | undefined = boardSelections.find(bs => bs._id === _id);
+    function selectBoard(id: string): void {
+        const boardSelection: BoardSelection | undefined = boardSelections.find(bs => bs.id === id);
         if(boardSelection) {
-            setSelectedBoardId(_id);
+            setSelectedBoardId(id);
             setEntryIds(boardSelection.entryPointIds);
         }
     }
@@ -90,8 +90,6 @@ export default function GameController() {
         console.log(`entryId: ${selectedEntryId}`);
     }
 
-
-
     function gameSetup(): JSX.Element {
         return <div className="game-setup-container">
             <select onChange={(e) => setSelectedPartyId(e.target.options[e.target.selectedIndex].value)}>
@@ -105,7 +103,7 @@ export default function GameController() {
             <select onChange={(e) => selectBoard(e.target.options[e.target.selectedIndex].value)}>
                 <option hidden={true}>Select a board...</option>
                 {boardSelections.map((selection: BoardSelection) =>
-                    <option key={selection._id} value={selection._id}>{selection.name}</option>
+                    <option key={selection.id} value={selection.id}>{selection.name}</option>
                 )}
             </select>
             <select 

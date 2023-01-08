@@ -14,7 +14,7 @@
 
 .left-list {width: 25%;}
 .atk-bonus-list {width: 30%;}
-.ele-bonus-list {width: 30%;}
+.ele-bonus-list {width: 30%; flex-wrap: wrap;}
 
 .list-row {width: 100%; display: flex;}
 
@@ -34,7 +34,7 @@
 }
 
 .stat-pane-atk-bonus-pane {height: 25%; width: 80%; font-size: 90%;}
-.ele-bonus-pane {height: 19%; width: 70%; font-size: 75%;}
+.ele-bonus-pane {height: 19%; width: 47%; font-size: 75%;}
 
 .atk-bonus-label, .ele-bonus-label {
     width: 40%;
@@ -57,3 +57,5 @@
 .earth {color: darkgoldenrod;}
 .shadow {color: purple;}
 .water {color: dodgerblue;}
+.holy {color: gold;}
+.poison {color: green;}

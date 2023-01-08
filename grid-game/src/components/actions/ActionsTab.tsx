@@ -61,7 +61,7 @@ export default function ActionsTab() {
     }
 
     function actionsList(): JSX.Element {
-        return <div className="actions-list">
+        return <div className="pane-list">
             <div className="sort-by-container">
                 <strong>Sort by:</strong>
                 <button className="sort-button" onClick={() => sortByName()}>Name</button>
@@ -83,8 +83,8 @@ export default function ActionsTab() {
     function newAction(): void {setSelectedAction(blankAction())}
 
   return (
-    <div className="actions-container">
-        <div className="actions-top-bar">
+    <div className="tab-container">
+        <div className="top-bar">
             <Button 
                 variant="contained"
                 className="button"

@@ -60,8 +60,8 @@ export default function PartiesTab() {
     //function deleteParty(_id: string) {}
 
   return (
-    <div className="parties-tab-container">
-        <div className="parties-top-bar">
+    <div className="tab-container">
+        <div className="top-bar">
             <Button 
                 variant="contained"
                 className="button"

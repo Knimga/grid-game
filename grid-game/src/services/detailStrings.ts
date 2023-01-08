@@ -1,4 +1,4 @@
-import {Action, Armor, Attributes, Stats, Effect, EffectType, EffectTargetStat} from '../types' ;
+import {Action, Armor, Attributes, Stats, Effect, EffectType, EffectTargetStat, Dungeon, Door} from '../types';
 
 import { getBonus } from './charCalc';
 
@@ -172,4 +172,15 @@ export function makeInputOptionsWithIds(items: any[]): InputOption[] {
     return items.map(item => {return {enumValue: item._id, displayValue: item.name}})
 }
 
+export function doorInputOptions(dungeon: Dungeon): InputOption[] {
+    const doors: Door[] = dungeon.boards.map(board => board.doors).flat(1);
+    const blankOption: InputOption = {enumValue: '', displayValue: ''};
+    const options: InputOption[] = doors.map(door => {
+        return {enumValue: door.id, displayValue: `${door.name[1]}-${door.name[2]}`}}
+    );
+    return [blankOption, ...options];
+}
+
 export function cap(str: string): string {return str[0].toUpperCase() + str.substring(1)}
+
+export function randId(): string {return Math.random().toString().substring(2)}

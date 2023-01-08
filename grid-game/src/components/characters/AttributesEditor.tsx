@@ -1,7 +1,7 @@
 import './attributesEditor.css';
 
 import NumStepper from '../shared/NumStepper';
-import ColorPicker from './ColorPicker';
+import ColorPicker from '../shared/ColorPicker';
 
 import { attributeDetailString } from '../../services/detailStrings';
 
@@ -14,7 +14,7 @@ interface AttributesInput {
 }
 
 export default function AttributesEditor({char, updatePb, updateColor}: AttributesInput) {
-    const pbMax: number = char.class.name === 'Classless' ? (char.level * 4) + 4 : char.level * 4;
+    const pbMax: number = char.level * 4;
     const pbTotal: number = pointBuyTotal();
 
     function pointBuyTotal(): number {
@@ -47,7 +47,7 @@ export default function AttributesEditor({char, updatePb, updateColor}: Attribut
             <NumStepper 
                 number={char.pointBuy[attrName]}
                 min={0}
-                max={100} 
+                max={100}
                 update={updatePb} 
                 attr={attrName} 
             />
@@ -57,7 +57,7 @@ export default function AttributesEditor({char, updatePb, updateColor}: Attribut
   return (
     <div className="attributes-container">
         <div className="labels-column">
-            <ColorPicker color={char.color} update={updateColor} />
+            <ColorPicker label={"Token Color"} color={char.color} update={updateColor} />
             <span>Class Bonuses:</span>
             <span className={`pb-label ${pbTotal > pbMax ? 'red' : ''}`}>
                 {`Point Buy (${pbTotal}/${pbMax}):`}

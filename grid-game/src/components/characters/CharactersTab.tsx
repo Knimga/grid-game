@@ -2,7 +2,6 @@ import {useState, useEffect} from 'react';
 
 import {Button} from '@mui/material';
 
-import './charactersTab.css';
 import urls from '../../urls';
 import {blankChar} from '../../services/charCalc';
 
@@ -73,23 +72,7 @@ export default function CharactersTab() {
         }
     }
 
-    function newChar(): void {
-        const newCharObj: Character | null = blankChar(classes);
-        if(newCharObj) setSelectedChar(newCharObj);
-    }
-
-    function charPanes(): JSX.Element {
-        return <div className="char-list">
-            {chars.map(char => 
-                <CharPane 
-                    char={char} 
-                    selectChar={selectChar} 
-                    key={char._id} 
-                    isSelected={selectedChar ?  (char._id === selectedChar._id) : false} 
-                />)
-            }
-        </div>
-    }
+    function newChar(): void {setSelectedChar(blankChar(classes))}
 
     function charBuilder(): JSX.Element {
         if(selectedChar) {
@@ -98,8 +81,8 @@ export default function CharactersTab() {
     }
 
     return (
-        <div className="characters-container">
-            <div className="chars-top-bar">               
+        <div className="tab-container">
+            <div className="top-bar">               
                 <Button 
                     variant="contained"
                     className="button"
@@ -107,7 +90,16 @@ export default function CharactersTab() {
                 >+ New Character</Button>
             </div>
             <div className="main-section">
-                {charPanes()}
+                <div className="pane-list">
+                    {chars.map(char => 
+                        <CharPane 
+                            char={char} 
+                            selectChar={selectChar} 
+                            key={char._id} 
+                            isSelected={selectedChar ?  (char._id === selectedChar._id) : false} 
+                        />)
+                    }
+                </div>
                 {charBuilder()}
             </div>
         </div>

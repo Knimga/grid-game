@@ -16,7 +16,7 @@ export default function CharPane({char, isSelected, selectChar}: CharPaneInput) 
     const nameStyle: Object = {color: char.color};
 
   return (
-    <div className={`char-pane ${isSelected ? 'selected' : ''}`} onClick={() => {selectChar(char)}}>
+    <div className={`pane ${isSelected ? 'selected' : ''}`} onClick={() => {selectChar(char)}}>
         <div className="inner-container">
             <div className="char-label">
                 <FaCircle style={nameStyle} /><strong className="char-name">{char.name}</strong>

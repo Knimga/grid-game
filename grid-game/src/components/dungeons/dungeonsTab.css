@@ -1,0 +1,24 @@
+.top-bar > select {
+    min-width: 150px;
+    font-weight: bold;
+}
+
+.board-container {
+    min-width: 900px;
+    display: flex; justify-content: center; align-items: center;
+}
+
+.dungeon-board-edit-tools {
+    width: 250px; height: 100%;
+    display: flex; flex-direction: column;
+    align-items: center;
+    padding: 0.5%;
+}
+.dungeon-board-edit-tools > * {margin: 3% 0;}
+
+.door-list {
+    width: 100%; height: 100%;
+    display: flex; flex-direction: column;
+    align-items: center;
+    overflow-y: scroll;
+}

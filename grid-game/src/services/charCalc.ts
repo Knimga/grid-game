@@ -76,7 +76,7 @@ export function createStats(
                 dr: fl(tns / 5)
             },
             ranged: {
-                atk: fl(fin / 2.5),
+                atk: fl(fin / 2),
                 dmg: fl(fin / 3),
                 dr: fl((tns + fin) / 8)
             },
@@ -111,9 +111,9 @@ export function createStats(
                 dr: fl(affinities.water / 2)
             },
             holy: {
-            atk: affinities.holy,
-            dmg: affinities.holy,
-            dr: fl(affinities.holy / 2)
+                atk: affinities.holy,
+                dmg: affinities.holy,
+                dr: fl(affinities.holy / 2)
             },
             poison: {
                 atk: affinities.poison,
@@ -177,7 +177,7 @@ export function isElemental(dmgType: DamageType): boolean {
     return magicTypes.includes(dmgType);
 }
 
-export function blankChar(classData: Class[]): Character | null {
+export function blankChar(classData: Class[]): Character {
     const attributes: Attributes = {
         strength: 0,
         finesse: 0,

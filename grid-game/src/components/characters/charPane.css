@@ -1,19 +1,9 @@
-.char-pane {
-    width: 95%; height: 70px;
-    display: flex;
-    background-color: #181818; color: lightgray;
-    border-radius: 10px;
-    margin: 1% 0;
-}
-
-.char-pane:hover {background-color: #252525; outline: 0.5px solid gray;}
-
 /*inner-container is for padding*/
 .inner-container {
     width: 90%;
     display: flex; flex-direction: column;
     justify-content: space-between; align-items: center;
-    padding: 5%;
+    padding: 1%;
 }
 
 .char-label, .char-details {

@@ -18,7 +18,7 @@ export default function TerrainTool({toolIsActive, selectTool, setSelectedBrush}
     function toggleActive(): void {
         toolIsActive = !toolIsActive;
         if(toolIsActive) {
-            selectTool(ToolType.terrain);
+            selectTool(ToolType.wall);
             setSelectedBrush({name: "wall", color: "#303030"});
         } else {selectTool(ToolType.none)}
     }

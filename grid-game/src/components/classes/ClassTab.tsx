@@ -1,5 +1,3 @@
-import './classTab.css';
-
 import { useState, useEffect } from 'react';
 
 import { Button } from '@mui/material';
@@ -79,39 +77,39 @@ export default function ClassTab() {
     function newClass(): void {setSelectedClass(blankClass())}
 
   return (
-    <div className="classes-container">
-    <div className="classes-top-bar">               
-        <Button 
-            variant="contained"
-            className="button"
-            onClick={() => newClass()}
-        >+ New Class</Button>
-    </div>
-    <div className="main-section">
-        <div className="class-tab-class-list">
-            {
-                classes.map(charClass => 
-                    <ClassPane 
-                        charClass={charClass}
-                        key={charClass._id}
-                        stats={null}
-                        isSelected={false}
-                        selectClass={setSelectedClass}
-                        isClassDisplay={true}
-                    />
-                )
-            }
+    <div className="tab-container">
+        <div className="top-bar">               
+            <Button 
+                variant="contained"
+                className="button"
+                onClick={() => newClass()}
+            >+ New Class</Button>
         </div>
-        {selectedClass ? 
-            <ClassBuilder 
-                charClass={selectedClass} 
-                actions={actions} 
-                armors={armors} 
-                update={updateClass} 
-                save={saveClass}
-            /> 
-        : ''}
+        <div className="main-section">
+            <div className="pane-list">
+                {
+                    classes.map(charClass => 
+                        <ClassPane 
+                            charClass={charClass}
+                            key={charClass._id}
+                            stats={null}
+                            isSelected={false}
+                            selectClass={setSelectedClass}
+                            isClassDisplay={true}
+                        />
+                    )
+                }
+            </div>
+            {selectedClass ? 
+                <ClassBuilder 
+                    charClass={selectedClass} 
+                    actions={actions} 
+                    armors={armors} 
+                    update={updateClass} 
+                    save={saveClass}
+                /> 
+            : ''}
+        </div>
     </div>
-</div>
   )
 }
