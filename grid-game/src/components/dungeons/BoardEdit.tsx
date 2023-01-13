@@ -1,5 +1,5 @@
 import '../game-tab/board.css';
-import './boardsTab.css';
+import './dungeonPane.css'; //replace w/ dungeonPane.css
 
 import { GiMagicPortal } from 'react-icons/gi';
 import { GiWoodenDoor } from 'react-icons/gi';

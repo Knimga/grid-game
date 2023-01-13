@@ -24,3 +24,29 @@ button:hover {outline: 0.5px solid gray;}
     align-items: center;
     overflow-y: scroll;
 }
+
+.board-container {min-width: 900px;}
+
+.board-edit-tools {
+    width: 30%; height: 100%;
+    display: flex; flex-direction: column;
+    align-items: center;
+    padding: 0.5%;
+}
+.board-edit-tools > * {margin: 2% 0;}
+
+.board-save-button {align-self: flex-start;}
+
+.not-saved {color: pink;}
+
+.brush-box {
+    width: 60px; height: 60px;
+    display: flex; justify-content: center; align-items: center;
+}
+
+.door-square-container {
+    width: 100%; height: 100%;
+    display: flex; flex-direction: column;
+    justify-content: center; align-items: center;
+}
+.door-square-container > small {font-size: 65%;}

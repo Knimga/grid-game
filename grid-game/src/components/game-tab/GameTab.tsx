@@ -21,9 +21,15 @@ import { findBestBurstPlacement} from '../../services/aiAct';
 import { GameBoard, GameChar, Action, ActionResult, CharType, AiPlan } from '../../types';
 import {TurnLog, RangeType, MetersEntry } from '../../uiTypes';
 
-interface GameTabInput {startingBoard: GameBoard}
+interface GameTabInput {
+    startingBoard: GameBoard;
+    colorScheme: {
+        wall: string;
+        floor: string;
+    }
+}
 
-export default function GameTab({startingBoard}: GameTabInput) {
+export default function GameTab({startingBoard, colorScheme}: GameTabInput) {
     const [board, setBoard] = useState<GameBoard>({...startingBoard});
     const [chars, setChars] = useState<GameChar[]>(board.chars);
 
@@ -32,7 +38,8 @@ export default function GameTab({startingBoard}: GameTabInput) {
     const [hasBeenSeen, setHasBeenSeen] = useState<number[]>(startingLos);
 
     const [turnIndex, setTurnIndex] = useState<number>(0);
-    const [gameIsActive, setGameIsActive] = useState<boolean>(true);
+    const [roomIsClear, setRoomIsClear] = useState<boolean>(
+        countChars(board, [CharType.enemy, CharType.beast]) === 0);
     const [roundNumber, setRoundNumber] = useState<number>(1);
 
     const [turnLog, setTurnLog] = useState<TurnLog[]>(newTurnLog(chars[0]));
@@ -57,7 +64,7 @@ export default function GameTab({startingBoard}: GameTabInput) {
         let newChars: GameChar[] = [...chars];
         let newTurnIndex: number = (turnIndex + 1) % chars.length;
 
-        while(newChars[newTurnIndex].game.stats.hp <= 0) {
+        while(chars[newTurnIndex].game.stats.hp <= 0) {
             newTurnIndex = (newTurnIndex + 1) % chars.length;
             if(newTurnIndex === 0) isNewRound = true;
         }
@@ -85,11 +92,6 @@ export default function GameTab({startingBoard}: GameTabInput) {
         setSelectedAction(null);
         clearHighlights();
         setCharStatPaneChar(newChars[newTurnIndex].type === CharType.player ? newChars[newTurnIndex] : null);
-
-        /*if(chars[newTurnIndex].type === CharType.player || chars[newTurnIndex].game.hasBeenSeen) {
-            turnLog.unshift(logger.newTurn(chars[0].name));
-            setTurnLog(turnLog);
-        }*/
     }
 
     async function aiTurn(char: GameChar) {
@@ -141,8 +143,7 @@ export default function GameTab({startingBoard}: GameTabInput) {
 
                 if(char.game.isVisible) {
                     const mvtRangeIndices = getInRangeIndices(
-                        board, char.game.positionIndex, getRemainingMvt(char), RangeType.mvt
-                    );
+                        board, char.game.positionIndex, getRemainingMvt(char), RangeType.mvt);
                     setMvtHighlight(mvtRangeIndices);
                 }
                 await sleep(sleepLength);
@@ -160,43 +161,38 @@ export default function GameTab({startingBoard}: GameTabInput) {
     function moveTo(index: number): void {
         const startingPosition: number = chars[turnIndex].game.positionIndex;
         const distanceMoved: number = distance(startingPosition, index, board.gridWidth);
-
-        const newChars: GameChar[] = [...chars];
-        const newGameBoard: GameBoard = {...board};
         
-        newChars[turnIndex].game.positionIndex = index;
-        newChars[turnIndex].game.round.movementTaken += distanceMoved;
-        newGameBoard.chars = newChars;
+        chars[turnIndex].game.positionIndex = index;
+        chars[turnIndex].game.round.movementTaken += distanceMoved;
+        board.chars = chars;
 
-        if(newChars[turnIndex].type === CharType.player || newChars[turnIndex].game.isVisible) {
-            turnLog[0].actions.push(logger.move(newChars[turnIndex].name, distanceMoved));
-        } else if(newChars[turnIndex].game.hasBeenSeen) {
-            turnLog[0].actions.push(logger.unseenMove(newChars[turnIndex].name))
+        if(chars[turnIndex].type === CharType.player || chars[turnIndex].game.isVisible) {
+            turnLog[0].actions.push(logger.move(chars[turnIndex].name, distanceMoved));
+        } else if(chars[turnIndex].game.hasBeenSeen) {
+            turnLog[0].actions.push(logger.unseenMove(chars[turnIndex].name))
         }
 
-        adjMatrix = getAdjacencyMatrix(newGameBoard);
+        adjMatrix = getAdjacencyMatrix(board);
         setTurnLog(turnLog);
         setMvtHighlight([]);
-        setChars(setCharVisibility(newGameBoard));
-        setBoard(newGameBoard);
+        setChars(setCharVisibility(board));
+        setBoard(board);
         
-        if(newChars[turnIndex].type === CharType.player) {
-            const playerLos: number[] = getPlayerLos(newGameBoard);
+        if(chars[turnIndex].type === CharType.player) {
+            const playerLos: number[] = getPlayerLos(board);
             setLos(playerLos);
             updateHasBeenSeen(playerLos);
         }
     }
 
-
     function setCharDest(char: GameChar, newDest: number): void {
         const newChar: GameChar = {...char};
-        const newChars: GameChar[] = [...chars];
         newChar.game.destinationIndex = newDest;
         const oldChar: GameChar | undefined = chars.find(oldChar => oldChar.game.gameId === char.game.gameId);
         if(oldChar) {
             const oldCharIndex: number = chars.indexOf(oldChar);
-            newChars[oldCharIndex] = newChar;
-            setChars(newChars);
+            chars[oldCharIndex] = newChar;
+            setChars(chars);
         }
     }
 
@@ -209,6 +205,7 @@ export default function GameTab({startingBoard}: GameTabInput) {
             const mvtIndices: number[] = getInRangeIndices(
                 board, mover.game.positionIndex, mvtRemaining, RangeType.mvt
             );
+            if(selectedAction) setSelectedAction(null);
             if(actionHighlight.length) setActionHighlight([]);
             setMvtHighlight(mvtIndices);
         }
@@ -253,9 +250,8 @@ export default function GameTab({startingBoard}: GameTabInput) {
         const action: Action | null = actionInput ? actionInput : selectedAction;
 
         if(action && !actor.game.round.actionTaken && actor.game.stats.mp >= action.mpCost) {
-            const newChars: GameChar[] = [...chars];
             const targetCharTypes: CharType[] = getTargetTypes(action.intent, actor.type);
-            const affectedChars: GameChar[] = newChars.filter(char => 
+            const affectedChars: GameChar[] = chars.filter(char => 
                 affectedIndices.includes(char.game.positionIndex) && targetCharTypes.includes(char.type)
             ); 
 
@@ -265,7 +261,8 @@ export default function GameTab({startingBoard}: GameTabInput) {
                 const results: ActionResult[] = resolveAction(actor, affectedChars, action);
                 
                 for (let r = 0; r < results.length; r++) {
-                    const thisChar: GameChar | undefined = chars.find(char => char.game.gameId === results[r].newChar.game.gameId);
+                    const thisChar: GameChar | undefined = chars.find(
+                        char => char.game.gameId === results[r].newChar.game.gameId);
                     if(thisChar) {
                         const targetIndex: number = chars.indexOf(thisChar);
                         chars[targetIndex] = results[r].newChar;
@@ -276,15 +273,15 @@ export default function GameTab({startingBoard}: GameTabInput) {
                             const thisEffect = results[r].effectResults[i];                         
                             
                             switch(thisEffect.effect.type) {
-                                case 'healing': newMeters = healingDone(
-                                        meters, actor.game.gameId, thisEffect.effectiveAmount, thisEffect.effect.targetStat
-                                    ); 
+                                case 'healing': newMeters = healingDone(meters, actor.game.gameId, 
+                                        thisEffect.effectiveAmount, thisEffect.effect.targetStat); 
                                     break;
-                                case 'damage': newMeters = dmgDoneAndTaken(
-                                    meters, actor.game.gameId, chars[targetIndex].game.gameId, 
-                                    thisEffect.effectiveAmount, thisEffect.effect.targetStat
-                                ); break;
-                                case 'buff': newMeters = statEffectsDone(meters, actor.game.gameId, thisEffect.effectiveAmount); 
+                                case 'damage': newMeters = dmgDoneAndTaken(meters, actor.game.gameId, 
+                                    chars[targetIndex].game.gameId, thisEffect.effectiveAmount, 
+                                    thisEffect.effect.targetStat); 
+                                    break;
+                                case 'buff': newMeters = statEffectsDone(meters, actor.game.gameId, 
+                                    thisEffect.effectiveAmount); 
                                     break;
                                 default: break;
                             }
@@ -329,21 +326,20 @@ export default function GameTab({startingBoard}: GameTabInput) {
                 setMeters(resetThreat(meters, charId));
             }
 
-            const countOfPlayers: number = newBoard.chars.filter(
-                char => char.type === CharType.player && char.game.stats.hp > 0
-            ).length;
-            const countOfEnemies: number = newBoard.chars.filter(
-                char => char.type !== CharType.player && char.game.stats.hp > 0
-            ).length;
+            const countOfPlayers: number = countChars(newBoard, [CharType.player]);
+            const countOfEnemies: number = countChars(newBoard, [CharType.enemy, CharType.beast]);
 
             if(countOfPlayers === 0) {
                 turnLog.unshift(logger.victory(CharType.enemy));
-                setGameIsActive(false);
             } else if(countOfEnemies === 0) {
                 turnLog.unshift(logger.victory(CharType.player));
-                setGameIsActive(false);
+                setRoomIsClear(true);
             }
         }
+    }
+
+    function countChars(board: GameBoard, charType: CharType[]): number {
+        return board.chars.filter(char => charType.includes(char.type) && char.game.stats.hp > 0).length
     }
 
     function updateHasBeenSeen(newLos: number[]): void {
@@ -403,21 +399,15 @@ export default function GameTab({startingBoard}: GameTabInput) {
                             los={los}
                             hasBeenSeen={hasBeenSeen}
                             boardFunctions={boardFunctions}
+                            colorScheme={colorScheme}
+                            roomIsClear={roomIsClear}
                         />
                     </div>
                     : ''
                 }
                 <div className="right-side-panel">
-                    <Combatants 
-                        chars={chars} 
-                        gameIsActive={gameIsActive}
-                        roundNumber={roundNumber}
-                    />
-                    <Actions 
-                        char={chars[turnIndex]} 
-                        actionFunctions={actionFunctions} 
-                        gameIsActive={true}
-                    />
+                    <Combatants chars={chars} roundNumber={roundNumber}/>
+                    <Actions char={chars[turnIndex]} actionFunctions={actionFunctions}/>
                 </div>
             </div>
         </div>

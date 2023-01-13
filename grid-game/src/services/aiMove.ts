@@ -140,6 +140,8 @@ export function getAdjacencyMatrix(board: GameBoard): number[][] {
     const matrix: number[][] = [];
     const indexLength: number = board.gridWidth * board.gridHeight;
     const charIndices: number[] = board.chars.map(char => char.game.positionIndex);
+    const doorIndices: number[] = board.doors.map(d => d.position);
+    if(board.portal) doorIndices.push(board.portal);
 
     for (let i = 0; i < indexLength; i++) {
         const thisCoord: Coord = indexToCoord(i, board.gridWidth);
@@ -147,7 +149,7 @@ export function getAdjacencyMatrix(board: GameBoard): number[][] {
         let adjIndices: number[] = adjCoords.map(coord => coordToIndex(coord, board.gridWidth));
 
         adjIndices = adjIndices.filter(index => {
-            return !board.walls.includes(index) && !charIndices.includes(index)
+            return !board.walls.includes(index) && !charIndices.includes(index) && !doorIndices.includes(index)
                 && index > 0 && index < indexLength
         });
 

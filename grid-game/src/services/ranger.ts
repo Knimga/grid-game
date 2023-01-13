@@ -14,12 +14,13 @@ export function getInRangeIndices(
     let inRangeIndices: number[] = getSeenIndices(gameBoard, position, range);
 
     if(rangeType === RangeType.mvt) {
-        const charPositions: number[] = gameBoard.chars.map(char => char.game.positionIndex);
-        inRangeIndices = inRangeIndices.filter(index => {
-            const charIsHere: boolean = charPositions.includes(index);
-            const portalIsHere: boolean = gameBoard.portal ? index === gameBoard.portal : false;
-            return !charIsHere && !portalIsHere;   
-        });
+        const cantMoveTo: number[] = [
+            ...gameBoard.chars.map(char => char.game.positionIndex),
+            ...gameBoard.doors.map(door => door.position)
+        ];
+        if(gameBoard.portal) cantMoveTo.push(gameBoard.portal);
+
+        inRangeIndices = inRangeIndices.filter(index => {return !cantMoveTo.includes(index)});
     }
 
     if(rangeType === RangeType.atk) inRangeIndices.splice(inRangeIndices.indexOf(position), 1);
@@ -28,6 +29,7 @@ export function getInRangeIndices(
 }
 
 export function getSpawnArea(board: GameBoard | Board, startIndex: number, charPositions: number[]): number[] {
+    
     return getSeenIndices(board, startIndex, 2)
         .filter(index => !charPositions.includes(index) && index !== startIndex)
 }

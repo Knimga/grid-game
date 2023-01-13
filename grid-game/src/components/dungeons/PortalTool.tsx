@@ -1,4 +1,4 @@
-import './boardsTab.css';
+import './dungeonPane.css';
 
 import { ToolType } from '../../uiTypes';
 

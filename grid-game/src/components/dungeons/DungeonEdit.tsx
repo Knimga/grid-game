@@ -1,12 +1,12 @@
 import {useState} from 'react';
 
 import DungeonPane from './DungeonPane';
-import BoardEdit from '../boards/BoardEdit';
+import BoardEdit from './BoardEdit';
 import NameInput from '../shared/NameInput';
-import DimensionEdit from '../boards/DimensionEdit';
+import DimensionEdit from './DimensionEdit';
 import WallTool from './WallTool';
-import CharTool from '../boards/CharTool';
-import PortalTool from '../boards/PortalTool';
+import CharTool from './CharTool';
+import PortalTool from './PortalTool';
 import DoorTool from './DoorTool';
 import DoorPane from './DoorPane';
 

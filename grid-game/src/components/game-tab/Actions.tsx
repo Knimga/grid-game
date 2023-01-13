@@ -10,9 +10,8 @@ import {GameChar, Action, CharType} from '../../types';
 import {getRemainingMvt} from '../../services/aiMove';
 
 interface ActionsInput {
-    char: GameChar,
-    gameIsActive: boolean;
-    actionFunctions: any
+    char: GameChar;
+    actionFunctions: any;
 }
 
 enum ActionCategory {
@@ -20,9 +19,12 @@ enum ActionCategory {
     abilities = 'abilities'
 }
 
-export default function Actions({char, gameIsActive, actionFunctions}: ActionsInput) {
+export default function Actions({char, actionFunctions}: ActionsInput) {
     const [selectedId, setSelectedId] = useState<string | null>(null);
-    const [selectedCategory, setSelectedCategory] = useState<ActionCategory>(ActionCategory.weapons);
+    const [selectedCategory, setSelectedCategory] = useState<ActionCategory>(
+        ['melee', 'ranged'].includes(char.class.role) ? ActionCategory.weapons : ActionCategory.abilities
+    );
+    
     const remainingMvt: number = char ? char.game.stats.mvt - char.game.round.movementTaken : 0 ;
     const actionRemaining: boolean = char ? !char.game.round.actionTaken : false;
 
@@ -50,7 +52,7 @@ export default function Actions({char, gameIsActive, actionFunctions}: ActionsIn
     }    
 
     function enemyTurnDisplay(): JSX.Element {
-        if(char && gameIsActive && char.type !== CharType.player) {
+        if(char && char.type !== CharType.player) {
             return <div className="actions-column">
                 <strong className="enemy-turn-text">Enemy's turn...</strong>
             </div>
@@ -58,11 +60,11 @@ export default function Actions({char, gameIsActive, actionFunctions}: ActionsIn
     }
 
     function playerTurnDisplay(): JSX.Element {
-        if(char && gameIsActive && char.type === CharType.player) {
+        if(char && char.type === CharType.player) {
             return <div className="actions-column">
                 <Button 
                     variant="contained"
-                    disabled={!remainingMvt || !gameIsActive}
+                    disabled={!remainingMvt}
                     onClick={() => actionFunctions.showMovement()}
                 >{`Move (${char ? getRemainingMvt(char) : 0}/${char ? char.game.stats.mvt : 0})`}</Button>
                 
@@ -84,7 +86,6 @@ export default function Actions({char, gameIsActive, actionFunctions}: ActionsIn
                 <Button 
                     variant="contained" 
                     onClick={() => endTurn()}
-                    disabled={!gameIsActive}
                 >End Turn</Button>
             </div> 
         } else {return <></>}
@@ -131,7 +132,7 @@ export default function Actions({char, gameIsActive, actionFunctions}: ActionsIn
 
   return (
     <div className="actions">
-        <strong>{(char && char.type === CharType.player && gameIsActive) ? char.name : ''}</strong>
+        <strong>{(char && char.type === CharType.player) ? char.name : ''}</strong>
         {enemyTurnDisplay()}
         {playerTurnDisplay()}
     </div>

@@ -1,8 +1,0 @@
-.terrain-tool-container {
-    width: 60%; height: 80px;
-    display: flex; flex-direction: column;
-    justify-content: center; align-items: center;
-}
-
-.outline {outline: 0.5px solid lightblue;} 
-.lightblue {color: lightblue;}

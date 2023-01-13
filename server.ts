@@ -6,7 +6,6 @@ import * as config from './config';
 
 import CharacterRoute from './routes/Characters';
 import DungeonRoute from './routes/Dungeons';
-import BoardRoute from './routes/Boards';
 import GameData from './routes/gameData';
 import ActionsRoute from './routes/Actions';
 import ClassesRoute from './routes/Classes';
@@ -22,7 +21,6 @@ app.use(cors());
 
 app.use('/characters', CharacterRoute);
 app.use('/dungeons', DungeonRoute);
-app.use('/boards', BoardRoute);
 app.use('/gameData', GameData);
 app.use('/actions', ActionsRoute);
 app.use('/classes', ClassesRoute);

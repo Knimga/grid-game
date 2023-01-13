@@ -32,9 +32,14 @@ export function getBoardStyles(board: Board | GameBoard, customBoardSize?: Style
 export function createEditorGrid(board: Board): EditorSquare[]  {
     const grid: EditorSquare[] = [];
     const gridLength: number = board.gridWidth * board.gridHeight;
+    const squareSize: Style = getBoardStyles(board).square;
 
-    for (let i = 0; i < gridLength; i++) grid[i] = {type: TerrainType.floor};
-    for (let w = 0; w < board.walls.length; w++) grid[board.walls[w]] = {type: TerrainType.wall};
+    for (let i = 0; i < gridLength; i++) {
+        grid[i] = {type: TerrainType.floor, style: squareSize};
+    }
+    for (let w = 0; w < board.walls.length; w++) {
+        grid[board.walls[w]] = {type: TerrainType.wall, style: squareSize};
+    }
     for (let c = 0; c < board.chars.length; c++) {
         if(board.chars[c].index > -1) grid[board.chars[c].index].char = board.chars[c]
     }
@@ -45,9 +50,10 @@ export function createEditorGrid(board: Board): EditorSquare[]  {
 export function createGameGrid(board: GameBoard): GameSquare[] {
     const grid: GameSquare[] = [];
     const gridLength: number = board.gridWidth * board.gridHeight;
+    const squareSize: Style = getBoardStyles(board).square;
 
-    for (let i = 0; i < gridLength; i++) grid[i] = {type: TerrainType.floor}
-    for (let w = 0; w < board.walls.length; w++) grid[board.walls[w]] = {type: TerrainType.wall}
+    for (let i = 0; i < gridLength; i++) grid[i] = {type: TerrainType.floor, style: squareSize}
+    for (let w = 0; w < board.walls.length; w++) grid[board.walls[w]] = {type: TerrainType.wall, style: squareSize}
     for (let c = 0; c < board.chars.length; c++) {
         if(board.chars[c].game.positionIndex > -1) {
             grid[board.chars[c].game.positionIndex].char = board.chars[c]

@@ -12,24 +12,23 @@ import { getSpawningIndices } from '../../services/boards';
 import { setCharVisibility } from '../../services/los';
 import { rollInitiative } from '../../services/roller';
 
-import { BoardSelection } from '../../uiTypes';
-import { Party, GameBoard, GameChar } from '../../types';
+import { DungeonSelection } from '../../uiTypes';
+import { GameDungeon, Party, GameBoard, GameChar } from '../../types';
 
 export default function GameController() {
     const [parties, setParties] = useState<Party[]>([]);
-    const [boardSelections, setBoardSelections] = useState<BoardSelection[]>([]);
-    const [entryIds, setEntryIds] = useState<string[]>([]);
+    const [dungeonSelections, setDungeonSelections] = useState<DungeonSelection[]>([]);
 
     const [selectedPartyId, setSelectedPartyId] = useState<string>();
-    const [selectedBoardId, setSelectedBoardId] = useState<string>();
-    const [selectedEntryId, setSelectedEntryId] = useState<string>();
+    const [selectedDungeonId, setSelectedDungeonId] = useState<string>();
 
+    const [currentDungeon, setCurrentDungeon] = useState<GameDungeon>();
     const [board, setBoard] = useState<GameBoard>();
 
     useEffect(() => {
-        fetch(urls.localRoot + urls.boards.getSelections)
+        fetch(urls.localRoot + urls.dungeons.dungeonSelections)
             .then(res => res.json())
-            .then((data) => setBoardSelections(data))
+            .then((data) => setDungeonSelections(data))
             .catch((err) => console.log(err));
 
         fetch(urls.localRoot + urls.parties.getAll)
@@ -38,12 +37,16 @@ export default function GameController() {
             .catch((err) => console.log(err));
     },[]);
 
-    async function setPreGameData(partyId: string, boardId: string, entryId: string) {
+    async function initiateGame(partyId: string, dungeonId: string, entryId: string) {
         const partyCharsRes = await fetch(urls.localRoot + urls.parties.partyCharsById(partyId));
-        const gameBoardRes = await fetch(urls.localRoot + urls.boards.getGameBoardById(boardId));
-        const gameBoard: GameBoard = await gameBoardRes.json();
+        const gameDungeonRes = await fetch(urls.localRoot + urls.dungeons.getGameDungeonById(dungeonId));
         const partyChars: GameChar[] = await partyCharsRes.json();
-        setBoard(populateBoard(gameBoard, entryId, partyChars));
+        const gameDungeon: GameDungeon = await gameDungeonRes.json();
+
+        gameDungeon.boards[0] = populateBoard(gameDungeon.boards[0], entryId, partyChars);
+
+        setCurrentDungeon(gameDungeon);
+        setBoard(gameDungeon.boards[0]);
     }
 
     function populateBoard(board: GameBoard, entryPointName: string, currentParty: GameChar[]): GameBoard {
@@ -70,26 +73,22 @@ export default function GameController() {
         return newBoard;  
     }
 
-    function selectBoard(id: string): void {
-        const boardSelection: BoardSelection | undefined = boardSelections.find(bs => bs.id === id);
-        if(boardSelection) {
-            setSelectedBoardId(id);
-            setEntryIds(boardSelection.entryPointIds);
-        }
+    function selectDungeon(_id: string): void {
+        const dungeonSelection: DungeonSelection | undefined = dungeonSelections.find(d => d._id === _id);
+        if(dungeonSelection) setSelectedDungeonId(_id);
     }
 
     function startGame(): void {
-        if(selectedPartyId && selectedBoardId && selectedEntryId) {
-            setPreGameData(selectedPartyId, selectedBoardId, selectedEntryId)
+        if(selectedPartyId && selectedDungeonId) {
+            initiateGame(selectedPartyId, selectedDungeonId, 'portal')
         }
     }
 
     function log(): void {
         console.log(`partyId: ${selectedPartyId}`);
-        console.log(`boardId: ${selectedBoardId}`);
-        console.log(`entryId: ${selectedEntryId}`);
+        console.log(`boardId: ${selectedDungeonId}`);
     }
-
+    
     function gameSetup(): JSX.Element {
         return <div className="game-setup-container">
             <select onChange={(e) => setSelectedPartyId(e.target.options[e.target.selectedIndex].value)}>
@@ -100,30 +99,25 @@ export default function GameController() {
                     </option>
                 )}
             </select>
-            <select onChange={(e) => selectBoard(e.target.options[e.target.selectedIndex].value)}>
-                <option hidden={true}>Select a board...</option>
-                {boardSelections.map((selection: BoardSelection) =>
-                    <option key={selection.id} value={selection.id}>{selection.name}</option>
+            <select onChange={(e) => selectDungeon(e.target.options[e.target.selectedIndex].value)}>
+                <option hidden={true}>Select a dungeon...</option>
+                {dungeonSelections.map((selection: DungeonSelection) =>
+                    <option key={selection._id} value={selection._id}>{selection.name}</option>
                 )}
             </select>
-            <select 
-                disabled={!entryIds.length} 
-                onChange={(e) => setSelectedEntryId(e.target.options[e.target.selectedIndex].value)}
-            >
-                <option hidden={true}>Select an entry point...</option>
-                {entryIds.map((id: string) => <option key={id} value={id}>{id}</option>)}
-            </select>
-            <Button 
-                variant="contained"
-                onClick={() => startGame()}
-            >Start Game</Button>
+            <Button variant="contained" onClick={() => startGame()}>Start Game</Button>
             <button onClick={() => log()}>Log</button>
         </div>
     }
 
   return (
     <div className="gametab-container">
-        {board ? <GameTab startingBoard={board}/> : gameSetup()}
+        {board && currentDungeon ? <GameTab 
+            startingBoard={board} 
+            colorScheme={{
+                wall: currentDungeon.wallColor, 
+                floor: currentDungeon.floorColor
+            }}/> : gameSetup()}
     </div>
   )
 }

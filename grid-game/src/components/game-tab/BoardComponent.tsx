@@ -1,58 +1,62 @@
 import './board.css';
 
 import { GiMagicPortal } from 'react-icons/gi';
+import { GiWoodenDoor } from 'react-icons/gi';
 
 import {createGameGrid, getBoardStyles} from '../../services/boards';
 
 import CharSquare from './CharSquare';
 
-import {GameBoard, GameChar, Action} from '../../types';
-import {GameSquare, TerrainType, Style} from '../../uiTypes';
+import {GameBoard, Action} from '../../types';
+import {GameSquare, Style} from '../../uiTypes';
 
 interface BoardInput {
-    board: GameBoard,
-    mvtHighlight: number[],
-    actionHighlight: number[],
-    aoeHighlight: number[],
-    los: number[],
-    hasBeenSeen: number[],
-    selectedAction: Action | null | undefined,
-    boardFunctions: any
+    board: GameBoard;
+    colorScheme: {wall: string; floor: string;};
+    mvtHighlight: number[];
+    actionHighlight: number[];
+    aoeHighlight: number[];
+    los: number[];
+    hasBeenSeen: number[];
+    selectedAction: Action | null | undefined;
+    roomIsClear: boolean;
+    boardFunctions: any;
 }
 
 export default function BoardComponent({
-    board, mvtHighlight, actionHighlight, aoeHighlight, los, hasBeenSeen, boardFunctions, selectedAction
+    board, colorScheme, boardFunctions, selectedAction, roomIsClear,
+    mvtHighlight, actionHighlight, aoeHighlight, los, hasBeenSeen
 }: BoardInput) {
     const grid: GameSquare[] = createGameGrid(board);
     const boardStyles = getBoardStyles(board);
 
-    board.walls.forEach(w => grid[w].type = TerrainType.wall);
-    board.chars.forEach((char: GameChar) => {
-        if(char.game.positionIndex > -1) grid[char.game.positionIndex].char = char
-    });
+    function squareStyle(index: number): Style {
+        const squareSize: Style = boardStyles.square;
+        let bgColor: string = grid[index].type === 'floor' ? colorScheme.floor : colorScheme.wall;
+        let filter: string = '';
+        let outline: string = '';
 
-    function squareClassNames(index: number): string {
-        const square: GameSquare = grid[index];
-        let classNames: string = 'square';
         if(!hasBeenSeen.includes(index)) {
-            classNames += ' unseen'
+            bgColor = 'black'
         } else {
-            classNames += ` seen ${square.type}`;
-            if(!los.includes(index)) classNames += ' darken';
-            if(grid[index].char) classNames += ' char';
-            if(mvtHighlight.includes(index)) classNames += ' move-range';
+            outline = '0.1px solid gray';
+            if(!los.includes(index)) filter = 'brightness(0.7)';
             if(selectedAction) {
                 if(actionHighlight.includes(index)) {
-                    classNames += selectedAction.intent === 'offense' ? ' offense-range' : ' defense-range';
+                    filter = 'brightness(1.5)' //used to be red or blue based on selectedAction.intent
                 }
                 if(aoeHighlight.includes(index)) {
-                    classNames += selectedAction.intent === 'offense' ? ' off-aoe-range' : ' def-aoe-range';
+                    filter = 'brightness(1.8)' //used to be red or blue based on selectedAction.intent
                 }
-            }
+            } else if(mvtHighlight.includes(index)) filter = 'brightness(1.5)';
         }
-        
-        
-        return classNames;
+
+        return {
+            ...squareSize,
+            backgroundColor: bgColor,
+            filter: filter,
+            outline: outline
+        };
     }
 
     function clickSquare(index: number): void {
@@ -82,7 +86,7 @@ export default function BoardComponent({
             {
                 grid.map((square, index) => {
                     const isPortal: boolean = board.portal ? index === board.portal : false;
-                    let thisSquareStyle: Style = boardStyles.square;
+                    const door = board.doors.find(d => d.position === index);
                     let showChar: boolean = false;
                 
                     if(square.char) {
@@ -102,12 +106,15 @@ export default function BoardComponent({
                         :
                         <div
                             key={index}
-                            className={squareClassNames(index)}
-                            style={thisSquareStyle}
+                            className="square"
+                            style={squareStyle(index)}
                             onClick={() => clickSquare(index)}
                             onMouseOver={() => mouseOver(index)}
                         >
                             {isPortal && hasBeenSeen.includes(index) ? <GiMagicPortal className="portal-icon"/> : ''}
+                            {door && hasBeenSeen.includes(index) ? 
+                                <GiWoodenDoor className="door-icon" style={roomIsClear ? {color: 'white'} : {}}/> : ''
+                            }
                         </div>
                     })
             }

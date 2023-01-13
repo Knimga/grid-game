@@ -27,13 +27,9 @@ const urls = {
     },
     dungeons: {
         getAll: 'dungeons/getAll',
-        save: 'dungeons/save'
-    },
-    boards: {
-        getSelections: 'boards/boardSelections',
-        getGameBoardById: (_id: string) => `boards/getGameBoard/${_id}`,
-        getAllBoards: 'boards/getAllBoards',
-        save: 'boards/save'
+        save: 'dungeons/save',
+        dungeonSelections: 'dungeons/dungeonSelections',
+        getGameDungeonById: (_id: string) => `dungeons/getGameDungeonById/${_id}`
     },
     gameData: {
         bulk: 'gameData/bulk'

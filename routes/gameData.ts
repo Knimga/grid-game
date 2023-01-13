@@ -1,9 +1,13 @@
 import express from 'express';
 
-import {Character, GameChar, Class, Action, Armor, Attributes, Party, PartyMember} from '../grid-game/src/types';
+import {
+    Character, GameChar, BoardChar, Class, Action, Armor, Attributes, Party, PartyMember,
+    Dungeon, GameDungeon, GameBoard
+} from '../grid-game/src/types';
 import { DbCharacter, DbClass, DbParty } from '../dbTypes';
 
 import { createStats, createAttributes, getACBonus, getMACBonus } from '../grid-game/src/services/charCalc';
+import { randId } from '../grid-game/src/services/detailStrings';
 
 import CharactersModel from '../models/Characters.model';
 import ClassModel from '../models/Classes.model';
@@ -77,8 +81,9 @@ export function packageCharacter(char: Character): DbCharacter {
     }
 }
 
-export async function createCharacters(): Promise<Character[]> {
-    const dbChars: DbCharacter[] = await CharactersModel.find().lean();
+export async function createCharacters(_ids?: string[]): Promise<Character[]> {
+    const query = _ids ? {_id: {$in: _ids}} : {};
+    const dbChars: DbCharacter[] = await CharactersModel.find(query).lean();
     const characters: Character[] = [];
     for (let i = 0; i < dbChars.length; i++) {
         const char: Character = await createOneCharacter(dbChars[i]);
@@ -96,7 +101,7 @@ export async function createOneCharacter(dbChar: DbCharacter): Promise<Character
 
     return {
         ...dbChar,
-        _id: dbChar._id,
+        _id: dbChar._id.toString(),
         class: completedClass,
         attributes: attributes,
         stats: createStats(attributes, armorACBonus, armorMACBonus, dbChar.level),
@@ -110,27 +115,31 @@ export async function dbCharsToGameChars(dbChars: DbCharacter[]): Promise<GameCh
 
     for (let i = 0; i < dbChars.length; i++) {
         const char: Character = await createOneCharacter(dbChars[i]);
-        gameChars.push({
-            ...char,
-            game: {
-                gameId: Math.random().toString().substring(2),
-                positionIndex: -1,
-                iniRoll: 0,
-                isTurn: false,
-                attributes: char.attributes,
-                stats: char.stats,
-                round: {
-                    movementTaken: 0,
-                    actionTaken: false
-                },
-                isVisible: false,
-                hasBeenSeen: false,
-                activeEffects: []
-            }
-        });
+        gameChars.push(charToGameChar(char));
     }
 
     return gameChars;
+}
+
+export function charToGameChar(char: Character, positionIndex?: number): GameChar {
+    return {
+        ...char,
+        game: {
+            gameId: randId(),
+            positionIndex: positionIndex || -1,
+            iniRoll: 0,
+            isTurn: false,
+            attributes: char.attributes,
+            stats: char.stats,
+            round: {
+                movementTaken: 0,
+                actionTaken: false
+            },
+            isVisible: false,
+            hasBeenSeen: false,
+            activeEffects: []
+        }
+    }
 }
 
 export async function dbPartiesToParties(dbParties: DbParty[]): Promise<Party[]> {
@@ -158,6 +167,28 @@ export async function dbPartyToParty(dbParty: DbParty): Promise<Party> {
     }
 
     return {_id: dbParty._id, members: members}
+}
+
+export async function dungeonToGameDungeon(dungeon: Dungeon): Promise<GameDungeon> {
+    const allCharIds: string[] = dungeon.boards.map(board => board.chars.map(c => c._id)).flat(1);
+    const uniqueIds: string[] = [...new Set(allCharIds)];
+    const allChars: Character[] = await createCharacters(uniqueIds);
+
+    const gameBoards: GameBoard[] = dungeon.boards.map(board => {
+        const charIds: string[] = board.chars.map(c => c._id);
+        const charsOnThisBoard: Character[] = allChars.filter(c => charIds.includes(c._id));
+        const gameChars: GameChar[] = [];
+        
+        for (let i = 0; i < board.chars.length; i++) {
+            const boardChar: BoardChar = board.chars[i];
+            const char: Character | undefined = charsOnThisBoard.find(c => c._id === boardChar._id);
+            if(char) gameChars.push(charToGameChar(char, boardChar.index));
+        }
+
+        return {...board, chars: gameChars}
+    });
+
+    return {...dungeon, boards: gameBoards}
 }
 
 export default router;

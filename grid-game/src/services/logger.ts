@@ -70,14 +70,17 @@ function action(actorName: string, actionResults: ActionResult[]): string[] {
 
         if(actionResults[r].success) {
             string += actionResults[r].newChar.name;
+
             for (let e = 0; e < actionResults[r].effectResults.length; e++) {
-                const effectResult = actionResults[r].effectResults[e];            
+                const effectResult = actionResults[r].effectResults[e];
                 const amount: number = effectResult.effectiveAmount;
-                const atkRollString: string | undefined = actionResults[r].atkRollResult?.summary;
-                const dmgRollString: string | undefined = actionResults[r].dmgRollResult?.summary;
+                const isFlatAmount: boolean = effectResult.effect.flatAmount !== undefined;
+                //const atkRollString: string | undefined = actionResults[r].atkRollResult?.summary;
+                const dmgRollString: string | undefined = isFlatAmount ? 
+                   '' : actionResults[r].dmgRollResult?.summary;
     
                 switch(effectResult.effect.type) {
-                    case 'healing': string += ` healed for ${amount + (atkRollString ? ` (${atkRollString})` : '')}`; break;
+                    case 'healing': string += ` healed for ${amount + (dmgRollString ? ` (${dmgRollString})` : '')}`; break;
                     case 'damage': string += ` takes ${amount + (dmgRollString ? ` (${dmgRollString})` : '')} ${effectResult.effect.dmgType} damage to ${effectTargetStatString(effectResult.effect.targetStat)}`; break;
                     case 'buff': string += ` gets +${amount} to ${effectTargetStatString(effectResult.effect.targetStat)} for ${effectResult.effect.duration} rounds`; 
                         break;
@@ -100,11 +103,21 @@ function action(actorName: string, actionResults: ActionResult[]): string[] {
     return actions;
 }
 
+//react won't render html in strings... 
+/*function dmgDoneString(dmgAmount: number, rollString: string | undefined): string {
+    if(rollString) {
+        return `<strong title="${rollString}">${dmgAmount}</strong>`
+    } else {
+        return `<strong>${dmgAmount}</strong>`
+    }
+}*/
+
 function charDies(slayerName: string, slayeeName: string): string {
     return `${slayerName} has slain ${slayeeName}!`
 }
 
 function victory(victors: CharType): TurnLog {
-    const charTypeString: string = victors === 'player' ? 'players' : 'enemies';
-    return {header: `The ${charTypeString} have achieved VICTORY!`, actions: []}
+    const header: string = victors === CharType.player ? 'This room is clear of enemies... Doors may now be opened!'
+        : 'The players have lost...';
+    return {header: header, actions: []}
 }

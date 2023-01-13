@@ -10,6 +10,8 @@
     cursor: pointer;
 }
 
+.square:hover {filter: brightness(1.2)}
+
 .char-square {
     display: flex; flex-direction: column;
     justify-content: flex-end; align-items: center;
@@ -23,12 +25,6 @@
 .door-icon {font-size: 200%; color: lightgray;}
 
 .editor-square {outline: 0.1px solid gray;}
-
-.unseen {background-color: black;}
-
-.seen {outline: 0.1px solid gray;}
-
-.darken {filter: brightness(0.7);}
 
 .char-square-top, .char-square-bottom {
     width: 100%;
@@ -57,9 +53,6 @@
     overflow-wrap: break-word;
     text-overflow: ellipsis;
 }
-
-.move-range {background-color: #505050;}
-.move-range:hover {background-color: #606060;}
 
 .offense-range {background-color: #966262;}
 .defense-range {background-color: #517d9e;}

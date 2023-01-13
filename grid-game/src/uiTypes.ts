@@ -1,15 +1,31 @@
 import {GameChar, BoardChar} from './types';
 
-export type Coord = [number, number] // only use coords when calculating lines / distance
+export type Coord = [number, number]
+
+export interface Square {
+    type: TerrainType;
+    style: Style;
+    char?: GameChar | BoardChar;
+}
 
 export interface GameSquare {
     type: TerrainType;
+    style?: Style;
     char?: GameChar;
 }
 
 export interface EditorSquare {
     type: TerrainType;
+    style?: Style;
     char?: BoardChar;
+}
+
+export interface Style {
+    width: number;
+    height: number;
+    backgroundColor?: string;
+    filter?: string;
+    outline?: string;
 }
 
 export interface Terrain {
@@ -34,13 +50,7 @@ export interface BoardCharSelection {
     color: string;
 }
 
-export interface Style {
-    width: number;
-    height: number;
-    backgroundColor?: string;
-    color?: string;
-    filter?: string;
-}
+
 
 export enum ToolType {
     wall = "wall",
@@ -65,6 +75,11 @@ export interface BoardSelection {
     id: string; 
     name: string; 
     entryPointIds: string[];
+}
+
+export interface DungeonSelection {
+    _id: string;
+    name: string;
 }
 
 export interface BoardCharSelection {

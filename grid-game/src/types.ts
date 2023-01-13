@@ -17,6 +17,10 @@ export interface Board {
     chars: BoardChar[];
 }
 
+export interface GameDungeon extends Omit<Dungeon, 'boards'> {
+    boards: GameBoard[];
+}
+
 export interface GameBoard extends Omit<Board, 'chars'> {
     chars: GameChar[];
 }

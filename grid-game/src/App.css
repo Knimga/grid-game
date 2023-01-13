@@ -10,7 +10,7 @@ select {
 }
 
 .tab-container {
-  width: 1500px; height: 950px;
+  width: 1500px; max-width: 1500px; height: 950px;
   display: flex; flex-direction: column;
 }
 
