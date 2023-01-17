@@ -3,7 +3,7 @@ import express from 'express';
 import {
     Character, GameChar, BoardChar, Class, Action, Armor, Attributes, Party, PartyMember,
     Dungeon, GameDungeon, GameBoard
-} from '../grid-game/src/types';
+} from '../grid-game/src/types/types';
 import { DbCharacter, DbClass, DbParty } from '../dbTypes';
 
 import { createStats, createAttributes, getACBonus, getMACBonus } from '../grid-game/src/services/charCalc';
@@ -185,7 +185,7 @@ export async function dungeonToGameDungeon(dungeon: Dungeon): Promise<GameDungeo
             if(char) gameChars.push(charToGameChar(char, boardChar.index));
         }
 
-        return {...board, chars: gameChars}
+        return {...board, chars: gameChars, exploredAreas: []}
     });
 
     return {...dungeon, boards: gameBoards}

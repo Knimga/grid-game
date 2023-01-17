@@ -1,4 +1,4 @@
-import {Roll, RollResult, GameChar } from '../types';
+import {Roll, RollResult, GameChar } from '../types/types';
 
 export function rand(max: number): number {return Math.floor(Math.random() * max) + 1}
 

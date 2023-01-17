@@ -7,7 +7,7 @@ import ColorPicker from '../shared/ColorPicker';
 import { FaSave } from 'react-icons/fa';
 import { randId } from '../../services/detailStrings';
 
-import { Dungeon } from '../../types';
+import { Dungeon } from '../../types/types';
 import { useState } from 'react';
 
 interface DungeonsPaneInput {

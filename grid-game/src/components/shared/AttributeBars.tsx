@@ -2,7 +2,7 @@ import './attributeBars.css';
 
 import { attributeDetailString } from '../../services/detailStrings';
 
-import { Attributes } from '../../types';
+import { Attributes } from '../../types/types';
 
 interface AttributeBarsInput {attributes: Attributes, isClassDisplay?: boolean}
 

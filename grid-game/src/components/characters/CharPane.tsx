@@ -2,7 +2,7 @@ import './charPane.css';
 
 import { FaCircle } from 'react-icons/fa';
 
-import {Character} from '../../types';
+import {Character} from '../../types/types';
 
 import {cap} from '../../services/detailStrings';
 

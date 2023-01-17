@@ -3,8 +3,8 @@ import './miniBoardMap.css';
 import { getBoardStyles, createEditorGrid } from "../../services/boards"
 import { randId } from '../../services/detailStrings';
 
-import { Board } from "../../types";
-import { EditorSquare, TerrainType } from "../../uiTypes";
+import { Board } from "../../types/types";
+import { EditorSquare, TerrainType } from "../../types/uiTypes";
 
 
 interface MiniBoardMapInput {

@@ -8,7 +8,7 @@ import {blankChar} from '../../services/charCalc';
 import CharPane from './CharPane';
 import CharBuilder from './CharBuilder';
 
-import {Character, Class } from '../../types';
+import {Character, Class } from '../../types/types';
 
 export default function CharactersTab() {
     const [chars, setChars] = useState<Character[]>([]);

@@ -1,6 +1,6 @@
 import './clickSwitch.css';
 
-import {InputOption} from '../../uiTypes';
+import {InputOption} from '../../types/uiTypes';
 
 interface ClickSwitchInput {
     label: string,

@@ -10,11 +10,11 @@ import PortalTool from './PortalTool';
 import DoorTool from './DoorTool';
 import DoorPane from './DoorPane';
 
-import { blankBoard, newDoor, doorToBoardMap } from '../../services/boards';
+import { blankBoard, newDoor, doorToBoardMap, doorNameFormat } from '../../services/boards';
 import { doorInputOptions } from '../../services/detailStrings';
 
-import { Dungeon, Board, Door } from '../../types';
-import { ToolType, BoardCharSelection, DoorToBoardMap, InputOption } from '../../uiTypes';
+import { Dungeon, Board, Door } from '../../types/types';
+import { ToolType, BoardCharSelection, DoorToBoardMap, InputOption } from '../../types/uiTypes';
 
 interface DungeonEditInput {
     dungeon: Dungeon;
@@ -29,7 +29,7 @@ export default function DungeonEdit(
 ) {
     const [selectedBoard, setSelectedBoard] = useState<Board>(dungeon.boards[0]);
     const [selectedTool, setSelectedTool] = useState<ToolType>(ToolType.wall);
-    const [selectedChar, setSelectedChar] = useState<BoardCharSelection>();
+    const [selectedChar, setSelectedChar] = useState<BoardCharSelection>(boardCharSelections[0]);
     const doorSelectOptions: InputOption[] = doorInputOptions(dungeon);
     const doorBoardMap: DoorToBoardMap[] = doorToBoardMap(dungeon);
 
@@ -43,7 +43,11 @@ export default function DungeonEdit(
     }
 
     function updateBoardName(newName: string): void {
-        dungeon.boards[selectedBoardIndex()].name = newName;
+        const selectedIndex: number = selectedBoardIndex();
+        const board: Board = dungeon.boards[selectedIndex];
+        board.name = newName;
+        for (let i = 0; i < board.doors.length; i++) board.doors[i].name[1] = doorNameFormat(newName);
+        dungeon.boards[selectedIndex] = board;
         updateDungeon(dungeon);
     }
 

@@ -1,4 +1,4 @@
-import { ToolType } from '../../uiTypes';
+import { ToolType } from '../../types/uiTypes';
 
 import { GiWoodenDoor } from 'react-icons/gi';
 

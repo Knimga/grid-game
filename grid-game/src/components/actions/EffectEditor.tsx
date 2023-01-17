@@ -1,7 +1,8 @@
 import './effectEditor.css';
 
-import { Effect, EffectType, DamageType, Intent, EffectTargetStat, DamageTypeDarkColor } from '../../types';
-import {InputOption} from '../../uiTypes';
+import { Effect } from '../../types/types';
+import { EffectType, DamageType, Intent, EffectTargetStat, DamageTypeDarkColor } from '../../types/enums';
+import {InputOption} from '../../types/uiTypes';
 
 import { FaTrashAlt } from "react-icons/fa";
 

@@ -26,13 +26,11 @@ export interface Style {
     backgroundColor?: string;
     filter?: string;
     outline?: string;
+    border?: string;
+    boxShadow?: string;
 }
 
-export interface Terrain {
-    _id: string;
-    name: string;
-    color: string;
-}
+
 
 export enum TerrainType {
     wall = 'wall',
@@ -49,8 +47,6 @@ export interface BoardCharSelection {
     name: string;
     color: string;
 }
-
-
 
 export enum ToolType {
     wall = "wall",
@@ -96,18 +92,20 @@ export enum RangeType {
 }
 
 export interface MetersEntry {
-    gameId: string,
-    charName: string,
-    charType: string,
-    color: string,
-    meters: MeterTypes
+    gameId: string;
+    charName: string;
+    charType: string;
+    charThreatMultiplier: number;
+    color: string;
+    meters: MeterTypes;
 }
 
 export interface MeterTypes {
-    dmgDone: number,
-    dmgTaken: number,
-    healingDone: number,
-    threat: number
+    dmgDone: number;
+    dmgTaken: number;
+    healingDone: number;
+    statEffectsDone: number;
+    threat: number;
 }
 
 export interface InputOption {enumValue: string, displayValue: string}

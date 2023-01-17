@@ -1,13 +1,10 @@
 import { distance, getSpawnArea } from './ranger';
 import { randId } from './detailStrings';
 
-import {GameSquare, EditorSquare, TerrainType, Style, DoorToBoardMap} from '../uiTypes';
-import {GameBoard, Dungeon, Board, Door, DoorName} from '../types';
+import {GameSquare, EditorSquare, TerrainType, Style, DoorToBoardMap} from '../types/uiTypes';
+import {GameBoard, Dungeon, Board, Door, DoorName} from '../types/types';
 
-interface BoardStyles {
-    square: Style,
-    board: Style
-}
+interface BoardStyles {square: Style, board: Style}
 
 const staticBoardSize: Style = {width: 900, height: 900};
 
@@ -79,20 +76,13 @@ export function getSpawningIndices(board: GameBoard, spawnLocation: number, part
     return sortedByClosest.slice(0, partySize);
 }
 
-export function blankBoard(width: number, height: number) {
-    return {
-        id: randId(),
-        name: 'Blank board',
-        gridWidth: width,
-        gridHeight: height,
-        doors: [],
-        walls: [],
-        chars: []
+export function updateExploredAreas(currentExploredAreas: number[], newLos: number[]): number[] {
+    const newExploredAreas: number[] = currentExploredAreas;
+    for (let i = 0; i < newLos.length; i++) {
+        if(!newExploredAreas.includes(newLos[i])) newExploredAreas.push(newLos[i])
     }
+    return newExploredAreas;
 }
-
-export function blankEditorBoard(): Board {return blankBoard(15,15)}
-export function blankGameBoard(): GameBoard {return blankBoard(15,15)}
 
 export function newDoor(dungeonName: string, boardName: string, position: number): Door {
     return {
@@ -122,3 +112,17 @@ export function doorToBoardMap(dungeon: Dungeon): DoorToBoardMap[] {
     });
     return doorsByBoard.flat(1);
 }
+
+export function blankBoard(width: number, height: number) {
+    return {
+        id: randId(),
+        name: 'Blank board',
+        gridWidth: width,
+        gridHeight: height,
+        doors: [],
+        walls: [],
+        chars: []
+    }
+}
+
+export function blankEditorBoard(): Board {return blankBoard(15,15)}

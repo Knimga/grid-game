@@ -5,7 +5,7 @@ import { Button } from '@mui/material';
 import ClassPane from '../shared/ClassPane';
 import ClassBuilder from './ClassBuilder';
 
-import {Class, Action, Armor} from '../../types';
+import {Class, Action, Armor} from '../../types/types';
 
 import { blankClass } from '../../services/charCalc';
 

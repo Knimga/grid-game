@@ -1,5 +1,5 @@
 import {Schema, model} from "mongoose";
-import {Action} from '../grid-game/src/types';
+import {Action} from '../grid-game/src/types/types';
 
 const schema = new Schema<Action>({
     name: String,

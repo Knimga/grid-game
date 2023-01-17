@@ -1,6 +1,6 @@
 import './dropdown.css';
 
-import {InputOption} from '../../uiTypes';
+import {InputOption} from '../../types/uiTypes';
 
 interface DropdownInput {
     label: string,

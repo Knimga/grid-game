@@ -1,6 +1,6 @@
 import './combatants.css';
 
-import { GameChar } from '../../types';
+import { GameChar } from '../../types/types';
 
 interface CombatantsInput {
   chars: GameChar[];

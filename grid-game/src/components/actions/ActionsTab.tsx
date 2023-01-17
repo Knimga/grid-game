@@ -11,7 +11,7 @@ import urls from "../../urls";
 
 import { blankAction } from '../../services/actions';
 
-import { Action } from "../../types";
+import { Action } from "../../types/types";
 
 export default function ActionsTab() {
     const [actions, setActions] = useState<Action[]>([]);

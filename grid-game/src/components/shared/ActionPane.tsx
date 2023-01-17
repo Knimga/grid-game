@@ -1,6 +1,7 @@
 import './actionPane.css';
 
-import {Action, Effect, Stats, DamageTypeColor, DamageTypeDarkColor} from '../../types';
+import {Action, Effect, Stats } from '../../types/types';
+import { DamageTypeColor, DamageTypeDarkColor } from '../../types/enums';
 
 import { getAtkBonus }  from '../../services/charCalc';
 import { cap, effectDamageString, effectDmgDesc, effectDurationString } from '../../services/detailStrings';

@@ -1,6 +1,6 @@
 import './wallTool.css';
 
-import { ToolType } from '../../uiTypes';
+import { ToolType } from '../../types/uiTypes';
 
 interface WallToolInput {
     toolIsActive: boolean;

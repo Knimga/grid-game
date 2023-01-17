@@ -1,5 +1,6 @@
-import { ActionResult,  CharType, GameChar } from "../types";
-import { TurnLog } from '../uiTypes';
+import { ActionResult, GameChar } from "../types/types";
+import { CharType } from "../types/enums";
+import { TurnLog } from '../types/uiTypes';
 
 import { effectTargetStatString } from './detailStrings';
 

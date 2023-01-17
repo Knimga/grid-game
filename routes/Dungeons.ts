@@ -2,7 +2,7 @@ import express from 'express';
 
 import DungeonModel from '../models/Dungeons.model';
 
-import { Dungeon } from '../grid-game/src/types';
+import { Dungeon } from '../grid-game/src/types/types';
 import { dungeonToGameDungeon } from './gameData';
 
 const router = express.Router();

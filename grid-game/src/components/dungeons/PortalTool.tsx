@@ -1,6 +1,6 @@
 import './dungeonPane.css';
 
-import { ToolType } from '../../uiTypes';
+import { ToolType } from '../../types/uiTypes';
 
 import { GiMagicPortal } from 'react-icons/gi';
 

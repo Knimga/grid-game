@@ -11,8 +11,9 @@ import AttrFocusSelector from './AttrFocusSelector';
 import ActionPane from '../shared/ActionPane';
 import ArmorPane from '../shared/ArmorPane';
 
-import { Class, ClassRole, Attributes, AttributeFocus, AttributeEnum, Action, Armor } from '../../types';
-import { InputOption } from '../../uiTypes';
+import { Class, Attributes, AttributeFocus, Action, Armor } from '../../types/types';
+import { ClassRole, AttributeEnum } from '../../types/enums';
+import { InputOption } from '../../types/uiTypes';
 
 import {makeInputOptions, cap} from '../../services/detailStrings';
 

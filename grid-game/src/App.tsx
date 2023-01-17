@@ -60,9 +60,9 @@ function App() {
           <Tab label="Game" {...a11yProps(0)} />
           <Tab label="Dungeons" {...a11yProps(1)} />
           <Tab label="Characters" {...a11yProps(2)} />
-          <Tab label="Classes" {...a11yProps(3)} />
-          <Tab label="Actions" {...a11yProps(4)} />
-          <Tab label="Parties" {...a11yProps(5)} />
+          <Tab label="Parties" {...a11yProps(3)} />
+          <Tab label="Classes" {...a11yProps(4)} />
+          <Tab label="Actions" {...a11yProps(5)} />
         </Tabs>
       </Box>
       <TabPanel value={value} index={0}>
@@ -75,14 +75,15 @@ function App() {
         <CharactersTab />
       </TabPanel>
       <TabPanel value={value} index={3}>
-        <ClassTab />
-      </TabPanel>
-      <TabPanel value={value} index={4}>
-        <ActionsTab />
-      </TabPanel>
-      <TabPanel value={value} index={5}>
         <PartiesTab />
       </TabPanel>
+      <TabPanel value={value} index={4}>
+        <ClassTab />
+      </TabPanel>
+      <TabPanel value={value} index={5}>
+        <ActionsTab />
+      </TabPanel>
+      
     </Box>
   );
 }

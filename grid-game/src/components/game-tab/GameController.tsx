@@ -12,8 +12,9 @@ import { getSpawningIndices } from '../../services/boards';
 import { setCharVisibility } from '../../services/los';
 import { rollInitiative } from '../../services/roller';
 
-import { DungeonSelection } from '../../uiTypes';
-import { GameDungeon, Party, GameBoard, GameChar } from '../../types';
+import { DungeonSelection } from '../../types/uiTypes';
+import { GameDungeon, Party, GameBoard, GameChar, Door } from '../../types/types';
+import { CharType } from '../../types/enums';
 
 export default function GameController() {
     const [parties, setParties] = useState<Party[]>([]);
@@ -37,6 +38,15 @@ export default function GameController() {
             .catch((err) => console.log(err));
     },[]);
 
+    function selectDungeon(_id: string): void {
+        const dungeonSelection: DungeonSelection | undefined = dungeonSelections.find(d => d._id === _id);
+        if(dungeonSelection) setSelectedDungeonId(_id);
+    }
+
+    function startGame(): void {
+        if(selectedPartyId && selectedDungeonId) initiateGame(selectedPartyId, selectedDungeonId, 'portal')
+    }
+
     async function initiateGame(partyId: string, dungeonId: string, entryId: string) {
         const partyCharsRes = await fetch(urls.localRoot + urls.parties.partyCharsById(partyId));
         const gameDungeonRes = await fetch(urls.localRoot + urls.dungeons.getGameDungeonById(dungeonId));
@@ -49,46 +59,69 @@ export default function GameController() {
         setBoard(gameDungeon.boards[0]);
     }
 
-    function populateBoard(board: GameBoard, entryPointName: string, currentParty: GameChar[]): GameBoard {
+    function populateBoard(board: GameBoard, entryPointId: string, party: GameChar[]): GameBoard {
         const newBoard: GameBoard = {...board};
         let spawnIndex: number = 0;
 
-        if(entryPointName === 'portal' && board.portal) {
+        if(entryPointId === 'portal' && board.portal) {
             spawnIndex = board.portal
         } else {
-            spawnIndex = board.doors.find(d => d.name[2] === entryPointName)?.position || 0;
+            spawnIndex = board.doors.find(d => d.id === entryPointId)?.position || 0;
         }
 
-        const spawnIndices: number[] = getSpawningIndices(newBoard, spawnIndex, currentParty.length);
+        const spawnIndices: number[] = getSpawningIndices(newBoard, spawnIndex, party.length);
 
         for (let i = 0; i < spawnIndices.length; i++) {
-            const positionedChar: GameChar = currentParty[i];
+            const positionedChar: GameChar = party[i];
             positionedChar.game.positionIndex = spawnIndices[i];
             newBoard.chars.push(positionedChar);
         }
 
+        newBoard.chars = resetCharGameData(newBoard.chars);
         newBoard.chars = setCharVisibility(newBoard);
         newBoard.chars = rollInitiative(newBoard.chars);
 
         return newBoard;  
     }
 
-    function selectDungeon(_id: string): void {
-        const dungeonSelection: DungeonSelection | undefined = dungeonSelections.find(d => d._id === _id);
-        if(dungeonSelection) setSelectedDungeonId(_id);
-    }
-
-    function startGame(): void {
-        if(selectedPartyId && selectedDungeonId) {
-            initiateGame(selectedPartyId, selectedDungeonId, 'portal')
+    function resetCharGameData(chars: GameChar[]): GameChar[] {
+        for (let i = 0; i < chars.length; i++) {
+            chars[i].game.isTurn = false;
+            chars[i].game.round.actionTaken = false;
+            chars[i].game.round.movementTaken = 0;
         }
+        return chars;
+    }
+    
+    function enterDoor(doorUsed: Door, previousBoard: GameBoard): void {
+        if(currentDungeon) {
+            const party: GameChar[] = previousBoard.chars.filter(c => c.type === CharType.player);
+            const currentBoard: GameBoard | undefined = currentDungeon.boards
+                .find(b => b.id === previousBoard.id);
+            const nextBoard: GameBoard | undefined = currentDungeon.boards
+                .find(b => b.id === doorUsed.leadsTo.boardId);
+
+            if(currentBoard && nextBoard) {
+                const currentBoardIndex: number = currentDungeon.boards.indexOf(currentBoard);
+                const nextBoardIndex: number = currentDungeon.boards.indexOf(nextBoard);
+
+                previousBoard.chars = previousBoard.chars.filter(c => c.type !== CharType.player);
+                currentDungeon.boards[currentBoardIndex] = previousBoard;
+
+                currentDungeon.boards[nextBoardIndex] = populateBoard(
+                    currentDungeon.boards[nextBoardIndex], doorUsed.leadsTo.doorId, party);
+                
+                setCurrentDungeon(currentDungeon);
+                setBoard(currentDungeon.boards[nextBoardIndex]);
+            } else {console.log('omg')}
+        }       
     }
 
     function log(): void {
         console.log(`partyId: ${selectedPartyId}`);
         console.log(`boardId: ${selectedDungeonId}`);
     }
-    
+
     function gameSetup(): JSX.Element {
         return <div className="game-setup-container">
             <select onChange={(e) => setSelectedPartyId(e.target.options[e.target.selectedIndex].value)}>
@@ -112,12 +145,17 @@ export default function GameController() {
 
   return (
     <div className="gametab-container">
-        {board && currentDungeon ? <GameTab 
-            startingBoard={board} 
-            colorScheme={{
-                wall: currentDungeon.wallColor, 
-                floor: currentDungeon.floorColor
-            }}/> : gameSetup()}
+        {board && currentDungeon ? 
+            <GameTab 
+                startingBoard={board} 
+                colorScheme={{
+                    wall: currentDungeon.wallColor, 
+                    floor: currentDungeon.floorColor
+                }}
+                enterDoor={enterDoor}
+                key={board.id}
+            /> 
+        : gameSetup()}
     </div>
   )
 }

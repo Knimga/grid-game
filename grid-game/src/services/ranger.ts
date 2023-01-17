@@ -1,5 +1,5 @@
-import {GameBoard, Board, Action} from '../types';
-import {RangeType} from '../uiTypes';
+import {GameBoard, Board, Action} from '../types/types';
+import {RangeType} from '../types/uiTypes';
 
 type Coord = [number, number];
 
@@ -29,7 +29,6 @@ export function getInRangeIndices(
 }
 
 export function getSpawnArea(board: GameBoard | Board, startIndex: number, charPositions: number[]): number[] {
-    
     return getSeenIndices(board, startIndex, 2)
         .filter(index => !charPositions.includes(index) && index !== startIndex)
 }

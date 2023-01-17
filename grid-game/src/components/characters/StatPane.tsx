@@ -1,6 +1,9 @@
 import './statPane.css';
 
-import {Stats} from '../../types';
+import DmgTypeStatPane from '../shared/DmgTypeStatPane';
+
+import { Stats } from '../../types/types';
+import { DamageType } from '../../types/enums';
 
 interface StatPaneInput {stats: Stats}
 
@@ -48,88 +51,18 @@ export default function StatPane({stats}: StatPaneInput) {
             </div>
         </div>
         <div className="atk-bonus-list">
-            <div className="stat-pane-atk-bonus-pane">
-                <div className="atk-bonus-label">Melee</div>
-                <div className="atk-bonus-values">
-                    <span>{`Attack: ${stats.dmgTypes.melee.atk}`}</span>
-                    <span>{`Damage: ${stats.dmgTypes.melee.dmg}`}</span>
-                    <span>{`DR: ${stats.dmgTypes.melee.dr}`}</span>
-                </div>
-            </div>
-            <div className="stat-pane-atk-bonus-pane">
-                <div className="atk-bonus-label">Ranged</div>
-                <div className="atk-bonus-values">
-                    <span>{`Attack: ${stats.dmgTypes.ranged.atk}`}</span>
-                    <span>{`Damage: ${stats.dmgTypes.ranged.dmg}`}</span>
-                    <span>{`DR: ${stats.dmgTypes.ranged.dr}`}</span>
-                </div>
-            </div>
-            <div className="stat-pane-atk-bonus-pane">
-                <div className="atk-bonus-label">Magic</div>
-                <div className="atk-bonus-values">
-                    <span>{`Attack: ${stats.dmgTypes.magic.atk}`}</span>
-                    <span>{`Damage: ${stats.dmgTypes.magic.dmg}`}</span>
-                    <span>{`DR: ${stats.dmgTypes.magic.dr}`}</span>
-                </div>
-            </div>
+            <DmgTypeStatPane dmgType={DamageType.melee} baseBonuses={stats.dmgTypes.melee}/>
+            <DmgTypeStatPane dmgType={DamageType.ranged} baseBonuses={stats.dmgTypes.ranged}/>
+            <DmgTypeStatPane dmgType={DamageType.magic} baseBonuses={stats.dmgTypes.magic}/>
         </div>
         <div className="ele-bonus-list">
-            <div className="ele-bonus-pane">
-                <div className="ele-bonus-label fire">Fire</div>
-                <div className="ele-bonus-values">
-                    <span>{`Attack: ${stats.dmgTypes.fire.atk}`}</span>
-                    <span>{`Damage: ${stats.dmgTypes.fire.dmg}`}</span>
-                    <span>{`DR: ${stats.dmgTypes.fire.dr}`}</span>
-                </div>
-            </div>
-            <div className="ele-bonus-pane">
-                <div className="ele-bonus-label wind">Wind</div>
-                <div className="ele-bonus-values">
-                    <span>{`Attack: ${stats.dmgTypes.wind.atk}`}</span>
-                    <span>{`Damage: ${stats.dmgTypes.wind.dmg}`}</span>
-                    <span>{`DR: ${stats.dmgTypes.wind.dr}`}</span>
-                </div>
-            </div>
-            <div className="ele-bonus-pane">
-                <div className="ele-bonus-label earth">Earth</div>
-                <div className="ele-bonus-values">
-                    <span>{`Attack: ${stats.dmgTypes.earth.atk}`}</span>
-                    <span>{`Damage: ${stats.dmgTypes.earth.dmg}`}</span>
-                    <span>{`DR: ${stats.dmgTypes.earth.dr}`}</span>
-                </div>
-            </div>
-            <div className="ele-bonus-pane">
-                <div className="ele-bonus-label shadow">Shadow</div>
-                <div className="ele-bonus-values">
-                    <span>{`Attack: ${stats.dmgTypes.shadow.atk}`}</span>
-                    <span>{`Damage: ${stats.dmgTypes.shadow.dmg}`}</span>
-                    <span>{`DR: ${stats.dmgTypes.shadow.dr}`}</span>
-                </div>
-            </div>
-            <div className="ele-bonus-pane">
-                <div className="ele-bonus-label water">Water</div>
-                <div className="ele-bonus-values">
-                    <span>{`Attack: ${stats.dmgTypes.water.atk}`}</span>
-                    <span>{`Damage: ${stats.dmgTypes.water.dmg}`}</span>
-                    <span>{`DR: ${stats.dmgTypes.water.dr}`}</span>
-                </div>
-            </div>
-            <div className="ele-bonus-pane">
-                <div className="ele-bonus-label holy">Holy</div>
-                <div className="ele-bonus-values">
-                    <span>{`Attack: ${stats.dmgTypes.holy.atk}`}</span>
-                    <span>{`Damage: ${stats.dmgTypes.holy.dmg}`}</span>
-                    <span>{`DR: ${stats.dmgTypes.holy.dr}`}</span>
-                </div>
-            </div>
-            <div className="ele-bonus-pane">
-                <div className="ele-bonus-label poison">Poison</div>
-                <div className="ele-bonus-values">
-                    <span>{`Attack: ${stats.dmgTypes.poison.atk}`}</span>
-                    <span>{`Damage: ${stats.dmgTypes.poison.dmg}`}</span>
-                    <span>{`DR: ${stats.dmgTypes.poison.dr}`}</span>
-                </div>
-            </div>
+            <DmgTypeStatPane dmgType={DamageType.fire} baseBonuses={stats.dmgTypes.fire}/>
+            <DmgTypeStatPane dmgType={DamageType.wind} baseBonuses={stats.dmgTypes.wind}/>
+            <DmgTypeStatPane dmgType={DamageType.earth} baseBonuses={stats.dmgTypes.earth}/>
+            <DmgTypeStatPane dmgType={DamageType.shadow} baseBonuses={stats.dmgTypes.shadow}/>
+            <DmgTypeStatPane dmgType={DamageType.water} baseBonuses={stats.dmgTypes.water}/>
+            <DmgTypeStatPane dmgType={DamageType.holy} baseBonuses={stats.dmgTypes.holy}/>
+            <DmgTypeStatPane dmgType={DamageType.poison} baseBonuses={stats.dmgTypes.poison}/>
         </div>
     </div>
   )

@@ -1,5 +1,6 @@
-import { AiPlan, GameBoard, GameChar, CharType, ClassRole, Action } from "../types";
-import { MetersEntry } from "../uiTypes";
+import { AiPlan, GameBoard, GameChar, Action } from "../types/types";
+import { CharType, ClassRole } from "../types/enums";
+import { MetersEntry } from "../types/uiTypes";
 
 import { canSeePlayers, visiblePlayers } from "./los";
 import { distance } from "./ranger";

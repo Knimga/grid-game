@@ -2,7 +2,7 @@ import { FaCircle, FaSave, FaTrashAlt } from 'react-icons/fa';
 
 import './partiesTab.css';
 
-import {Party} from '../../types';
+import {Party} from '../../types/types';
 
 interface PartyPaneInput {
     party: Party;

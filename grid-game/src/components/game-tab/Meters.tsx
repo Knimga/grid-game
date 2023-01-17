@@ -2,7 +2,7 @@ import './meters.css';
 
 import {useState} from 'react';
 
-import { MetersEntry, MeterTypes } from '../../uiTypes';
+import { MetersEntry, MeterTypes } from '../../types/uiTypes';
 
 interface MetersInput {meters: MetersEntry[]}
 

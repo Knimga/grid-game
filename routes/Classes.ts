@@ -1,6 +1,6 @@
 import express from 'express';
 
-import { Class } from '../grid-game/src/types';
+import { Class } from '../grid-game/src/types/types';
 import { DbClass } from '../dbTypes';
 
 import ClassesModel from '../models/Classes.model';

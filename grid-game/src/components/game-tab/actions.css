@@ -1,5 +1,5 @@
 .actions {
-    width: 90%; height: 50%;
+    width: 90%; height: 55%;
     margin: 2%;
     display: flex; flex-direction: column;
     align-items: center;
@@ -23,13 +23,40 @@
 }
 .action-container > strong {font-size: 90%;}
 
-.enemy-turn-text {
-    justify-self: center; font-style: italic;
+.char-name-bar {
+    width: 100%;
+    display: flex; justify-content: space-around;
+    align-items: center;
+    margin-bottom: 3%;
+}
+.char-name-bar > strong {font-size: 110%;}
+
+.char-bars-container {
+    width: 100%; height: 11%;
+    display: flex; flex-direction: column;
+    align-items: center;
+}
+.char-bars-container > small {font-size: 70%;}
+
+.char-stats-hp-bar-container, .char-stats-mp-bar-container {
+    width: 100%; 
+    display: flex;
+    background-color: #202020;
+    border-radius: 10px;
+}
+.char-stats-hp-bar-container {height: 10px;}
+.char-stats-mp-bar-container {height: 5px;}
+
+.char-stats-hp-bar, .char-stats-mp-bar {
+    height: 100%;
+    display: flex;
+    border-radius: 10px;
 }
 
-.dash-checkbox-container {
-    display: flex; justify-content: center; align-items: center;
-}
+.char-stats-hp-bar {background-color: darkred;}
+.char-stats-mp-bar {background-color: dodgerblue;}
+
+.enemy-turn-text {justify-self: center; font-style: italic;}
 
 .action-type-toggle-button-row {
     display: flex; justify-content: space-around; align-items: center;
@@ -37,17 +64,19 @@
 }
 
 .action-type-button {
-    width: 40%; height: 17px;
+    width: 32%; height: 17px;
     display: flex; justify-content: center; align-items: center;
     background-color: #404040; color: lightgray;
     font-size: 85%;
     border-radius: 5px;
 }
-.action-type-button:hover {
-    color: lightblue; outline: 0.5px solid lightgray;
-}
+.action-type-button:hover {color: lightblue; outline: 0.5px solid lightgray;}
 
-.action-type-selected {color: lightblue; font-weight: bold; outline: 0.5px solid lightblue;}
+.action-type-selected {
+    color: lightblue; 
+    font-weight: bold; 
+    outline: 0.5px solid lightblue;
+}
 
 .action-list {
     width: 100%; height: 100%;
@@ -56,44 +85,8 @@
     overflow-y: auto;
 }
 
-.game-power-pane {
-    width: 90%; 
-    display: flex; justify-content: space-between;
-    margin: 1% 0; padding: 0 3%;
-    font-size: 90%;
-    border-radius: 5px;
-}
-
-.game-power-pane {height: 85px;}
-
-.game-power-pane:hover {background-color: #303030; color: lightblue;}
-.selected-attack  {background-color: #303030; color: lightblue;}
-
-.action-label, .attack-details {
-    display: flex; flex-direction: column;
-    align-items: left; justify-content: center;
-}
-
-.attack-details {font-size: 95%;}
-.attack-details > span {white-space: nowrap;}
-
-.power-main-details {
-    display: flex; flex-direction: column;
-    font-size: 90%;
-}
-
-.name {font-weight: bold;}
-.type {font-style: italic; color: gray;}
+.flex-row-centered {width: 100%; display: flex; justify-content: center; align-items: center;}
 
 .disabled {color: #505050;}
 
-.not-dashing {color: gray;}
-.is-dashing {color: lightgray; font-style: italic;}
-
-.dash-hover:hover {color: white;}
-
-.fire {color: crimson;}
-.wind {color: lightblue;}
-.earth {color: darkgoldenrod;}
-.shadow {color: purple;}
-.water {color: dodgerblue;}
+::-webkit-scrollbar {width: 6px;}

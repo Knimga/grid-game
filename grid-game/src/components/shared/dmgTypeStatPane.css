@@ -1,0 +1,21 @@
+.dmg-type-stat-pane {
+    width: 110px;
+    display: flex;
+    outline: 0.5px solid gray;
+    border-radius: 10px;
+    font-size: 75%;
+}
+
+.dmg-type-bonus-label {
+    width: 45%;
+    display: flex; 
+    justify-content: center; align-items: center;
+}
+
+.dmg-type-bonus-values {
+    width: 55%;
+    display: flex; flex-direction: column;
+    justify-content: space-around; align-items: flex-start;
+    background-color: #303030;
+    padding-left: 5%;
+}

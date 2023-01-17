@@ -3,7 +3,7 @@ import express from 'express';
 import { createCharacters, createOneCharacter, packageCharacter } from './gameData';
 
 import CharacterModel from '../models/Characters.model';
-import { Character, BoardChar } from '../grid-game/src/types';
+import { Character, BoardChar } from '../grid-game/src/types/types';
 import { DbCharacter } from '../dbTypes';
 
 const router = express.Router();

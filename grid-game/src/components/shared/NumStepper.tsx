@@ -1,6 +1,6 @@
 import './numStepper.css';
 
-import {Attributes} from '../../types';
+import {Attributes} from '../../types/types';
 
 interface NumStepperInput {
     number: number;

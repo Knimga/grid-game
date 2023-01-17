@@ -6,7 +6,7 @@ import Dropdown from '../shared/Dropdown';
 
 import {makeInputOptionsWithIds} from '../../services/detailStrings';
 
-import {BoardCharSelection, ToolType, InputOption} from '../../uiTypes';
+import {BoardCharSelection, ToolType, InputOption} from '../../types/uiTypes';
 
 interface CharToolInput {
     toolIsActive: boolean;

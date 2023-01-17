@@ -2,7 +2,8 @@ import './attrFocusSelector.css';
 
 import { useState } from 'react';
 
-import { AttributeFocus, AttributeEnum } from "../../types";
+import { AttributeFocus } from "../../types/types";
+import { AttributeEnum } from '../../types/enums';
 
 import {cap} from '../../services/detailStrings';
 

@@ -1,4 +1,5 @@
-import {Attributes, CharType, AttributeFocus, ClassRole, BoardChar} from './grid-game/src/types';
+import {Attributes, AttributeFocus } from './grid-game/src/types/types';
+import { CharType, ClassRole } from './grid-game/src/types/enums';
 
 export interface DbClass {
     _id?: string;
@@ -23,13 +24,4 @@ export interface DbCharacter {
 export interface DbParty {
     _id?: string;
     members: string[];
-}
-
-interface DbBoard {
-    _id?: string;
-    name: string;
-    gridWidth: number;
-    gridHeight: number;
-    walls: number[];
-    chars: BoardChar[];
 }

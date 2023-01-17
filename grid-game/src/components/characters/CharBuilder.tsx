@@ -15,8 +15,9 @@ import ActionPane from '../shared/ActionPane';
 import { statCalc } from '../../services/charCalc';
 import { makeInputOptions } from '../../services/detailStrings';
 
-import {Character, Class, Attributes, CharType, Action} from '../../types';
-import {InputOption} from '../../uiTypes';
+import {Character, Class, Attributes, Action} from '../../types/types';
+import { CharType } from '../../types/enums';
+import {InputOption} from '../../types/uiTypes';
 
 interface CharBuilderInput {
     char: Character;

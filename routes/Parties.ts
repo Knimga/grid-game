@@ -5,7 +5,7 @@ import { dbPartiesToParties, dbCharsToGameChars, createCharacters, dbPartyToPart
 import PartiesModel from '../models/Parties.model';
 import ClassesModel from '../models/Classes.model';
 
-import { Party, PartyMember, CharType } from '../grid-game/src/types';
+import { Party, PartyMember, CharType } from '../grid-game/src/types/types';
 import { DbParty } from '../dbTypes';
 import CharactersModel from '../models/Characters.model';
 

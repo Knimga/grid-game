@@ -1,5 +1,6 @@
-import { GameBoard, GameChar, CharType, Action, ClassRole, ActiveEffect } from "../types";
-import { MetersEntry } from "../uiTypes";
+import { GameBoard, GameChar, Action, ActiveEffect } from "../types/types";
+import {CharType, ClassRole} from '../types/enums';
+import { MetersEntry } from "../types/uiTypes";
 import { pathfinder } from "./aiMove";
 import { effectAlreadyApplied, getTargetTypes } from "./actions";
 import { distance, getInRangeIndices } from "./ranger";
@@ -73,12 +74,12 @@ export function selectTarget(
 ): GameChar {
     let targetPlayerId: string;
 
-    const visiblePlayerIds: string[] = board.chars.filter(
-        char => char.type === 'player' && char.game.isVisible
+    const visibleLivingPlayerIds: string[] = board.chars.filter(
+        char => char.type === 'player' && char.game.isVisible && char.game.stats.hp > 0
     ).map(char => char.game.gameId);
 
     const playerMeters: MetersEntry[] = meters.filter(
-        meter => meter.charType === 'player' && visiblePlayerIds.includes(meter.gameId)
+        meter => meter.charType === 'player' && visibleLivingPlayerIds.includes(meter.gameId)
     );
 
     if(playerMeters.length === 1) {
@@ -106,24 +107,12 @@ export function selectTarget(
 
             targetPlayerId = shortestDistance.game.gameId;
         } else {
-            //let highestThreat: MetersEntry = playerMeters[0];
-            //players whose threat amount is >= the 85th percentile of all threat
             const highestThreatValue: number = Math.max(...playerMeters.map(m => m.meters.threat));
-
             const threateningPlayers: MetersEntry[] = playerMeters.filter(
-                player => player.meters.threat / highestThreatValue >= 0.85
-            );
-
+                player => player.meters.threat / highestThreatValue >= 0.85);
             const randIndex: number = rand(threateningPlayers.length) - 1;
 
             targetPlayerId = threateningPlayers[randIndex].gameId;
-
-            /*for (let i = 1; i < playerMeters.length; i++) {
-                if(playerMeters[i].meters.threat > highestThreat.meters.threat) {
-                    highestThreat = playerMeters[i]
-                }
-            }
-            targetPlayerId = highestThreat.gameId;*/
         }
     }   
 
@@ -190,15 +179,19 @@ export function whoNeedsHealing(board: GameBoard): GameChar[] {
 
 //interface AoeLinePlacement {moveToIndex: number, castAtIndex: number}
 
-export function findBestBurstPlacement(board: GameBoard, action: Action, casterGameId: string, targetCharIndex: number, adjMatrix: number[][]): number {
+export function findBestBurstPlacement(
+    board: GameBoard, action: Action, casterGameId: string, targetCharIndex: number, adjMatrix: number[][]
+): number {
     if(action.burstRadius !== undefined) { //this can return indices with no adjIndices! This can return indices with chars on them!
-        const playerIndices: number[] = board.chars.filter(char => char.type === 'player').map(char => char.game.positionIndex);
+        const playerIndices: number[] = board.chars.filter(char => char.type === 'player')
+            .map(char => char.game.positionIndex);
         let indicesWhereBurstHitsTarget: number[] = getInRangeIndices(board, targetCharIndex, action.burstRadius);
         
         if(action.range === 0) {
             const otherCharIndices: number[] = board.chars.filter(char => char.game.gameId !== casterGameId)
                 .map(char => char.game.positionIndex);
-            indicesWhereBurstHitsTarget = indicesWhereBurstHitsTarget.filter(index => !otherCharIndices.includes(index));
+            indicesWhereBurstHitsTarget = indicesWhereBurstHitsTarget
+                .filter(index => !otherCharIndices.includes(index));
         }
 
         let burstPlacements: {targetIndex: number, burstIndices: number[]}[] = [];

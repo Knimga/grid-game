@@ -1,5 +1,5 @@
 import '../game-tab/board.css';
-import './dungeonPane.css'; //replace w/ dungeonPane.css
+import './dungeonPane.css';
 
 import { GiMagicPortal } from 'react-icons/gi';
 import { GiWoodenDoor } from 'react-icons/gi';
@@ -8,8 +8,8 @@ import {createEditorGrid, getBoardStyles} from '../../services/boards';
 import { getSpawnArea } from '../../services/ranger';
 import { randId } from '../../services/detailStrings';
 
-import {Board, DoorName} from '../../types';
-import { EditorSquare, Style, TerrainType } from '../../uiTypes';
+import {Board, DoorName} from '../../types/types';
+import { EditorSquare, Style, TerrainType } from '../../types/uiTypes';
 
 interface BoardEditInput {
     board: Board;
@@ -45,7 +45,11 @@ export default function BoardEdit({board, wallColor, floorColor, clickSquare}: B
                     const isDoor: boolean = doorPositions.includes(index);
                     const doorName: string = isDoor ? getDoorName(index) : '';
                     const terrainColor: string = square.type === TerrainType.wall ? wallColor : floorColor;
-                    const thisSquareStyle: Style = {...boardStyles.square, backgroundColor: terrainColor}
+                    const thisSquareStyle: Style = {
+                        ...boardStyles.square, 
+                        backgroundColor: terrainColor,
+                        outline: '0.5px solid rgba(128, 128, 128, .75)'
+                    }
 
                     if(spawnAreas.includes(index)) thisSquareStyle.filter = 'brightness(1.5)';
                     if(square.char) thisSquareStyle.backgroundColor = square.char.color;

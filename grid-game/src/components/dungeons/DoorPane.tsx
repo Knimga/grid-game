@@ -5,8 +5,8 @@ import Dropdown from '../shared/Dropdown';
 
 import { doorNameString, doorNameFormat } from '../../services/boards';
 
-import { Door } from "../../types";
-import { InputOption, DoorToBoardMap } from '../../uiTypes';
+import { Door } from "../../types/types";
+import { InputOption, DoorToBoardMap } from '../../types/uiTypes';
 
 interface DoorPaneInput {
     door: Door;

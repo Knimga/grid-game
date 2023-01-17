@@ -1,5 +1,6 @@
-import { EffectTargetStat, GameChar } from "../types";
-import { MetersEntry } from "../uiTypes";
+import { ActionResult, GameChar } from "../types/types";
+import { EffectTargetStat } from "../types/enums";
+import { MetersEntry } from "../types/uiTypes";
 
 export function dmgDoneAndTaken(
     meters: MetersEntry[], attackerId: string, targetId: string, dmgDealt: number, targetStat: EffectTargetStat
@@ -19,7 +20,7 @@ export function dmgDoneAndTaken(
 }
 
 export function healingDone(
-    meters: MetersEntry[], healerGameId: string, healAmount: number, targetStat: EffectTargetStat
+    meters: MetersEntry[], healerGameId: string, healAmount: number
 ): MetersEntry[] {
     const newMeters: MetersEntry[] = meters;
     const healerEntry: MetersEntry | undefined = newMeters.find(entry => entry.gameId === healerGameId);
@@ -36,7 +37,7 @@ export function statEffectsDone(meters: MetersEntry[], casterGameId: string, amo
     const casterEntry: MetersEntry | undefined = newMeters.find(entry => entry.gameId === casterGameId);
     if(casterEntry) {
         const meterIndex: number = newMeters.indexOf(casterEntry);
-        newMeters[meterIndex].meters.healingDone += Math.floor(amount / 2);
+        newMeters[meterIndex].meters.statEffectsDone += Math.abs(amount);
         newMeters[meterIndex].meters.threat = threatCalc(newMeters[meterIndex]);
     } else {console.log('could not find meters entry')}
     return newMeters;
@@ -53,7 +54,32 @@ export function resetThreat(meters: MetersEntry[], charGameId: string): MetersEn
 }
 
 function threatCalc(meterEntry: MetersEntry): number {
-    return fl(meterEntry.meters.dmgDone * 0.4) + fl(meterEntry.meters.healingDone * 0.6)
+    let baseThreat: number = fl(meterEntry.meters.dmgDone * 0.4) 
+        + fl(meterEntry.meters.healingDone * 0.6) + fl(meterEntry.meters.statEffectsDone * 0.3);
+    if(baseThreat < 1) baseThreat = 1;
+    return fl(baseThreat * meterEntry.charThreatMultiplier);
+}
+
+export function updateMeters(
+    actionResult: ActionResult, meters: MetersEntry[], actorGameId: string, targetGameId: string
+): MetersEntry[] {
+    for (let i = 0; i < actionResult.effectResults.length; i++) {
+        const thisEffect = actionResult.effectResults[i];                         
+        
+        switch(thisEffect.effect.type) {
+            case 'healing': meters = healingDone(meters, actorGameId, thisEffect.effectiveAmount); 
+                break;
+            case 'damage': meters = dmgDoneAndTaken(meters, actorGameId, targetGameId, 
+                thisEffect.effectiveAmount, thisEffect.effect.targetStat); 
+                break;
+            case 'buff': meters = statEffectsDone(meters, actorGameId, thisEffect.effectiveAmount); 
+                break;
+            case 'debuff': meters = statEffectsDone(meters, actorGameId, thisEffect.effectiveAmount); 
+                break;
+            default: break;
+        }
+    }
+    return meters;
 }
 
 export function createMeters(chars: GameChar[]): MetersEntry[] {
@@ -63,11 +89,13 @@ export function createMeters(chars: GameChar[]): MetersEntry[] {
             gameId: char.game.gameId,
             charName: char.name,
             charType: char.type,
+            charThreatMultiplier: char.stats.threatMuliplier,
             color: char.color,
             meters: {
                 dmgDone: 0,
                 dmgTaken: 0,
                 healingDone: 0,
+                statEffectsDone: 0,
                 threat: 0
             }
         }

@@ -10,7 +10,7 @@ import PartyMemberPane from './PartyMemberPane';
 
 import {useState, useEffect} from 'react';
 
-import { Party, PartyMember } from '../../types';
+import { Party, PartyMember } from '../../types/types';
 
 export default function PartiesTab() {
     const [parties, setParties] = useState<Party[]>([]);

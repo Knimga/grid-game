@@ -1,14 +1,15 @@
 .game-setup-container {
-    width: 75%; height: 15%;
+    width: 1500px; height: 15%;
     justify-self: center; align-self: center;
-    display: flex; justify-content: space-around;
+    display: flex;
     align-items: center;
 }
+.game-setup-container > * {margin: 0 2%;}
 
 .middle {display: flex; width: 100%; height: 100%;}
 
 .right-side-panel, .left-side-panel {
-    width: 325px; height: 95%;
+    width: 325px; height: 100%;
     display: flex; flex-direction: column;
     justify-content: space-around; align-items: center;
     

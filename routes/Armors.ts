@@ -1,6 +1,6 @@
 import express from 'express';
 
-import { Armor } from '../grid-game/src/types';
+import { Armor } from '../grid-game/src/types/types';
 
 import ArmorsModel from '../models/Armor.model';
 

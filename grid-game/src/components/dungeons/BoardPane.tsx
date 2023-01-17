@@ -2,7 +2,7 @@ import './boardPane.css';
 
 import MiniBoardMap from './MiniBoardMap';
 
-import { Board } from "../../types"
+import { Board } from "../../types/types"
 
 interface BoardPaneInput {
     board: Board;

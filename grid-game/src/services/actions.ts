@@ -3,12 +3,10 @@ import { rollDie, rollD20 } from './roller';
 import { dmgDoneAndTaken, healingDone } from './meters';
 import { getAtkBonus, isElemental, getBonus } from './charCalc';
 
-import { 
-    Roll, RollResult, GameChar, Action, ActionResult, Effect, EffectTargetStat, 
-    ActiveEffect, EffectType, CharType, Intent, DamageType, TargetingType, Stats 
-} from '../types';
+import { Roll, RollResult, GameChar, Action, ActionResult, Effect, ActiveEffect, Stats } from '../types/types';
+import { EffectTargetStat, EffectType, CharType, Intent, DamageType, TargetingType } from '../types/enums';
 
-import { MetersEntry } from '../uiTypes';
+import { MetersEntry } from '../types/uiTypes';
 
 export function resolveAction(actor: GameChar, targets: GameChar[], action: Action): ActionResult[] {
     const effects: Effect[] = [...action.effects];
@@ -136,7 +134,9 @@ function applyDamage(attacker: GameChar, result: ActionResult, effect: Effect, i
 function applyBuffOrDebuff(caster: GameChar, result: ActionResult, effect: Effect, isWeapon?: boolean): ActionResult {
     const newResult: ActionResult = result;
 
-    if(!effectAlreadyApplied(result.newChar.game.activeEffects, caster.game.gameId, result.action.name)) {
+    if(!effectAlreadyApplied(
+        result.newChar.game.activeEffects, caster.game.gameId, result.action.name, effect.targetStat)
+    ) {
         const directionMod: number = effect.type === EffectType.buff ? 1 : -1;
         const bonus: number = getBonus(caster.game.stats, effect, isWeapon ?? false, 1);
 
@@ -171,7 +171,9 @@ function applyBuffOrDebuff(caster: GameChar, result: ActionResult, effect: Effec
 function applyHotOrDot(caster: GameChar, result: ActionResult, effect: Effect): ActionResult {
     const newResult: ActionResult = result;
     
-    if(!effectAlreadyApplied(result.newChar.game.activeEffects, caster.game.gameId, result.action.name)) {
+    if(!effectAlreadyApplied(
+        result.newChar.game.activeEffects, caster.game.gameId, result.action.name, effect.targetStat)
+    ) {
             const newActiveEffect: ActiveEffect = {
             ...effect, 
             effectiveAmount: 0, 
@@ -228,45 +230,49 @@ function dotTick(caster: GameChar, target: GameChar, effect: Effect): number {
 }
 
 function applyStatEffect(targetChar: GameChar, targetStat: EffectTargetStat, effectAmount: number): GameChar {
-    const newChar: GameChar = {...targetChar}
+    const stats: Stats = targetChar.game.stats;
 
     switch(targetStat) {
-        case 'ac': newChar.game.stats.ac += effectAmount; break;
-        case 'mvt': if(newChar.game.stats.mvt + effectAmount > 0) {
-                newChar.game.stats.mvt += effectAmount
-            } else {newChar.game.stats.mvt = 0}
+        case 'ac': stats.ac += effectAmount; break;
+        case 'mac': stats.mac += effectAmount; break;
+        case 'mvt': if(stats.mvt + effectAmount > 0) {
+                stats.mvt += effectAmount
+            } else {stats.mvt = 0}
             break;
         case 'allAtkRolls': 
-            newChar.game.stats.dmgTypes.melee.atk += effectAmount;
-            newChar.game.stats.dmgTypes.ranged.atk += effectAmount;
-            newChar.game.stats.dmgTypes.magic.atk += effectAmount;
+            stats.dmgTypes.melee.atk += effectAmount;
+            stats.dmgTypes.ranged.atk += effectAmount;
+            stats.dmgTypes.magic.atk += effectAmount;
         break;
         case 'allDmgRolls': 
-            newChar.game.stats.dmgTypes.melee.dmg += effectAmount;
-            newChar.game.stats.dmgTypes.ranged.dmg += effectAmount;
-            newChar.game.stats.dmgTypes.magic.dmg += effectAmount;
+            stats.dmgTypes.melee.dmg += effectAmount;
+            stats.dmgTypes.ranged.dmg += effectAmount;
+            stats.dmgTypes.magic.dmg += effectAmount;
         break;
         case 'allDr':
-            newChar.game.stats.dmgTypes.melee.dr += effectAmount;
-            newChar.game.stats.dmgTypes.ranged.dr += effectAmount;
-            newChar.game.stats.dmgTypes.magic.dr += effectAmount;
+            stats.dmgTypes.melee.dr += effectAmount;
+            stats.dmgTypes.ranged.dr += effectAmount;
+            stats.dmgTypes.magic.dr += effectAmount;
         break;
-        case 'meleeAtk': newChar.game.stats.dmgTypes.melee.atk += effectAmount; break;
-        case 'rangedAtk': newChar.game.stats.dmgTypes.ranged.atk += effectAmount; break;
-        case 'magicAtk': newChar.game.stats.dmgTypes.magic.atk += effectAmount; break;
-        case 'meleeDmg': newChar.game.stats.dmgTypes.melee.dmg += effectAmount; break;
-        case 'rangedDmg': newChar.game.stats.dmgTypes.ranged.dmg += effectAmount; break;
-        case 'magicDmg': newChar.game.stats.dmgTypes.magic.dmg += effectAmount; break;
-        case 'meleeDr': newChar.game.stats.dmgTypes.melee.dr += effectAmount; break;
-        case 'rangedDr': newChar.game.stats.dmgTypes.ranged.dr += effectAmount; break;
-        case 'magicDr': newChar.game.stats.dmgTypes.magic.dr += effectAmount; break;
-        case 'bonusHealingDone': newChar.game.stats.bonusHealingDone += effectAmount; break;
-        case 'bonusHealingRcvd': newChar.game.stats.bonusHealingRcvd += effectAmount; break;
-        case 'shadowDmg': newChar.game.stats.dmgTypes.shadow.dmg += effectAmount; break;
+        case 'threatMultiplier': stats.threatMuliplier += effectAmount; break;
+        case 'meleeAtk': stats.dmgTypes.melee.atk += effectAmount; break;
+        case 'rangedAtk': stats.dmgTypes.ranged.atk += effectAmount; break;
+        case 'magicAtk': stats.dmgTypes.magic.atk += effectAmount; break;
+        case 'meleeDmg': stats.dmgTypes.melee.dmg += effectAmount; break;
+        case 'rangedDmg': stats.dmgTypes.ranged.dmg += effectAmount; break;
+        case 'magicDmg': stats.dmgTypes.magic.dmg += effectAmount; break;
+        case 'meleeDr': stats.dmgTypes.melee.dr += effectAmount; break;
+        case 'rangedDr': stats.dmgTypes.ranged.dr += effectAmount; break;
+        case 'magicDr': stats.dmgTypes.magic.dr += effectAmount; break;
+        case 'bonusHealingDone': stats.bonusHealingDone += effectAmount; break;
+        case 'bonusHealingRcvd': stats.bonusHealingRcvd += effectAmount; break;
+        case 'shadowDmg': stats.dmgTypes.shadow.dmg += effectAmount; break;
         default: console.log('no targetStat!');
     }
 
-    return newChar;
+    targetChar.game.stats = stats;
+
+    return targetChar;
 }
 
 export function getTargetTypes(actionIntent: Intent, actorType: CharType): CharType[] {
@@ -306,9 +312,7 @@ export function setNewRound(oldChars: GameChar[], oldMeters: MetersEntry[]): {
                         const totalTick: number = effectiveHealingTick + bonusHealingTick;
                         if(activeEffects[e].targetStat === 'hp') char.game.stats.hp += totalTick;
                         if(activeEffects[e].targetStat === 'mp') char.game.stats.mp += totalTick;
-                        newMeters = healingDone(
-                            newMeters, activeEffects[e].castById, effectiveHealingTick, activeEffects[e].targetStat
-                        );
+                        newMeters = healingDone(newMeters, activeEffects[e].castById, effectiveHealingTick);
                     }
                 } else if(activeEffects[e].type === 'dot') {
                     const castByChar: GameChar | undefined = newChars.find(
@@ -352,9 +356,11 @@ export function setNewRound(oldChars: GameChar[], oldMeters: MetersEntry[]): {
 }
 
 export function effectAlreadyApplied(
-    targetActiveEffects: ActiveEffect[], castById: string, actionName: string
+    targetActiveEffects: ActiveEffect[], castById: string, actionName: string, targetStat?: EffectTargetStat
 ): boolean {
-    return targetActiveEffects.some(ae => ae.castById === castById && ae.actionName === actionName)
+    return targetActiveEffects.some(ae => ae.castById === castById && ae.actionName === actionName 
+        && (targetStat ? ae.targetStat === targetStat : true)
+    )
 }
 
 export function blankAction(): Action {

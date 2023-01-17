@@ -1,7 +1,5 @@
-import {
-    Character, Class, ClassRole, CharType, Stats, DamageType, 
-    Attributes, Affinities, Armor, Effect, EffectType
-} from '../types';
+import {Character, Class, Stats, Attributes, Affinities, Armor, Effect, } from '../types/types';
+import { ClassRole, CharType, DamageType, EffectType } from '../types/enums';
 
 function fl(n: number): number {return Math.floor(n)}
 
@@ -33,7 +31,8 @@ export function createAttributes(pointBuy: Attributes, charClass: Class, level: 
 }
 
 export function createStats(
-    attributes: Attributes, armorACBonus: number, armorMACBonus: number, level: number
+    attributes: Attributes, armorACBonus: number, armorMACBonus: number, level: number,
+    threatMultiplier?: number
 ): Stats {
 
     const str = attributes.strength, fin = attributes.finesse, tns = attributes.toughness;
@@ -55,11 +54,12 @@ export function createStats(
         mp: 10 + min + fl(1.5 * level),
         mpRegen: 1 + fl(spt / 4),
         ac: 10 + fl(fin / 4) + armorACBonus,
-        mac: 10 + fl(spt / 3) + fl(min / 4) + fl(fin / 4) + armorMACBonus,
+        mac: 10 + fl(spt / 4) + fl(min / 4) + fl(fin / 4) + armorMACBonus,
         ini: fl(fin / 2) + fl(min / 2),
         mvt: 3 + fl(str / 6) + fl(fin / 6),
         bonusHealingDone: fl(spt / 5),
         bonusHealingRcvd: fl(spt / 3),
+        threatMuliplier: 1 + (str / 100) + (min / 100) + (threatMultiplier || 0),
         affinities: {
             fire: fl(str / 4),
             wind: fl(fin / 4),

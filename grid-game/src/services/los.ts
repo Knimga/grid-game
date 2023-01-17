@@ -1,6 +1,7 @@
 
-import { GameBoard, GameChar, CharType } from "../types";
-import { RangeType } from "../uiTypes";
+import { GameBoard, GameChar } from "../types/types";
+import { CharType } from "../types/enums";
+import { RangeType } from "../types/uiTypes";
 import { getInRangeIndices, getAdjacentIndices } from "./ranger";
 
 export function getLos(board: GameBoard, fromPositions: number[]): number[] {

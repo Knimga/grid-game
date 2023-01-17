@@ -13,8 +13,9 @@ import EffectEditor from './EffectEditor';
 import { makeInputOptions } from '../../services/detailStrings';
 import { blankEffect } from '../../services/actions';
 
-import { Action, Intent, DamageType, TargetingType, Effect, DamageTypeDarkColor } from '../../types';
-import {InputOption} from '../../uiTypes';
+import { Action, Effect } from '../../types/types';
+import { Intent, DamageType, TargetingType, DamageTypeDarkColor } from '../../types/enums';
+import {InputOption} from '../../types/uiTypes';
 
 interface ActionEditorInput {
     action: Action,

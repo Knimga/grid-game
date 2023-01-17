@@ -1,6 +1,6 @@
 import './armorPane.css';
 
-import {Armor} from '../../types';
+import {Armor} from '../../types/types';
 
 interface ArmorPaneInput {armor: Armor}
 

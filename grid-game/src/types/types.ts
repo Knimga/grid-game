@@ -23,6 +23,7 @@ export interface GameDungeon extends Omit<Dungeon, 'boards'> {
 
 export interface GameBoard extends Omit<Board, 'chars'> {
     chars: GameChar[];
+    exploredAreas: number[];
 }
 
 export interface Door {
@@ -93,18 +94,19 @@ export interface Class {
 }
 
 export interface Stats { //all calculated from attributes
-    hp: number,
-    hpRegen: number,
-    mp: number,
-    mpRegen: number,
-    ac: number,
-    mac: number,
-    ini: number,
-    mvt: number,
-    bonusHealingDone: number,
-    bonusHealingRcvd: number,
-    affinities: Affinities,
-    dmgTypes: DamageTypes
+    hp: number;
+    hpRegen: number;
+    mp: number;
+    mpRegen: number;
+    ac: number;
+    mac: number;
+    ini: number;
+    mvt: number;
+    bonusHealingDone: number;
+    bonusHealingRcvd: number;
+    affinities: Affinities;
+    dmgTypes: DamageTypes;
+    threatMuliplier: number;
 }
 
 export interface Affinities {
@@ -270,7 +272,7 @@ export enum DamageType {
 }
 
 export enum DamageTypeColor {
-    fire = 'darkred',
+    fire = 'firebrick',
     wind = 'lightblue',
     earth = 'darkgoldenrod',
     shadow = 'purple',
@@ -326,6 +328,7 @@ export enum EffectTargetStat {
     mvt = 'mvt',
     bonusHealingDone = 'bonusHealingDone',
     bonusHealingRcvd = 'bonusHealingRcvd',
+    threatMuliplier = 'threatMultiplier',
     allAtkRolls = 'allAtkRolls',
     allDmgRolls = 'allDmgRolls',
     allDr = 'allDr',

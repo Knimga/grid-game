@@ -2,7 +2,8 @@ import './board.css';
 
 import HealthBar from './HealthBar';
 
-import { GameChar, ActiveEffect, DamageTypeColor, DamageTypeDarkColor, DamageType } from '../../types';
+import { GameChar, ActiveEffect } from '../../types/types';
+import { DamageTypeColor, DamageTypeDarkColor, DamageType } from '../../types/enums';
 
 interface CharSquareInput {
     char: GameChar,
@@ -14,6 +15,7 @@ interface CharSquareInput {
 
 export default function CharSquare({char, style, index, onClick, onMouseOver}: CharSquareInput) {
     let squareStyle: Object = {...style, backgroundColor: char.color};
+    const uniqueActiveEffects: ActiveEffect[] = getUniqueActiveEffects();
     if(char.game.isTurn) squareStyle = {...squareStyle, color: 'white'};
 
     function effectInnerText(effect: ActiveEffect): string {
@@ -29,6 +31,17 @@ export default function CharSquare({char, style, index, onClick, onMouseOver}: C
         }
     }
 
+    function getUniqueActiveEffects() {
+        //this is here b/c a buff/debuff can affect more than one stat, 
+        //and therefore can leave more than one AE on a char
+        const AEs = char.game.activeEffects;
+        const uniqueAEs: ActiveEffect[] = [];
+        for (let i = 0; i < AEs.length; i++) {
+            if(!uniqueAEs.find(ae => ae.actionName === AEs[i].actionName && ae.castById === AEs[i].castById)) 
+                {uniqueAEs.push(AEs[i])}
+        }
+        return uniqueAEs;
+    }
     
   return (
     <div 
@@ -39,7 +52,7 @@ export default function CharSquare({char, style, index, onClick, onMouseOver}: C
     >
         <div className="char-square-top">
             <div className="char-square-effects-row">
-                {char.game.activeEffects.map(ae => 
+                {uniqueActiveEffects.map(ae => 
                     <div 
                         className="char-square-effect"
                         style={dmgTypeStyle(ae.dmgType)}

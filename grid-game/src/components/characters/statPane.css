@@ -1,6 +1,6 @@
 .stat-pane {
     width: 100%; height: 28%;
-    display: flex; justify-content: space-around;
+    display: flex; 
     background-color: #202020;
     font-size: 85%;
     border-radius: 10px;
@@ -9,11 +9,11 @@
 
 .left-list, .atk-bonus-list, .ele-bonus-list {
     display: flex; flex-direction: column;
-    justify-content: space-around;
+    justify-content: center;
 }
 
 .left-list {width: 25%;}
-.atk-bonus-list {width: 30%;}
+.atk-bonus-list {width: 15%;}
 .ele-bonus-list {width: 30%; flex-wrap: wrap;}
 
 .list-row {width: 100%; display: flex;}
@@ -36,26 +36,3 @@
 .stat-pane-atk-bonus-pane {height: 25%; width: 80%; font-size: 90%;}
 .ele-bonus-pane {height: 19%; width: 47%; font-size: 75%;}
 
-.atk-bonus-label, .ele-bonus-label {
-    width: 40%;
-    display: flex; 
-    justify-content: center; align-items: center;
-}
-
-.atk-bonus-values, .ele-bonus-values {
-    width: 60%;
-    display: flex; flex-direction: column;
-    justify-content: space-around; align-items: flex-start;
-    background-color: #303030;
-    padding-left: 5%;
-}
-
-.ele-bonus-values > span {margin: -1px 0;}
-
-.fire {color: crimson;}
-.wind {color: lightblue;}
-.earth {color: darkgoldenrod;}
-.shadow {color: purple;}
-.water {color: dodgerblue;}
-.holy {color: gold;}
-.poison {color: green;}

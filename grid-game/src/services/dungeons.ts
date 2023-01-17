@@ -1,6 +1,6 @@
 import { blankBoard } from "./boards";
 
-import { Dungeon } from "../types";
+import { Dungeon } from "../types/types";
 
 export function blankDungeon(): Dungeon {
     return {

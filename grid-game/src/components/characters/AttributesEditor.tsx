@@ -5,7 +5,7 @@ import ColorPicker from '../shared/ColorPicker';
 
 import { attributeDetailString } from '../../services/detailStrings';
 
-import {Character, Attributes} from '../../types';
+import {Character, Attributes} from '../../types/types';
 
 interface AttributesInput {
     char: Character,

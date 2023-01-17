@@ -2,7 +2,7 @@ import './gameLog.css';
 
 import { randId } from '../../services/detailStrings';
 
-import {TurnLog} from '../../uiTypes';
+import {TurnLog} from '../../types/uiTypes';
 
 interface GameLogInput {logs: TurnLog[]}
 

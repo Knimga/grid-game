@@ -1,6 +1,6 @@
 import express from 'express';
 
-import { Action, TargetingType } from '../grid-game/src/types';
+import { Action, TargetingType } from '../grid-game/src/types/types';
 
 import ActionsModel from '../models/Actions.model';
 

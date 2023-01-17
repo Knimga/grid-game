@@ -4,7 +4,7 @@ import { FaRegQuestionCircle } from "react-icons/fa";
 
 import AttributeBars from '../shared/AttributeBars';
 
-import {Class, Stats, AttributeFocus} from '../../types';
+import {Class, Stats, AttributeFocus} from '../../types/types';
 import {actionDetailString, armorDetailString} from '../../services/detailStrings';
 
 interface ClassPaneInput {

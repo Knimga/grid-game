@@ -11,8 +11,8 @@ import DungeonEdit from './DungeonEdit';
 import { makeInputOptionsWithIds } from '../../services/detailStrings';
 import { blankDungeon } from '../../services/dungeons';
 
-import { Dungeon } from '../../types';
-import { InputOption, BoardCharSelection } from '../../uiTypes';
+import { Dungeon } from '../../types/types';
+import { InputOption, BoardCharSelection } from '../../types/uiTypes';
 
 export default function DungeonsTab() {
     const [dungeons, setDungeons] = useState<Dungeon[]>([]);

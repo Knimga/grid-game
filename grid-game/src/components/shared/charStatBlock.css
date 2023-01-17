@@ -1,0 +1,22 @@
+.char-stats-block {
+    min-width: 255px; height: 225px;
+    display: flex; justify-content: space-around;
+    background-color: #202020;
+    border-radius: 10px;
+    font-size: 85%;
+}
+
+.char-stats-block-column {
+    width: 49%; height: 100%;
+    display: flex; flex-direction: column;
+    align-items: center;
+}
+.char-stats-block-column > * {margin-top: 5%;}
+
+.main-stats {font-size: 80%;}
+.dmg-types {overflow-y: scroll;}
+
+.char-stats-block-row {
+    width: 90%; height: 10px;
+    display: flex; justify-content: space-between;
+}

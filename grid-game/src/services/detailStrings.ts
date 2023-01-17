@@ -1,8 +1,9 @@
-import {Action, Armor, Attributes, Stats, Effect, EffectType, EffectTargetStat, Dungeon, Door} from '../types';
+import {Action, Armor, Attributes, Stats, Effect, Dungeon, Door} from '../types/types';
+import { EffectType, EffectTargetStat } from '../types/enums';
 
 import { getBonus } from './charCalc';
 
-import { InputOption } from '../uiTypes';
+import { InputOption } from '../types/uiTypes';
 
 export function attributeDetailString(attribute: keyof Attributes) {
     switch(attribute) {

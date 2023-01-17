@@ -1,5 +1,5 @@
-import { GameBoard, GameChar, Action } from "../types";
-import { RangeType, Coord } from "../uiTypes";
+import { GameBoard, GameChar, Action } from "../types/types";
+import { RangeType, Coord } from "../types/uiTypes";
 
 import { 
     indexToCoord, coordToIndex, getAdjacentCoords, getInRangeIndices, distance 
@@ -139,9 +139,12 @@ export function newExploreDestination(board: GameBoard, currentPosition: number)
 export function getAdjacencyMatrix(board: GameBoard): number[][] {
     const matrix: number[][] = [];
     const indexLength: number = board.gridWidth * board.gridHeight;
-    const charIndices: number[] = board.chars.map(char => char.game.positionIndex);
-    const doorIndices: number[] = board.doors.map(d => d.position);
-    if(board.portal) doorIndices.push(board.portal);
+    const blockedIndices: number[] = [
+        ...board.walls,
+        ...board.chars.map(char => char.game.positionIndex),
+        ...board.doors.map(door => door.position)
+    ];
+    if(board.portal) blockedIndices.push(board.portal);
 
     for (let i = 0; i < indexLength; i++) {
         const thisCoord: Coord = indexToCoord(i, board.gridWidth);
@@ -149,8 +152,7 @@ export function getAdjacencyMatrix(board: GameBoard): number[][] {
         let adjIndices: number[] = adjCoords.map(coord => coordToIndex(coord, board.gridWidth));
 
         adjIndices = adjIndices.filter(index => {
-            return !board.walls.includes(index) && !charIndices.includes(index) && !doorIndices.includes(index)
-                && index > 0 && index < indexLength
+            return !blockedIndices.includes(index) && index > 0 && index < indexLength
         });
 
         matrix[i] = adjIndices;

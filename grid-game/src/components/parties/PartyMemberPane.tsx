@@ -2,7 +2,7 @@ import './partiesTab.css';
 
 import { FaCircle } from 'react-icons/fa';
 
-import { PartyMember } from '../../types';
+import { PartyMember } from '../../types/types';
 
 interface PartyMemberPaneInput {
     partyMember: PartyMember
