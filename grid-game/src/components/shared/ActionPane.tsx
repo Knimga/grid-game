@@ -1,10 +1,10 @@
 import './actionPane.css';
 
-import {Action, Effect, Stats } from '../../types/types';
-import { DamageTypeColor, DamageTypeDarkColor } from '../../types/enums';
+import {Action, Stats } from '../../types/types';
+import { DamageTypeColor } from '../../types/enums';
 
 import { getAtkBonus }  from '../../services/charCalc';
-import { cap, effectDamageString, effectDmgDesc, effectDurationString } from '../../services/detailStrings';
+import { cap, actionDetailString } from '../../services/detailStrings';
 
 interface ActionPaneInput {
     action: Action,
@@ -16,23 +16,42 @@ interface ActionPaneInput {
 
 export default function ActionPane({action, stats, isSelected, onClick, index}: ActionPaneInput) {
     const hasEnoughMp: boolean = stats ? (stats.mp >= action.mpCost) : true;
-    const dmgTypeString: string = cap(action.dmgType);
 
-    const targetString = (): string => {
+    function click() {if(onClick && index !== undefined) onClick(action)}
+
+    function actionDetailItem(prop: string) {
+        const value: string = actionDetailItemValue(prop);
+        const label: string = prop === 'mpCost' ? 'MP Cost' : cap(prop);
+        return <div className="action-detail-item">
+            <div className="action-detail-label">{label}</div>
+            <div className="action-detail-value">{value}</div>
+        </div>
+    }
+
+    function actionDetailItemValue(prop: string): string {
+        switch(prop) {
+            case 'target': return targetString();
+            case 'range': return rangeString();
+            case 'mpCost': return action.mpCost ? action.mpCost.toString() : '-';
+            case 'attack': return atkBonus();
+            default: return '';
+        }
+    }
+
+    function targetString(): string {
         if(action.burstRadius) return `Burst ${action.burstRadius}`;
-        return action.target === 'single' ? cap(action.target) + ' Target' : cap(action.target);
+        return cap(action.target);
+    }
+
+    function rangeString(): string {
+        if(action.range === 0 || action.target === 'self') return 'On Self';
+        return action.range.toString();
     }
 
     function atkBonus(): string {
         const bonus: number = stats ? getAtkBonus(stats, action.dmgType) : 0;
         return bonus > 0 ? `+${bonus}` : `${bonus}`;
     }
-
-    function effectRowStyle(effect: Effect): Object {
-        return {color: DamageTypeColor[effect.dmgType], backgroundColor: DamageTypeDarkColor[effect.dmgType]}
-    }
-
-    function click() {if(onClick && index !== undefined) onClick(action)}
 
   return (
     <div 
@@ -41,34 +60,22 @@ export default function ActionPane({action, stats, isSelected, onClick, index}: 
         onClick={() => click()}
     >
         <div className="action-pane-header-row">
-            <strong style={{color: hasEnoughMp ? DamageTypeColor[action.dmgType] : 'gray'}}>
-                {action.name}
-            </strong>
-            <small className="action-desc-string">
-                {action.isWeapon ? ` ${dmgTypeString} Weapon` : `${targetString()}, MP ${action.mpCost}`}
-            </small>
-        </div>
-        <div className="action-pane-details-row">  
-            <div className="action-pane-detail">
-                {action.effects.map(effect => {
-                    return <div 
-                        className="action-pane-effect-box" 
-                        key={Math.random()}
-                        style={effectRowStyle(effect)}
-                    >
-                        <div className="effect-damage">{effectDamageString(effect, stats, action.isWeapon, action.hands ?? 1)}</div>
-                        <div className="effect-damage-detail">
-                            <span className="effect-dmg-desc">{effectDmgDesc(effect)}</span>
-                            <div className="effect-duration">{effectDurationString(effect)}</div>
-                        </div>
-                    </div>
-                })}
+            <div className="action-detail-desc-column">
+                <div>
+                    <strong style={{color: hasEnoughMp ? DamageTypeColor[action.dmgType] : 'gray'}}>
+                        {action.name}
+                    </strong>
+                </div>
+                <small>{actionDetailString(action, stats)}</small>
             </div>
-            <div className="action-pane-detail-list">
-                {stats && action.intent === 'offense' ? <small>{`Attack: ${atkBonus()}`}</small> : ''}
-                {targetString() === 'Self' ? '' : <small>{`Range: ${action.range}`}</small>}
+            <div className="action-detail-items-column">
+                {action.isWeapon ? '' : actionDetailItem('mpCost')}
+                {actionDetailItem('target')}
+                {action.target !== 'self' ? actionDetailItem('range') : ''}
+                {action.target !== 'self' && stats ? actionDetailItem('attack') : ''}
             </div>
         </div>
+        
     </div>
   )
 }

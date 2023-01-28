@@ -16,8 +16,8 @@ interface BoardInput {
     board: GameBoard;
     colorScheme: {wall: string; floor: string;};
     mvtHighlight: number[];
-    actionHighlight: number[];
-    aoeHighlight: number[];
+    rangeHighlight: number[];
+    targetHighlight: number[];
     los: number[];
     selectedAction: Action | null;
     roomIsClear: boolean;
@@ -27,18 +27,19 @@ interface BoardInput {
 
 export default function GameBoardComponent({
     board, colorScheme, boardFunctions, selectedAction, selectedDoor, roomIsClear,
-    mvtHighlight, actionHighlight, aoeHighlight, los
+    mvtHighlight, rangeHighlight, targetHighlight, los
 }: BoardInput) {
     const grid: GameSquare[] = createGameGrid(board);
     const sizeStyles = getBoardStyles(board);
     const doorIndices: number[] = board.doors.map(d => d.position);
     
     const inRangeFilter: string = 'brightness(1.5)';
-    const aoeFilter: string = 'brightness(1.8)';
-    const fogOfWarFilter: string = 'brightness(0.7)';
+    const targetFilter: string = 'brightness(1.8)';
+    const fogOfWarFilter: string = 'blur(4px)';
     const defensiveTargetBoxShadow: string = '0 0 20px 5px cyan';
     const offensiveTargetBoxShadow: string = '0 0 20px 5px red';
     const enabledDoorBoxShadow: string = '0 0 20px 5px lightblue';
+    const selectedDoorBoxShadow: string = '0 0 20px 5px cyan';
 
     function squareStyle(index: number): Style {
         let bgColor: string = grid[index].type === 'floor' ? colorScheme.floor : colorScheme.wall;
@@ -50,8 +51,8 @@ export default function GameBoardComponent({
             outline = '0.5px solid rgba(128, 128, 128, .75)';
             if(!los.includes(index)) filter = fogOfWarFilter;
             if(selectedAction) {
-                if(actionHighlight.includes(index)) filter = inRangeFilter;
-                if(aoeHighlight.includes(index)) filter = aoeFilter;
+                if(rangeHighlight.includes(index)) filter = inRangeFilter;
+                if(targetHighlight.includes(index)) filter = targetFilter;
             } else if(mvtHighlight.includes(index)) filter = inRangeFilter;
         }
 
@@ -81,7 +82,7 @@ export default function GameBoardComponent({
 
         if(roomIsClear) {
             boxShadow = enabledDoorBoxShadow;
-            if(selectedDoor?.position === door.position) boxShadow = defensiveTargetBoxShadow;
+            if(selectedDoor?.position === door.position) boxShadow = selectedDoorBoxShadow;
         }
 
         return {color: color, boxShadow: boxShadow}
@@ -90,7 +91,7 @@ export default function GameBoardComponent({
     function charStyle(index: number): Object {
         let boxShadow: string = '';
         if(selectedAction) {
-            if(aoeHighlight.includes(index)) {
+            if(targetHighlight.includes(index)) {
                 if(charIsTargeted(grid[index].char, selectedAction)) {
                     switch(selectedAction.intent) {
                         case 'defense': boxShadow = defensiveTargetBoxShadow; break;
@@ -107,8 +108,8 @@ export default function GameBoardComponent({
         console.log(index);
         if(mvtHighlight.includes(index)) {
             boardFunctions.moveTo(index)
-        } else if(actionHighlight.includes(index) && selectedAction) {
-            const affectedIndices: number[] = aoeHighlight.length ? aoeHighlight : [index];
+        } else if(rangeHighlight.includes(index) && selectedAction) {
+            const affectedIndices: number[] = targetHighlight.length ? targetHighlight : [index];
             if(affectedIndices.some(i => {return grid[i].char ? true : false})) {
                 boardFunctions.performAction(affectedIndices)
             } else {console.log('no char on target square')}
@@ -119,9 +120,9 @@ export default function GameBoardComponent({
 
     function mouseOver(index: number): void {
         if(selectedAction) {
-            if(actionHighlight.includes(index)) {
-                boardFunctions.setAoeHighlight(boardFunctions.aoeRange(index))
-            } else {boardFunctions.setAoeHighlight([])}
+            if(rangeHighlight.includes(index)) {
+                boardFunctions.setTargetHighlight(boardFunctions.aoeRange(index))
+            } else {boardFunctions.setTargetHighlight([])}
         }
     }
 

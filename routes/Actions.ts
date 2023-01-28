@@ -1,6 +1,6 @@
 import express from 'express';
 
-import { Action, TargetingType } from '../grid-game/src/types/types';
+import { Action } from '../grid-game/src/types/types';
 
 import ActionsModel from '../models/Actions.model';
 
@@ -28,27 +28,5 @@ router.route('/create').post(async (req,res) => {
     await action.save();
     res.status(200).send();
 });
-
-/*router.route('/transform').get(async (req,res) => {
-    const actions = await ActionsModel.find().lean();
-
-    for (let i = 0; i < actions.length; i++) {
-        const thisAction = actions[i];
-        thisAction.target = targetingType(thisAction);
-        if(thisAction.line) delete thisAction.line;
-
-        const newModel = new ActionsModel(thisAction);
-
-        await ActionsModel.findOneAndUpdate({_id: newModel._id}, newModel, {upsert: true, new: true}).clone();
-    }
-    res.status(200).send();
-});
-
-function targetingType(action: Action): TargetingType {
-    if(action.burstRadius) return TargetingType.burst;
-    if(action.line) return TargetingType.line;
-    if(action.range === 0) return TargetingType.self;
-    return TargetingType.single;
-}*/
 
 export default router;

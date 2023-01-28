@@ -1,70 +1,156 @@
-import { AiPlan, GameBoard, GameChar, Action } from "../types/types";
-import { CharType, ClassRole } from "../types/enums";
-import { MetersEntry } from "../types/uiTypes";
-
-import { canSeePlayers, visiblePlayers } from "./los";
-import { distance } from "./ranger";
-import { getInRangeDest, newExploreDestination, randomMoveToIndex } from "./aiMove";
+import { 
+    getInRangeDest, newExploreDestination, randomMoveToIndex, getRemainingMvt,
+    pathfinder
+} from "./aiMove";
 
 import { 
-    whoNeedsHealing, selectHealAndTarget, selectTarget, selectOffensiveAction, getNearestPlayer, 
-    hasBuff, selectBuff, getRandomBuffTarget 
+    whoNeedsHealing, hasBuff, canHeal, decidesToBuff, randomSort, sortedOffenseActions, 
+    getHealingActions, sortToPreferStrongHeals, shouldHealSelf, randomSortedBuffActions,
+    canBuffSelf
 } from "./aiAct";
 
+import { canSeePlayers, visiblePlayers } from "./los";
+import { isDead } from "./miscGameLogic";
+import { effectAlreadyApplied } from "./actions";
+
+import { AiPlan, GameBoard, GameChar, Action } from "../types/types";
+import { CharType, TargetingType } from "../types/enums";
+
+interface Plans {preferred: AiPlan | null, viable: AiPlan | null}
 
 export function aiPlan(
-    chars: GameChar[], char: GameChar, board: GameBoard, meters: MetersEntry[], 
-    adjMatrix: number[][], roundNumber: number
+    chars: GameChar[], actor: GameChar, board: GameBoard, adjMatrix: number[][], roundNumber: number
 ): AiPlan {
-
-    const isBeast: boolean = char.type === CharType.beast;
-    const exploreMode: boolean = isBeast ? !canSeePlayers(board, char.game.positionIndex) 
-        : (visiblePlayers(chars).length ? false : true);
     const needsHealing: GameChar[] = whoNeedsHealing(board);
-    const healSpellAndTarget = selectHealAndTarget(char, needsHealing);
+    const shouldTryToHeal: boolean = needsHealing.length > 0 && canHeal(actor);
+    
+    let preferredPlan: AiPlan = {target: null, chosenAction: null, newDest: null}
 
+    if(isExploreMode(actor, chars, board)) return explorationPlan(actor, board, roundNumber);
+
+    if(shouldTryToHeal) {
+        const healingPlans: Plans = getHealingPlans(actor, needsHealing, board, adjMatrix);
+        if(healingPlans.viable) return healingPlans.viable;
+        if(healingPlans.preferred) preferredPlan = healingPlans.preferred;
+    }
+
+    if(decidesToBuff(actor)) {
+        const alliedTargets: GameChar[] = randomSort(chars.filter(c => c.type === CharType.enemy && !isDead(c)));
+        const buffingPlans: Plans = getBuffingPlans(actor, alliedTargets, board, adjMatrix);
+        
+        if(buffingPlans.viable) return buffingPlans.viable;
+        if(buffingPlans.preferred && isNullPlan(preferredPlan)) preferredPlan = buffingPlans.preferred;
+    }
+
+    const playersByThreat: GameChar[] = chars.filter(c => c.type === CharType.player && !isDead(c))
+        .sort((a,b) => a.game.meters.threat > b.game.meters.threat ? -1 : 1);
+    const sortedActions: Action[] = sortedOffenseActions(actor);
+    const offensivePlans: Plans = findAiPlans(actor, playersByThreat, sortedActions, board, adjMatrix);
+
+    if(offensivePlans.viable) return offensivePlans.viable;
+    if(offensivePlans.preferred && isNullPlan(preferredPlan)) preferredPlan = offensivePlans.preferred;
+
+    return preferredPlan;
+}
+
+function getHealingPlans(healer: GameChar, targets: GameChar[], board: GameBoard, adjMatrix: number[][]): Plans {
+    let healingActions: Action[] = getHealingActions(healer);
+    const targetsAreCritical: boolean = targets.some(c => c.game.stats.hp / c.stats.hp <= 0.4);
+    if(targetsAreCritical) healingActions = sortToPreferStrongHeals(healingActions);
+   
+    if(shouldHealSelf(healer, targets)) {
+        return findAiPlans(healer, [healer], healingActions, board, adjMatrix)
+    } else {
+        healingActions = healingActions.filter(a => a.target !== TargetingType.self)
+    }
+    
+    return findAiPlans(healer, targets, healingActions, board, adjMatrix);
+}
+
+function getBuffingPlans(buffer: GameChar, targets: GameChar[], board: GameBoard, adjMatrix: number[][]): Plans {
+    let buffActions: Action[] = randomSortedBuffActions(buffer);
+
+    if(buffActions[0].target === TargetingType.self && canBuffSelf(buffer, buffActions[0])) {
+        return findAiPlans(buffer, [buffer], [buffActions[0]], board, adjMatrix)
+    } else {
+        buffActions = buffActions.filter(a => a.target !== TargetingType.self)
+    }
+
+    return findAiPlans(buffer, targets, buffActions, board, adjMatrix)
+}
+
+function findAiPlans(
+    actor: GameChar, sortedTargets: GameChar[], sortedActions: Action[], board: GameBoard, adjMatrix: number[][]
+): Plans {   
+    //the preferredPlan is the first valid plan discovered, regardless of whether dest is reachable this turn
+    let preferredPlan: AiPlan | null = null;
+    //the viablePlan is the first valid plan where dest is reachable this turn
+    let viablePlan: AiPlan | null = null;
+
+    for (let t = 0; t < sortedTargets.length; t++) {
+        const thisTarget: GameChar = sortedTargets[t];
+        for (let a = 0; a < sortedActions.length; a++) {
+            const thisAction: Action = sortedActions[a];
+
+            if(thisAction.target === TargetingType.self && thisTarget.game.gameId !== actor.game.gameId) continue;
+
+            if(!effectAlreadyApplied(thisTarget.game.activeEffects, actor.game.gameId, thisAction.name)) {
+                const thisInRangeDest: number | null = getInRangeDest(board, actor, thisAction, 
+                    thisTarget.game.positionIndex, adjMatrix);
+                
+                if(!thisInRangeDest) break;
+
+                const canReachDestThisTurn: boolean = destReachableThisTurn(actor, board, adjMatrix, thisInRangeDest);
+
+                if(!preferredPlan) {
+                    preferredPlan = {target: thisTarget, chosenAction: thisAction, newDest: thisInRangeDest}
+                }
+
+                if(canReachDestThisTurn) {
+                    viablePlan = {target: thisTarget, chosenAction: thisAction, newDest: thisInRangeDest};
+                    return {preferred: preferredPlan, viable: viablePlan}
+                }
+            }
+        }
+    }
+
+    return {preferred: preferredPlan, viable: viablePlan};
+}
+
+function destReachableThisTurn(
+    mover: GameChar, board: GameBoard, adjMatrix: number[][], destIndex: number
+): boolean {
+    const path: number[] = pathfinder(board, mover.game.positionIndex, destIndex, adjMatrix);
+    return path.length > getRemainingMvt(mover);
+}
+
+function isNullPlan(plan: AiPlan): boolean {
+    return plan.chosenAction === null && plan.target === null && plan.newDest === null
+}
+
+function isExploreMode(actor: GameChar, chars: GameChar[], board: GameBoard): boolean {
+    if(actor.type === CharType.beast) return !canSeePlayers(board, actor.game.positionIndex);
+    return visiblePlayers(chars).length ? false : true;
+}
+
+function explorationPlan(char: GameChar, board: GameBoard, roundNumber: number): AiPlan {
     let newDest: number | null = null;
     let target: GameChar | null = null;
     let chosenAction: Action | null = null;
 
-    if(needsHealing.length && healSpellAndTarget) {
-        chosenAction = healSpellAndTarget.spell;
-        target = healSpellAndTarget.target;
-        newDest = getInRangeDest(board, char, chosenAction, target.game.positionIndex, adjMatrix);
-    } else if(!exploreMode) {
-        const chanceToCastBuff: number = char.class.role === ClassRole.support ? 0.15 : 0.1;
-
-        if(hasBuff(char) && Math.random() <= chanceToCastBuff) {
-            chosenAction = selectBuff(char);
-            target = getRandomBuffTarget(chars, char, chosenAction);
-            newDest = getInRangeDest(board, char, chosenAction, target.game.positionIndex, adjMatrix);
-        } else {
-            target = selectTarget(board, char, meters);
-            const targetIsAdjacent: boolean = distance(
-                char.game.positionIndex, target.game.positionIndex, board.gridWidth
-            ) === 1;
-            chosenAction = selectOffensiveAction(char, targetIsAdjacent, target.game.activeEffects);
-            newDest = getInRangeDest(board, char, chosenAction, target.game.positionIndex, adjMatrix);
-            if(!newDest) {
-                target = getNearestPlayer(board, char.game.positionIndex, adjMatrix)
-                newDest = getInRangeDest(board, char, chosenAction, target.game.positionIndex, adjMatrix);
-            }
-        }
-
-    } else {
-        if(roundNumber === 1 && hasBuff(char)) {
-            chosenAction = selectBuff(char);
-            target = char;
-        }
-        if((!char.game.destinationIndex || char.game.positionIndex === char.game.destinationIndex)
-            && !isBeast) {
-            const newExploreDest: number = newExploreDestination(board, char.game.positionIndex);
-            newDest = newExploreDest;
-        }
-        if(isBeast) {
-            newDest = randomMoveToIndex(board, char);
-        }
+    if(roundNumber === 1 && hasBuff(char)) {
+        chosenAction = randomSortedBuffActions(char)[0];
+        target = char;
     }
 
-    return {newDest: newDest, target: target, chosenAction: chosenAction}
+    if(char.type === CharType.beast) {
+        return {chosenAction: chosenAction, target: target, newDest: randomMoveToIndex(board, char)}
+    }
+
+    if(!char.game.destinationIndex || char.game.positionIndex === char.game.destinationIndex) {
+        const newExploreDest: number = newExploreDestination(board, char.game.positionIndex);
+        newDest = newExploreDest;
+    }
+
+    return {chosenAction: chosenAction, target: target, newDest: newDest}
 }

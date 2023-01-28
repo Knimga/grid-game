@@ -30,8 +30,6 @@ export interface Style {
     boxShadow?: string;
 }
 
-
-
 export enum TerrainType {
     wall = 'wall',
     floor = 'floor'
@@ -89,23 +87,6 @@ export enum RangeType {
     def = 'def',
     mvt = 'mvt',
     los = 'los'
-}
-
-export interface MetersEntry {
-    gameId: string;
-    charName: string;
-    charType: string;
-    charThreatMultiplier: number;
-    color: string;
-    meters: MeterTypes;
-}
-
-export interface MeterTypes {
-    dmgDone: number;
-    dmgTaken: number;
-    healingDone: number;
-    statEffectsDone: number;
-    threat: number;
 }
 
 export interface InputOption {enumValue: string, displayValue: string}

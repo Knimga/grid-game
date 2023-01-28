@@ -1,4 +1,4 @@
-import {Attributes, AttributeFocus } from './grid-game/src/types/types';
+import {Attributes, AttributeFocus, PassiveEffect } from './grid-game/src/types/types';
 import { CharType, ClassRole } from './grid-game/src/types/enums';
 
 export interface DbClass {
@@ -9,6 +9,7 @@ export interface DbClass {
     attributeFocus: AttributeFocus;
     armor: string[];
     actions: string[];
+    passives: PassiveEffect[];
 }
 
 export interface DbCharacter {

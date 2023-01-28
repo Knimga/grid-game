@@ -44,8 +44,9 @@ export function createStats(
         earth: fl(tns / 4),
         shadow: fl(min / 4),
         water: fl(spt / 4),
-        holy: fl((spt + str) / 6),
-        poison: fl((tns + fin) / 6)
+        holy: fl((str + spt) / 8),
+        poison: fl((fin + tns) / 8),
+        lightning: fl((fin + min) / 8)
     }
 
     return {
@@ -59,16 +60,7 @@ export function createStats(
         mvt: 3 + fl(str / 6) + fl(fin / 6),
         bonusHealingDone: fl(spt / 5),
         bonusHealingRcvd: fl(spt / 3),
-        threatMuliplier: 1 + (str / 100) + (min / 100) + (threatMultiplier || 0),
-        affinities: {
-            fire: fl(str / 4),
-            wind: fl(fin / 4),
-            earth: fl(tns / 4),
-            shadow: fl(min / 4),
-            water: fl(spt / 4),
-            holy: fl(spt / 6) + fl(str / 6),
-            poison: fl(tns / 6) + fl(fin / 6)
-        },
+        threatMuliplier: 1 + (str / 150) + (min / 150) + (threatMultiplier || 0),
         dmgTypes: {
             melee: {
                 atk: fl(0.75 * str) + fl(fin / 2),
@@ -119,6 +111,11 @@ export function createStats(
                 atk: affinities.poison,
                 dmg: affinities.poison,
                 dr: fl(affinities.poison / 2)
+            },
+            lightning: {
+                atk: affinities.lightning,
+                dmg: affinities.lightning,
+                dr: fl(affinities.lightning / 2)
             }
         }
     }
@@ -144,6 +141,7 @@ export function getBonus(stats: Stats, effect: Effect, isWeapon: boolean, hands:
         case EffectType.debuff: return getBuffDebuffBonus(stats, effect.dmgType);
         case EffectType.dot: return getDmgBonus(stats, effect.dmgType, isWeapon, hands ?? 1);
         case EffectType.hot: return getHealingBonus(stats, effect.dmgType);
+        case EffectType.threat: return getThreatBonus(stats, effect.dmgType);
         default: console.log('no effect type!'); return 0;
     }
 }
@@ -169,10 +167,22 @@ export function getBuffDebuffBonus(stats: Stats, dmgType: DamageType): number {
     return Math.floor(0.5 * stats.dmgTypes[dmgType].dmg)
 }
 
+export function getThreatBonus(stats: Stats, dmgType: DamageType): number {
+    return stats.dmgTypes[dmgType].dmg
+}
+
 export function isElemental(dmgType: DamageType): boolean {
     const magicTypes: DamageType[] = [
         DamageType.fire, DamageType.wind, DamageType.earth, DamageType.shadow, DamageType.water, 
         DamageType.holy, DamageType.poison
+    ];
+    return magicTypes.includes(dmgType);
+}
+
+export function isMagic(dmgType: DamageType): boolean {
+    const magicTypes: DamageType[] = [
+        DamageType.fire, DamageType.wind, DamageType.earth, DamageType.shadow, DamageType.water, 
+        DamageType.holy, DamageType.poison, DamageType.magic
     ];
     return magicTypes.includes(dmgType);
 }
@@ -215,6 +225,7 @@ export function blankClass(): Class {
         },
         attributeFocus: ['strength','toughness'],
         armor: [],
-        actions: []
+        actions: [],
+        passives: []
     }
 }

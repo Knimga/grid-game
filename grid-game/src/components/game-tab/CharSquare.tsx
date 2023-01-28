@@ -1,4 +1,6 @@
-import './board.css';
+import './charSquare.css';
+
+import { FaSkull } from 'react-icons/fa';
 
 import HealthBar from './HealthBar';
 
@@ -25,10 +27,7 @@ export default function CharSquare({char, style, index, onClick, onMouseOver}: C
     }
 
     function dmgTypeStyle(dmgType: DamageType): Object {
-        return {
-            color: DamageTypeColor[dmgType],
-            backgroundColor: DamageTypeDarkColor[dmgType]
-        }
+        return {color: DamageTypeColor[dmgType], backgroundColor: DamageTypeDarkColor[dmgType]}
     }
 
     function getUniqueActiveEffects() {
@@ -45,13 +44,13 @@ export default function CharSquare({char, style, index, onClick, onMouseOver}: C
     
   return (
     <div 
-        className="char-square char-hover"
+        className="char-square"
         style={squareStyle}
         onClick={() => onClick(index)} 
         onMouseOver={() => onMouseOver(index)}
     >
         <div className="char-square-top">
-            <div className="char-square-effects-row">
+            <div className="char-square-effects-row">            
                 {uniqueActiveEffects.map(ae => 
                     <div 
                         className="char-square-effect"
@@ -59,11 +58,15 @@ export default function CharSquare({char, style, index, onClick, onMouseOver}: C
                         title={`${ae.actionName}`}
                         key={Math.random()}
                     ><small>{effectInnerText(ae)}</small></div>
-                )}
+                )}                
             </div>
+            
         </div>
         <div className="char-square-bottom">
-            <span className="char-square-name">{char.name}</span>
+            {char.game.isBoss ? <FaSkull className="skull-icon" /> : ''}
+            <div className='char-square-name-row'>
+                <span className="char-square-name">{char.name}</span>
+            </div>          
             <HealthBar 
                 currentHp={char.game.stats.hp} 
                 totalHp={char.stats.hp}

@@ -3,6 +3,7 @@ import './dungeonPane.css';
 
 import { GiMagicPortal } from 'react-icons/gi';
 import { GiWoodenDoor } from 'react-icons/gi';
+import { FaSkull } from 'react-icons/fa';
 
 import {createEditorGrid, getBoardStyles} from '../../services/boards';
 import { getSpawnArea } from '../../services/ranger';
@@ -56,11 +57,16 @@ export default function BoardEdit({board, wallColor, floorColor, clickSquare}: B
                     
                     return <div
                         key={randId()}
-                        className='square editor-square'
+                        className='square'
                         style={thisSquareStyle}
                         onClick={() => clickSquare(index)}
                     >
-                        {square.char ? <span className="char-square-name">{square.char.name}</span> : ''}
+                        {square.char ? 
+                            <div className="editor-char-square">
+                                <span className="char-square-name">{square.char.name}</span>
+                                {square.char.isBoss ? <FaSkull/> : ''}
+                            </div>
+                             : ''}
                         {isPortal ? <GiMagicPortal className="portal-icon"/> : ''}
                         {isDoor ? 
                             <div className="door-square-container">

@@ -15,8 +15,6 @@ interface PartyPaneInput {
 
 export default function PartyPane({party, isSelected, index, selectParty, removeMember, saveParty}: PartyPaneInput) {
 
-    //<FaTrashAlt className="trash-icons" />
-
     function partyMembers(): JSX.Element {
         if(party.members.length) {
             return <div className="inner-container">       

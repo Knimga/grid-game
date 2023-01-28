@@ -1,85 +1,85 @@
 import { GameBoard, GameChar, Action } from "../types/types";
+import { TargetingType } from "../types/enums";
 import { RangeType, Coord } from "../types/uiTypes";
 
 import { 
     indexToCoord, coordToIndex, getAdjacentCoords, getInRangeIndices, distance 
 } from '../services/ranger';
-
-import {findBestBurstPlacement} from './aiAct';
-
+import { findBestBurstPlacement } from './aiAct';
 import { getLos } from "./los";
 
+//for a given action, provides the position the action should be cast from in order to hit the target
+//remainingMvt should not matter; this only provides the final destination
 export function getInRangeDest(
     board: GameBoard, mover: GameChar, action: Action, targetIndex: number, adjMatrix: number[][]
-): number { //should not return dest's that have characters on them!
-    const remainingMvt = getRemainingMvt(mover); 
+): number | null {
     const moverPosition: number = mover.game.positionIndex;
-    const isBurst: boolean = action.target === 'burst';
-    const castAtIndex: number = isBurst ? findBestBurstPlacement(board, action, mover.game.gameId, targetIndex, adjMatrix)
-         : targetIndex;
-    if(isBurst && action.range === 0) return mover.game.positionIndex;
-
-    if(remainingMvt > 0) {
-        const alreadyInRange: boolean = distance(moverPosition, castAtIndex, board.gridWidth) <= action.range;
-        const hasLos: boolean = getLos(board, [moverPosition]).includes(castAtIndex);
-
-        if(!alreadyInRange || !hasLos) {
-            const targetInRangeIndices: number[] = getInRangeIndices(board, castAtIndex, action.range, RangeType.mvt)
-                .filter(index => {return adjMatrix[index].length > 0});
-            //filter targetInRangeIndices to those with highest distance from target, to help performance...
-
-            if(targetInRangeIndices.length) {
-                if(targetInRangeIndices.includes(moverPosition)) return moverPosition;
-                let shortestPath: number[] = [];
+    const isBurst: boolean = action.target === TargetingType.burst;
+    let castAtIndex: number = targetIndex;
     
-                for (let i = 0; i < targetInRangeIndices.length; i++) {
-                    const thisPath = pathfinder(board, moverPosition, targetInRangeIndices[i], adjMatrix);
-                    if(thisPath.length) {
-                        if(i === 0) {
-                            shortestPath = thisPath
-                        } else if(thisPath.length < shortestPath.length) {
-                            shortestPath = thisPath
-                        }
-                    }
-                }
-                
-                return shortestPath[shortestPath.length - 1];
+    if(isBurst) {
+        const burstCastAtIndex: number | null = findBestBurstPlacement(
+            board, action, mover.game.gameId, targetIndex, adjMatrix);
+        if(burstCastAtIndex) {
+            castAtIndex = burstCastAtIndex
+        } else {return null}
+    }
+
+    if(isBurst && action.range === 0) return castAtIndex;
+
+    const alreadyInRange: boolean = distance(moverPosition, castAtIndex, board.gridWidth) <= action.range;
+    const hasLos: boolean = getLos(board, [moverPosition]).includes(castAtIndex);
+
+    if(alreadyInRange && hasLos) return moverPosition;
+
+    const targetInRangeIndices: number[] = getInRangeIndices(board, castAtIndex, action.range, RangeType.mvt)
+        .filter(index => {return adjMatrix[index].length > 0});
+    //filter targetInRangeIndices to those with highest distance from target, to help performance...
+
+    if(!targetInRangeIndices.length) {console.log('no in-range indices...'); return null;}
+    if(targetInRangeIndices.includes(moverPosition)) return moverPosition;
+
+    let shortestPath: number[] = [];
+
+    for (let i = 0; i < targetInRangeIndices.length; i++) {
+        const thisPath = pathfinder(board, moverPosition, targetInRangeIndices[i], adjMatrix);
+        if(thisPath.length) {
+            if(i === 0) shortestPath = thisPath;
+            if(thisPath.length < shortestPath.length) shortestPath = thisPath;
+        }
+    }
     
-            } else {return moverPosition}
-        } else {return moverPosition}
-    } else {return moverPosition}
+    return shortestPath[shortestPath.length - 1];
 }
 
-export function moveTowardsDest( //what if there is no path to dest?
-    board: GameBoard, mover: GameChar, endIndex: number, adjMatrix: number[][]
+//what if there is no path to dest?
+export function moveTowardsDest( //returns next position in incremental move towards dest 
+    board: GameBoard, mover: GameChar, destIndex: number, adjMatrix: number[][]
 ): number {
     const remainingMvt: number = getRemainingMvt(mover);
 
-    if(remainingMvt > 0) {
-        const path: number[] = pathfinder(board, mover.game.positionIndex, endIndex, adjMatrix);
-        const startIndex: number = mover.game.positionIndex;
-        const mvtRangeIndices: number[] = getInRangeIndices(board, startIndex, remainingMvt, RangeType.mvt);
-        const pathIndicesInRange: number[] = path.filter(index => mvtRangeIndices.includes(index));
+    if(remainingMvt === 0) return mover.game.positionIndex;
 
-        const sortedByDistanceDescending: number[] = pathIndicesInRange.sort((a,b) => 
-            distance(startIndex, b, board.gridWidth) - distance(startIndex, a, board.gridWidth)
-        );
+    const startIndex: number = mover.game.positionIndex;
+    const path: number[] = pathfinder(board, startIndex, destIndex, adjMatrix);
+    const mvtRangeIndices: number[] = getInRangeIndices(board, startIndex, remainingMvt, RangeType.mvt);
+    const pathIndicesInRange: number[] = path.filter(index => mvtRangeIndices.includes(index));
 
-        return sortedByDistanceDescending[0];
-    } else {
-        return mover.game.positionIndex
-    }
+    const sortedByDistanceDescending: number[] = pathIndicesInRange.sort((a,b) => 
+        distance(startIndex, b, board.gridWidth) - distance(startIndex, a, board.gridWidth)
+    );
+
+    return sortedByDistanceDescending[0];
 }
 
 export function randomMoveToIndex(board: GameBoard, mover: GameChar): number {
     const mvtRangeIndices: number[] = getInRangeIndices(
-        board, mover.game.positionIndex, getRemainingMvt(mover), RangeType.mvt
-    );
+        board, mover.game.positionIndex, getRemainingMvt(mover), RangeType.mvt);
 
-    if(mvtRangeIndices.length) {
-        const randomIndex: number = Math.floor(Math.random() * mvtRangeIndices.length);
-        return mvtRangeIndices[randomIndex];
-    } else {return mover.game.positionIndex}
+    if(!mvtRangeIndices.length) return mover.game.positionIndex;
+
+    const randomIndex: number = Math.floor(Math.random() * mvtRangeIndices.length);
+    return mvtRangeIndices[randomIndex];
 }
 
 export function pathfinder(

@@ -59,10 +59,9 @@ export default function Actions({char, enableDoorButton, actionFunctions}: Actio
         }  
     }
 
-    function endTurn(): void {
-        setSelectedId(null);
-        actionFunctions.endTurn();
-    }
+    function endTurn(): void {setSelectedId(null); actionFunctions.endTurn();}
+
+    function clickMove(): void {setSelectedId(null); actionFunctions.showMovement();}
 
     function playerNameHeader(char: GameChar): JSX.Element {
         if(char.type === CharType.player) {
@@ -137,7 +136,7 @@ export default function Actions({char, enableDoorButton, actionFunctions}: Actio
                 <Button 
                     variant="contained"
                     disabled={!remainingMvt}
-                    onClick={() => actionFunctions.showMovement()}
+                    onClick={() => clickMove()}
                 >{`Move (${char ? getRemainingMvt(char) : 0}/${char ? char.game.stats.mvt : 0})`}</Button>
                 <div className='action-container'>
                     <strong className={actionRemaining ? '' : 'disabled'}>

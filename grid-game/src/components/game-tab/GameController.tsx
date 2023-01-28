@@ -89,6 +89,7 @@ export default function GameController() {
             chars[i].game.isTurn = false;
             chars[i].game.round.actionTaken = false;
             chars[i].game.round.movementTaken = 0;
+            chars[i].game.meters.threat = 0;
         }
         return chars;
     }

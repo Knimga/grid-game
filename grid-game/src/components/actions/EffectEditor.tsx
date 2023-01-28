@@ -28,19 +28,25 @@ export default function EffectEditor(
     const isOverTime: boolean = ['hot','dot'].includes(effect.type);
     const durationMin: number = hasDuration ? 1 : 0;
     const durationMax: number = hasDuration ? 5 : 0;
-    const flatAmountMin: number = isOverTime ? effect.duration : 0;
-
-    const allowedEffectTypes = currentActionIntent === Intent.offense ? 
-        ['damage','debuff','dot'] : ['healing', 'buff', 'hot'];
+    const flatAmountMin: number = minimumFlatAmount();
+    const offensiveEffectTypes: EffectType[] = [EffectType.damage, EffectType.debuff, EffectType.dot];
+    const defensiveEffectTypes: EffectType[] = [EffectType.healing, EffectType.buff, EffectType.hot, EffectType.threat];
 
     const allowedTargetStats: string[] = ['buff','debuff'].includes(effect.type) ? 
         Object.keys(EffectTargetStat).filter(str => !['hp','mp'].includes(str)) : ['hp','mp'];
     
-    const effectTypeOptions: InputOption[] = makeInputOptions(allowedEffectTypes);
+    const effectTypeOptions: InputOption[] = makeInputOptions([...offensiveEffectTypes, ...defensiveEffectTypes]);
     const dmgTypeOptions: InputOption[] = makeInputOptions(Object.keys(DamageType));
     const targetStatOptions: InputOption[] = makeInputOptions(allowedTargetStats);
+    const affectsOptions: InputOption[] = makeInputOptions(['target', 'self']);
     const effectDmgOptions: InputOption[] = makeInputOptions(['roll','flatAmount']);
     const dieTypeOptions: InputOption[] = makeInputOptions(['4','6','8','10','12','20']);
+
+    function minimumFlatAmount(): number {
+        if(isOverTime) return effect.duration;
+        if(effect.type === 'threat') return -20;
+        return 0;
+    }
 
     function updateEffectType(newType: EffectType): void {
         if([EffectType.damage,EffectType.healing].includes(newType)) effect.duration = 0;
@@ -55,6 +61,10 @@ export default function EffectEditor(
 
     function updateTargetStat(newTargetStat: EffectTargetStat): void {
         update({...effect, targetStat: newTargetStat}, index)
+    }
+
+    function updateTargetSelf(newAffectsValue: string): void {
+        update({...effect, targetsSelf: newAffectsValue === 'self'}, index)
     }
 
     function updateDuration(newDuration: number): void {
@@ -78,19 +88,19 @@ export default function EffectEditor(
     }
 
     function updateNumDie(newNumDie: string): void {
-        if(effect.roll) {effect.roll.numDie = Number(newNumDie); update({...effect}, index);}
+        if(effect.roll) {effect.roll.numDie = Number(newNumDie); update({...effect}, index)}
     }
 
     function updateDieType(newDieType: string): void {
-        if(effect.roll) {effect.roll.dieSides = Number(newDieType); update({...effect}, index);}
+        if(effect.roll) {effect.roll.dieSides = Number(newDieType); update({...effect}, index)}
     }
 
     function updateMod(newMod: string): void {
-        if(effect.roll) {effect.roll.mod = Number(newMod); update({...effect}, index);}
+        if(effect.roll) {effect.roll.mod = Number(newMod); update({...effect}, index)}
     }
 
     function updateFlatAmount(newAmount: number): void {
-        if(effect.flatAmount !== undefined) {effect.flatAmount = newAmount; update({...effect}, index);}
+        if(effect.flatAmount !== undefined) {effect.flatAmount = newAmount; update({...effect}, index)}
     }
 
     function rollEditor(): JSX.Element {
@@ -142,6 +152,12 @@ export default function EffectEditor(
             selectedOpt={effect.targetStat}
             options={targetStatOptions}
             update={updateTargetStat}
+        />
+        <ClickSwitch 
+            label="Affects"
+            currentValue={effect.targetsSelf ? 'self' : 'target'}
+            options={affectsOptions}
+            update={updateTargetSelf}
         />
         <div className="effect-editor-field-row">
             <div className="effect-editor-field-label">

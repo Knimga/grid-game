@@ -1,0 +1,52 @@
+.char-square {
+    display: flex; flex-direction: column;
+    justify-content: flex-end; align-items: center;
+    cursor: pointer;
+    outline: 0.5px solid #a6a6a6;
+}
+.char-square:hover {
+    filter: brightness(1.2);
+    /*box-shadow: '0 0 15px 3px lightgray' <- this doesn't work? */
+}
+
+.portal-icon {font-size: 200%; color: lightblue;}
+.door-icon {font-size: 200%; color: lightgray;}
+
+.editor-square {outline: 0.1px solid gray;}
+
+.char-square-top, .char-square-bottom {
+    width: 100%;
+    display: flex; flex-direction: column;
+    align-items: center;
+}
+.char-square-top {height: 20%;}
+.char-square-bottom {height: 80%; justify-content: flex-end;}
+
+.char-square-top-row {
+    width: 100%; height: 100%;
+    display: flex; align-items: center;
+}
+
+.char-square-effects-row, .char-square-name-row {
+    width: 100%;
+    display: flex; align-items: center;
+}
+.char-square-effects-row {height: 100%;}
+/*.char-square-name-row {height: 20%;}*/
+
+.char-square-effect {
+    width: 20%; height: 90%;
+    display: flex; 
+    justify-content: center; align-items: center;
+    background-color: #303030;
+}
+.char-square-effect:hover {outline: 0.5px solid white;}
+
+.char-square-name {
+    width: 100%;
+    font-size: 55%; text-align: center;
+    overflow-wrap: break-word;
+    text-overflow: ellipsis;
+}
+
+.skull-icon {font-size: 75%; margin-bottom: 10%;}

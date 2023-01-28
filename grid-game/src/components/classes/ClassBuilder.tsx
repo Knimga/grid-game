@@ -2,17 +2,17 @@ import './classBuilder.css';
 
 import { useState } from 'react';
 
-import { FaSave, FaArrowCircleRight, FaArrowCircleLeft } from "react-icons/fa";
+import { FaSave } from "react-icons/fa";
 
+import ClassItemsList from './ClassItemsList';
 import NameInput from '../shared/NameInput';
 import ClickSwitch from '../shared/ClickSwitch';
 import NumStepper from '../shared/NumStepper';
 import AttrFocusSelector from './AttrFocusSelector';
-import ActionPane from '../shared/ActionPane';
-import ArmorPane from '../shared/ArmorPane';
+import PassiveEffectPane from './PassiveEffectPane';
 
-import { Class, Attributes, AttributeFocus, Action, Armor } from '../../types/types';
-import { ClassRole, AttributeEnum } from '../../types/enums';
+import { Class, Attributes, AttributeFocus, Action, Armor, PassiveEffect } from '../../types/types';
+import { ClassRole, AttributeEnum, ItemListType, DamageType, EffectTargetStat } from '../../types/enums';
 import { InputOption } from '../../types/uiTypes';
 
 import {makeInputOptions, cap} from '../../services/detailStrings';
@@ -27,6 +27,7 @@ interface ClassBuilderInput {
 
 export default function ClassBuilder({charClass, actions, armors, update, save}: ClassBuilderInput) {
     const [updatesSaved, setUpdatesSaved] = useState<boolean>(true);
+    const [selectedItemListType, setSelectedItemListType] = useState<ItemListType>(ItemListType.allWeapons);
     const classRoleOptions: InputOption[] = makeInputOptions(Object.keys(ClassRole));
     const attributes: AttributeEnum[] = Object.values(AttributeEnum);
 
@@ -77,13 +78,31 @@ export default function ClassBuilder({charClass, actions, armors, update, save}:
         }
     }
 
+    function removePassiveEffect(index: number): void {
+        charClass.passives.splice(index, 1);
+        updateClass({...charClass});
+    }
+
     function pbTotal(attrObj: Attributes): number {
         let total: number = 0;
         for (let i = 0; i < attributes.length; i++) total += attrObj[attributes[i]];
         return total;
     }
 
-    function sortedActions(): Action[] {return actions.sort((a,b) => a.name > b.name ? 1 : -1)}
+    const itemFunctions = {
+        removeAction: removeAction,
+        removeArmor: removeArmor,
+        addAction: addAction,
+        addArmor: addArmor
+    }
+
+    const passives: PassiveEffect[] = [
+        {
+            name: "Eagle Eye",
+            dmgType: DamageType.ranged,
+            effects:[{targetStat: EffectTargetStat.rangedAtk, amount: 1}]
+        }
+    ]
 
   return (
     <div className="class-builder-container">
@@ -121,89 +140,50 @@ export default function ClassBuilder({charClass, actions, armors, update, save}:
                 </div>                
             </div>
         </div>
+        <div className="class-builder-passives-row">
+            <span>Passives:</span>
+            {passives.map((p, index) => 
+                <PassiveEffectPane 
+                    passive={p} 
+                    index={index} 
+                    removePassiveEffect={removePassiveEffect}
+                />
+            )}
+        </div>
         <div className="class-builder-actions-armors">
             <div className="class-builder-column">
-                <div className="class-builder-actions">
-                    <div className="class-builder-list weapons-list">
-                        <div className="class-builder-list-header"><strong>Weapons</strong></div>
-                        <div className="class-builder-list-box">
-                            {charClass.actions.filter(action => action.isWeapon).map(action => {
-                                return <div className="class-builder-list-box-row" key={Math.random()}>
-                                    <ActionPane action={action} stats={null} />
-                                    <FaArrowCircleRight 
-                                        className="arrow-icons" 
-                                        onClick={() => removeAction(action._id)} 
-                                    />
-                                </div>
-                            })}
-                        </div>
-                    </div>
-                    <div className="class-builder-list abilities-list">
-                        <div className="class-builder-list-header"><strong>Abilities</strong></div>
-                        <div className="class-builder-list-box">
-                            {charClass.actions.filter(action => !action.isWeapon).map(action => {
-                                return <div className="class-builder-list-box-row" key={Math.random()}>
-                                    <ActionPane action={action} stats={null} />
-                                    <FaArrowCircleRight 
-                                        className="arrow-icons"
-                                        onClick={() => removeAction(action._id)}
-                                    />
-                            </div>
-                            })}
-                        </div>
-                    </div>
-                </div>
-                <div className="class-builder-armor">
-                    <div className="class-builder-list armor-list">
-                        <div className="class-builder-list-header"><strong>Armor</strong></div>
-                        <div className="class-builder-list-box">
-                            {charClass.armor.map(armor => 
-                                <div className="class-builder-list-box-row" key={Math.random()}>
-                                    <ArmorPane armor={armor} />
-                                    <FaArrowCircleRight 
-                                        className="arrow-icons"
-                                        onClick={() => removeArmor(armor._id)} 
-                                    />
-                                </div>
-                            )}
-                        </div>
-                    </div>
-                </div>
+                <ClassItemsList
+                    itemType={ItemListType.weapons}
+                    actions={charClass.actions}
+                    armors={[]}
+                    itemFunctions={itemFunctions}
+                />
+                <ClassItemsList
+                    itemType={ItemListType.abilities}
+                    actions={charClass.actions}
+                    armors={[]}
+                    itemFunctions={itemFunctions}
+                />
+                <ClassItemsList
+                    itemType={ItemListType.armor}
+                    actions={[]}
+                    armors={charClass.armor}
+                    itemFunctions={itemFunctions}
+                />
             </div>
             <div className="class-builder-column">
-                <div className="class-builder-actions">
-                    <div className="class-builder-list action-list">
-                        <div className="class-builder-list-header"><strong>Actions List</strong></div>
-                        <div className="class-builder-list-box">
-                            {sortedActions().map(action => 
-                                <div className="class-builder-list-box-row" key={Math.random()}>
-                                    <FaArrowCircleLeft 
-                                        className="arrow-icons"
-                                        onClick={() => addAction(action)}
-                                    />
-                                    <ActionPane action={action} stats={null} />
-                                </div>
-                            )}
-                        </div>
-                    </div>
+                <div className="class-item-sort-button-row">
+                    <button onClick={() => setSelectedItemListType(ItemListType.allWeapons)}>Weapons</button>
+                    <button onClick={() => setSelectedItemListType(ItemListType.allAbilities)}>Abilities</button>
+                    <button onClick={() => setSelectedItemListType(ItemListType.allArmors)}>Armor</button>
+                    <button>Passives</button>
                 </div>
-                <div className="class-builder-armor">
-                    <div className="class-builder-list armor-list">
-                        <div className="class-builder-list-header"><strong>Armor List</strong></div>
-                        <div className="class-builder-list-box">
-                            {armors.map(armor => 
-                                <div className="class-builder-list-box-row" key={Math.random()}>
-                                    <FaArrowCircleLeft 
-                                        className="arrow-icons"
-                                        onClick={() => addArmor(armor)}
-                                        key={Math.random()}
-                                    />
-                                    <ArmorPane armor={armor} key={Math.random()} />
-                                </div>
-                            )}
-                        </div>
-                    </div>
-                </div>
+                <ClassItemsList 
+                    itemType={selectedItemListType}
+                    actions={actions}
+                    armors={armors}
+                    itemFunctions={itemFunctions}
+                />
             </div>
         </div>
     </div>

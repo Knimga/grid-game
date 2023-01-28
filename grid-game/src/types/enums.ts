@@ -4,6 +4,15 @@ export enum CharType {
     beast = 'beast'
 }
 
+export enum ItemListType {
+    weapons = 'weapons',
+    abilities = 'abilities',
+    armor = 'armor',
+    allAbilities = 'allAbilities',
+    allWeapons = 'allWeapons',
+    allArmors = 'allArmors'
+}
+
 export enum AttributeEnum {
     strength = 'strength',
     finesse = 'finesse',
@@ -28,6 +37,9 @@ export enum ElementType {
 }
 
 export enum DamageType {
+    melee = 'melee',
+    ranged = 'ranged',
+    magic = 'magic',
     fire = 'fire',
     wind = 'wind',
     earth = 'earth',
@@ -35,12 +47,13 @@ export enum DamageType {
     water = 'water',
     holy = 'holy',
     poison = 'poison',
-    melee = 'melee',
-    ranged = 'ranged',
-    magic = 'magic'
+    lightning = 'lightning'
 }
 
 export enum DamageTypeColor {
+    melee = '#c2c2c2',
+    ranged = '#c7c78d',
+    magic = '#a9d9d9',
     fire = 'firebrick',
     wind = 'lightblue',
     earth = 'darkgoldenrod',
@@ -48,12 +61,13 @@ export enum DamageTypeColor {
     water = 'dodgerblue',
     holy = 'gold',
     poison = 'olivedrab',
-    melee = '#c2c2c2',
-    ranged = '#c7c78d',
-    magic = '#a9d9d9'
+    lightning = 'darkturquoise'
 }
 
 export enum DamageTypeDarkColor {
+    melee = '#202020',
+    ranged = '#202020',
+    magic = 'darkslategray',
     fire = '#300300',
     wind = '#165e80',
     earth = '#261e03',
@@ -61,9 +75,7 @@ export enum DamageTypeDarkColor {
     water = '#05123d',
     holy = '#474701',
     poison = '#021f00',
-    melee = '#202020',
-    ranged = '#202020',
-    magic = 'darkslategray'
+    lightning = '#007173'
 }
 
 export enum Intent {
@@ -84,7 +96,8 @@ export enum EffectType {
     debuff = 'debuff',
     damage = 'damage',
     hot = 'hot',
-    dot = 'dot'
+    dot = 'dot',
+    threat = 'threat'
 }
 
 export enum EffectTargetStat {

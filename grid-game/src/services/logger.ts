@@ -13,7 +13,9 @@ export const logger = {
     unseenMove: unseenMove,
     action: action,
     charDies: charDies,
-    victory: victory
+    partyIsDead: partyIsDead,
+    roomIsClear: roomIsClear,
+    bossIsDefeated: bossIsDefeated
 }
 
 export function newTurnLog(firstTurnChar: GameChar): TurnLog[] {
@@ -51,7 +53,7 @@ function unseenMove(moverName: string): string {
 }
 
 function action(actorName: string, actionResults: ActionResult[]): string[] {
-    const targetNames: string[] = actionResults.map(result => result.newChar.name);
+    const targetNames: string[] = actionResults.map(result => result.newTargetChar.name);
     if(targetNames.length > 1) {
         targetNames[targetNames.length - 1] = `and `+targetNames[targetNames.length - 1]
     }
@@ -59,7 +61,7 @@ function action(actorName: string, actionResults: ActionResult[]): string[] {
     let firstString: string = '';
 
     if(actionResults[0].action.isWeapon) {
-        firstString = `${actorName} attacks ${actionResults[0].newChar.name} with ${actionResults[0].action.name}`
+        firstString = `${actorName} attacks ${actionResults[0].newTargetChar.name} with ${actionResults[0].action.name}`
     } else {
         firstString = `${actorName} casted ${actionResults[0].action.name} on ${targetsString}`
     }
@@ -70,13 +72,12 @@ function action(actorName: string, actionResults: ActionResult[]): string[] {
         let string: string = '';
 
         if(actionResults[r].success) {
-            string += actionResults[r].newChar.name;
+            string += actionResults[r].newTargetChar.name;
 
             for (let e = 0; e < actionResults[r].effectResults.length; e++) {
                 const effectResult = actionResults[r].effectResults[e];
                 const amount: number = effectResult.effectiveAmount;
                 const isFlatAmount: boolean = effectResult.effect.flatAmount !== undefined;
-                //const atkRollString: string | undefined = actionResults[r].atkRollResult?.summary;
                 const dmgRollString: string | undefined = isFlatAmount ? 
                    '' : actionResults[r].dmgRollResult?.summary;
     
@@ -95,7 +96,7 @@ function action(actorName: string, actionResults: ActionResult[]): string[] {
             }
         } else {
             const atkRollResult: string = actionResults[r].atkRollResult ? `(${actionResults[r].atkRollResult?.result})` : '';
-            string = `${actionResults[0].action.name} MISSES ${atkRollResult} ${actionResults[r].newChar.name}`
+            string = `${actionResults[0].action.name} MISSES ${atkRollResult} ${actionResults[r].newTargetChar.name}`
         }
         
         actions.push(string);
@@ -104,21 +105,18 @@ function action(actorName: string, actionResults: ActionResult[]): string[] {
     return actions;
 }
 
-//react won't render html in strings... 
-/*function dmgDoneString(dmgAmount: number, rollString: string | undefined): string {
-    if(rollString) {
-        return `<strong title="${rollString}">${dmgAmount}</strong>`
-    } else {
-        return `<strong>${dmgAmount}</strong>`
-    }
-}*/
-
 function charDies(slayerName: string, slayeeName: string): string {
     return `${slayerName} has slain ${slayeeName}!`
 }
 
-function victory(victors: CharType): TurnLog {
-    const header: string = victors === CharType.player ? 'This room is clear of enemies... Doors may now be opened!'
-        : 'The players have lost...';
-    return {header: header, actions: []}
+function partyIsDead(): TurnLog {
+    return {header: 'The players have lost...', actions: []}
+}
+
+function roomIsClear(): TurnLog {
+    return {header: 'This room is clear of enemies... Doors may now be opened!', actions: []}
+}
+
+function bossIsDefeated(bossName: string): TurnLog {
+    return {header: `You have defeated the powerful ${bossName} and completed the dungeon!`, actions: []}
 }

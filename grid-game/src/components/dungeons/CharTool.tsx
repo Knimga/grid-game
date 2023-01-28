@@ -1,6 +1,8 @@
 import './charTool.css';
 
-import {useState} from 'react';
+import { useState } from 'react';
+
+import { FaSkull } from 'react-icons/fa';
 
 import Dropdown from '../shared/Dropdown';
 
@@ -11,11 +13,15 @@ import {BoardCharSelection, ToolType, InputOption} from '../../types/uiTypes';
 interface CharToolInput {
     toolIsActive: boolean;
     chars: BoardCharSelection[];
+    selectedCharIsBoss: boolean;
     selectTool: Function;
     setSelectedChar: Function;
+    setIsBoss: Function;
 }
 
-export default function CharTool({toolIsActive, chars, selectTool, setSelectedChar}: CharToolInput) {
+export default function CharTool({
+    toolIsActive, chars, selectedCharIsBoss, selectTool, setSelectedChar, setIsBoss
+}: CharToolInput) {
     const [selectedIndex, setSelectedIndex] = useState<number>(0);
     const style = {backgroundColor: chars.length ? chars[selectedIndex].color : ''};
     const sortedChars: BoardCharSelection[] = chars.sort(
@@ -45,7 +51,9 @@ export default function CharTool({toolIsActive, chars, selectTool, setSelectedCh
             className={`brush-box ${toolIsActive ? 'outline' : ''}`} 
             onClick={() => toggleActive()}
             style={style}
-        ></div>
+        >
+            {selectedCharIsBoss ? <FaSkull/> : ''}
+        </div>
         <Dropdown 
             label=""
             selectedOpt={charInputOptions.length ? charInputOptions[selectedIndex].enumValue: 'yup'}
@@ -53,7 +61,10 @@ export default function CharTool({toolIsActive, chars, selectTool, setSelectedCh
             update={update}
             hideLabel={true}
         />
-        
+        <div className='flex-align-center'>
+            <input type="checkbox" checked={selectedCharIsBoss} onChange={() => setIsBoss()} />
+            <small>Is boss?</small>
+        </div>
     </div>
   )
 }

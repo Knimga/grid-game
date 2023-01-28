@@ -41,7 +41,7 @@ export async function createOneClass(dbClass: DbClass): Promise<Class> {
     const actions: Action[] = await ActionsModel.find({_id: {$in: dbClass.actions}}).lean();
     const armor: Armor[] = await ArmorModel.find({_id: {$in: dbClass.armor}}).lean();
 
-    return {...dbClass, actions: actions, armor: armor}
+    return {...dbClass, actions: actions, armor: armor, passives: dbClass.passives}
 }
 
 export async function createClasses(): Promise<Class[]> {
@@ -64,7 +64,8 @@ export function packageClass(charClass: Class): DbClass {
         attributes: charClass.attributes,
         attributeFocus: charClass.attributeFocus,
         armor: charClass.armor.map(armor => armor._id),
-        actions: charClass.actions.map(action => action._id)
+        actions: charClass.actions.map(action => action._id),
+        passives: charClass.passives
     }
 }
 
@@ -121,12 +122,12 @@ export async function dbCharsToGameChars(dbChars: DbCharacter[]): Promise<GameCh
     return gameChars;
 }
 
-export function charToGameChar(char: Character, positionIndex?: number): GameChar {
+export function charToGameChar(char: Character, boardChar?: BoardChar): GameChar {
     return {
         ...char,
         game: {
             gameId: randId(),
-            positionIndex: positionIndex || -1,
+            positionIndex: boardChar?.index ?? -1,
             iniRoll: 0,
             isTurn: false,
             attributes: char.attributes,
@@ -135,9 +136,17 @@ export function charToGameChar(char: Character, positionIndex?: number): GameCha
                 movementTaken: 0,
                 actionTaken: false
             },
+            meters: {
+                threat: 0,
+                dmgDone: 0,
+                dmgTaken: 0,
+                healingDone: 0,
+                statEffectsDone: 0
+            },
             isVisible: false,
             hasBeenSeen: false,
-            activeEffects: []
+            activeEffects: [],
+            isBoss: boardChar?.isBoss ?? false
         }
     }
 }
@@ -182,7 +191,7 @@ export async function dungeonToGameDungeon(dungeon: Dungeon): Promise<GameDungeo
         for (let i = 0; i < board.chars.length; i++) {
             const boardChar: BoardChar = board.chars[i];
             const char: Character | undefined = charsOnThisBoard.find(c => c._id === boardChar._id);
-            if(char) gameChars.push(charToGameChar(char, boardChar.index));
+            if(char) gameChars.push(charToGameChar(char, boardChar));
         }
 
         return {...board, chars: gameChars, exploredAreas: []}

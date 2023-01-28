@@ -13,7 +13,7 @@ import DoorPane from './DoorPane';
 import { blankBoard, newDoor, doorToBoardMap, doorNameFormat } from '../../services/boards';
 import { doorInputOptions } from '../../services/detailStrings';
 
-import { Dungeon, Board, Door } from '../../types/types';
+import { Dungeon, Board, BoardChar, Door } from '../../types/types';
 import { ToolType, BoardCharSelection, DoorToBoardMap, InputOption } from '../../types/uiTypes';
 
 interface DungeonEditInput {
@@ -30,6 +30,7 @@ export default function DungeonEdit(
     const [selectedBoard, setSelectedBoard] = useState<Board>(dungeon.boards[0]);
     const [selectedTool, setSelectedTool] = useState<ToolType>(ToolType.wall);
     const [selectedChar, setSelectedChar] = useState<BoardCharSelection>(boardCharSelections[0]);
+    const [selectedCharIsBoss, setSelectedCharIsBoss] = useState<boolean>(false);
     const doorSelectOptions: InputOption[] = doorInputOptions(dungeon);
     const doorBoardMap: DoorToBoardMap[] = doorToBoardMap(dungeon);
 
@@ -92,6 +93,12 @@ export default function DungeonEdit(
         updateDungeon(dungeon);
     }
 
+    function updateSelectedCharIsBoss(newValue?: boolean): void {
+        if(selectedTool === ToolType.character) {
+            setSelectedCharIsBoss(newValue ?? !selectedCharIsBoss)
+        }
+    }
+
     function clickSquare(index: number): void {
         const objectPlaceable: boolean = !selectedBoard.walls.includes(index);
         switch(selectedTool) {
@@ -120,7 +127,11 @@ export default function DungeonEdit(
             if(charOnIndex) {
                 const indexToRemove: number = selectedBoard.chars.indexOf(charOnIndex);
                 selectedBoard.chars.splice(indexToRemove, 1);
-            } else {selectedBoard.chars.push({...selectedChar, index: index})}
+            } else {
+                const newChar: BoardChar = {...selectedChar, index: index}
+                if(selectedCharIsBoss) newChar.isBoss = true;
+                selectedBoard.chars.push(newChar);
+            }
 
             dungeon.boards[selectedBoardIndex()] = selectedBoard;
             updateDungeon(dungeon);
@@ -196,8 +207,10 @@ export default function DungeonEdit(
             <CharTool
                 toolIsActive={selectedTool === ToolType.character}
                 chars={boardCharSelections}
+                selectedCharIsBoss={selectedCharIsBoss}
                 selectTool={setSelectedTool}
                 setSelectedChar={setSelectedChar}
+                setIsBoss={updateSelectedCharIsBoss}
             />
             <PortalTool
                 toolIsActive={selectedTool === ToolType.portal}
