@@ -75,7 +75,7 @@ function threatCalc(char: GameChar): number {
     let baseThreat: number = fl(char.game.meters.dmgDone * 0.4) 
         + fl(char.game.meters.healingDone * 0.6) + fl(char.game.meters.statEffectsDone * 0.3);
     if(baseThreat < 1) baseThreat = 1;
-    return fl(baseThreat * char.game.stats.threatMuliplier);
+    return fl(baseThreat * char.game.stats.threatMultiplier);
 }
 
 function fl(n: number): number {return Math.floor(n)}

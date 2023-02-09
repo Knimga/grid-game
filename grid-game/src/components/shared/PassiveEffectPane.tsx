@@ -2,7 +2,7 @@ import './passiveEffectPane.css';
 
 import { FaTrashAlt } from "react-icons/fa";
 
-import { passiveEffectString } from '../../services/detailStrings';
+import { passiveEffectString, randId } from '../../services/detailStrings';
 
 import { PassiveEffect } from '../../types/types';
 import { DamageTypeColor } from '../../types/enums';
@@ -10,10 +10,17 @@ import { DamageTypeColor } from '../../types/enums';
 interface PassiveEffectPaneInput {
     passive: PassiveEffect;
     index: number;
-    removePassiveEffect: Function;
+    removePassiveEffect?: Function;
 }
 
 export default function PassiveEffectPane({passive, index, removePassiveEffect}: PassiveEffectPaneInput) {
+
+    function deleteButton(): JSX.Element {
+        if(!removePassiveEffect) return <></>;
+        return <div className="passive-effect-icon-container">
+            <FaTrashAlt className="clickable-icons" onClick={() => removePassiveEffect(index)} />
+        </div>
+    }
 
   return (
     <div className="passive-effect-pane">
@@ -22,13 +29,10 @@ export default function PassiveEffectPane({passive, index, removePassiveEffect}:
                 <small>{passive.name}</small>
             </div>
             <div className="passive-effect-values">
-                {passive.effects.map(e => <small>{passiveEffectString(e)}</small>)}
+                {passive.effects.map(e => <small key={randId()}>{passiveEffectString(e)}</small>)}
             </div>
         </div>
-        
-        <div className="passive-effect-icon-container">
-            <FaTrashAlt className="clickable-icons" onClick={() => removePassiveEffect(index)} />
-        </div>
+        {deleteButton()}
     </div>
   )
 }

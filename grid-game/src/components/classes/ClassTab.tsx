@@ -68,7 +68,7 @@ export default function ClassTab() {
                     newClasses.push(newClass)
                 } else {newClasses[classIndex] = newClass}
 
-                setClasses(newClasses);
+                setClasses(newClasses.sort((a: Class, b: Class) => a.name > b.name ? 1 : -1));
                 setSelectedClass(newClass);
             } else {console.log('no char returned from save operation')} 
         }
@@ -109,6 +109,9 @@ export default function ClassTab() {
                     save={saveClass}
                 /> 
             : ''}
+            {selectedClass ? <div className="actions-effects-editor-container">
+                
+            </div> : ''}
         </div>
     </div>
   )

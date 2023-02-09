@@ -10,6 +10,7 @@ export interface DbClass {
     armor: string[];
     actions: string[];
     passives: PassiveEffect[];
+    availableInGame: boolean;
 }
 
 export interface DbCharacter {
@@ -18,6 +19,7 @@ export interface DbCharacter {
     name: string;
     class: string;
     level: number;
+    xp: number;
     type: CharType;
     pointBuy: Attributes;
 }

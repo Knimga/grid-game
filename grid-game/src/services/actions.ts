@@ -1,6 +1,6 @@
 import { rollDie, rollD20 } from './roller';
 
-import { getAtkBonus, isElemental, getBonus } from './charCalc';
+import { getAtkBonus, isElemental, getBonus, applyStatEffect, applyAttrEffect } from './charCalc';
 import { updateMeters } from './meters';
 
 import { RollResult, GameChar, Action, ActionResult, Effect, ActiveEffect, Stats } from '../types/types';
@@ -22,22 +22,22 @@ export function applyActionResults(actor: GameChar, results: ActionResult[], old
 
 export function resolveAction(actor: GameChar, targets: GameChar[], action: Action): ActionResult[] {
     const autoSuccess: boolean = getTargetTypes(action.intent, actor.type).includes(actor.type);
-
     const blankResults: ActionResult[] = targets.map(targetChar => blankActionResult(targetChar, action));
 
     if(autoSuccess) {
-        blankResults.forEach(result => result.success = true)
-    } else {
-        const atkRoll: RollResult = rollD20(getAtkBonus(actor.game.stats, action.dmgType));
+        blankResults.forEach(result => result.success = true);
+        return applyEffects(actor, blankResults, action);
+    } 
 
-        for (let r = 0; r < blankResults.length; r++) {
-            const targetAC: number = isElemental(action.dmgType) || action.dmgType === DamageType.magic ? 
-            blankResults[r].newTargetChar.game.stats.mac : blankResults[r].newTargetChar.game.stats.ac;
-            blankResults[r].atkRollResult = atkRoll;
-            if(atkRoll.result > targetAC) blankResults[r].success = true;
-        }
+    const atkRoll: RollResult = rollD20(getAtkBonus(actor.game.stats, action.dmgType));
+
+    for (let r = 0; r < blankResults.length; r++) {
+        const isMagic: boolean = isElemental(action.dmgType) || action.dmgType === DamageType.magic;
+        const targetAC: number = blankResults[r].newTargetChar.game.stats[(isMagic ? 'mac' : 'ac')];
+        blankResults[r].atkRollResult = atkRoll;
+        if(atkRoll.result > targetAC) blankResults[r].success = true;
     }
-
+    
     return applyEffects(actor, blankResults, action);
 }
 
@@ -54,13 +54,25 @@ function applyEffects(actor: GameChar, results: ActionResult[], action: Action):
         }
     }
 
-    if(targetSelfEffects.length && !results.find(r => r.newTargetChar.game.gameId === actor.game.gameId)) {
-        const selfResult: ActionResult = blankActionResult(actor, action);
-        results.push(selfResult);
-        const selfIndex: number = results.indexOf(selfResult);
+    if(targetSelfEffects.length && results.some(r => r.success)) {
+        const originalSelfResult: ActionResult | undefined = results.find(
+            r => r.newTargetChar.game.gameId === actor.game.gameId);
+        let newSelfResult: ActionResult = blankActionResult(actor, action);
+
+        if(originalSelfResult) newSelfResult = {...originalSelfResult};
+        
+        newSelfResult.success = true;
+        
         for (let e = 0; e < targetSelfEffects.length; e++) {
-            results[selfIndex].dmgRollResult = rollDmgOrHealing(actor, action, targetSelfEffects[e]);
-            results[selfIndex] = applyEffect(actor, results[selfIndex], action, targetSelfEffects[e]);
+            newSelfResult.dmgRollResult = rollDmgOrHealing(actor, action, targetSelfEffects[e]);
+            newSelfResult = applyEffect(actor, newSelfResult, action, targetSelfEffects[e]);
+        }
+
+        if(!originalSelfResult) {
+            results.push(newSelfResult)
+        } else {
+            const selfIndex: number = results.indexOf(originalSelfResult);
+            results[selfIndex] = newSelfResult;
         }
     }
 
@@ -68,10 +80,9 @@ function applyEffects(actor: GameChar, results: ActionResult[], action: Action):
 }
 
 function rollDmgOrHealing(actor: GameChar, action: Action, effect: Effect): RollResult | undefined {
-    if(effect.roll) {
-        const bonus: number = getBonus(actor.game.stats, effect, action.isWeapon, action.hands ?? 1);
-        return rollDie({...effect.roll, mod: effect.roll.mod + bonus});
-    } else {return undefined}
+    if(!effect.roll) return undefined;
+    const bonus: number = getBonus(actor.game.stats, effect, action.isWeapon, action.hands ?? 1);
+    return rollDie({...effect.roll, mod: effect.roll.mod + bonus});
 }
 
 function applyEffect(actor: GameChar, result: ActionResult, action: Action, effect: Effect): ActionResult {
@@ -83,14 +94,13 @@ function applyEffect(actor: GameChar, result: ActionResult, action: Action, effe
         case EffectType.hot: return applyHotOrDot(actor, result, effect);
         case EffectType.dot: return applyHotOrDot(actor, result, effect);
         case EffectType.threat: return applyThreatEffect(actor, result, effect);
-        default: console.log('no effect valid type!'); return result;
+        default: console.log('no valid effect type!'); return result;
     }
 }
 
 function applyDamage(
     attacker: GameChar, result: ActionResult, effect: Effect, isWeapon: boolean, hands: number
 ): ActionResult {
-    const newResult: ActionResult = result;
     const getsMagicDr: boolean = !isWeapon && (isElemental(effect.dmgType) || effect.dmgType === DamageType.magic);
     const dmgBonus: number = getBonus(attacker.game.stats, effect, isWeapon ?? false, hands ?? 1);
     const hpMp: (keyof Stats) = effect.targetStat === EffectTargetStat.hp ? 'hp' : 'mp';
@@ -105,28 +115,27 @@ function applyDamage(
 
     if(!result.dmgRollResult && effect.flatAmount === undefined) console.log('omg i cant do damage');
 
-    if(newResult.newTargetChar.game.stats[hpMp] - effectiveDamage < 0) {
-        effectiveDamage = newResult.newTargetChar.game.stats[hpMp];
-        newResult.newTargetChar.game.stats[hpMp] = 0;
+    if(result.newTargetChar.game.stats[hpMp] - effectiveDamage < 0) {
+        effectiveDamage = result.newTargetChar.game.stats[hpMp];
+        result.newTargetChar.game.stats[hpMp] = 0;
     } else {
-        newResult.newTargetChar.game.stats[hpMp] -= effectiveDamage;
+        result.newTargetChar.game.stats[hpMp] -= effectiveDamage;
     }
 
-    if(newResult.newTargetChar.game.stats.hp <= 0) newResult.charDiedThisTurn = true;
+    if(result.newTargetChar.game.stats.hp <= 0) result.charDiedThisTurn = true;
 
-    newResult.totalDmgDone += effectiveDamage;
-    newResult.effectResults.push({
+    result.totalDmgDone += effectiveDamage;
+    result.effectResults.push({
         effectiveAmount: effectiveDamage, 
         effect: effect,
         castById: attacker.game.gameId
     });
 
-    return newResult;
+    return result;
 }
 
 function applyHeal(caster: GameChar, result: ActionResult, effect: Effect): ActionResult {
-    const newResult: ActionResult = result;
-    const targetChar: GameChar = newResult.newTargetChar;
+    const targetChar: GameChar = result.newTargetChar;
     const healingBonus: number = getBonus(caster.game.stats, effect, false, 1);
     const hpMp: (keyof Stats) = effect.targetStat === EffectTargetStat.hp ? 'hp' : 'mp';
 
@@ -144,91 +153,97 @@ function applyHeal(caster: GameChar, result: ActionResult, effect: Effect): Acti
         if(targetChar.game.stats[hpMp] > targetChar.stats[hpMp]) targetChar.game.stats[hpMp] = targetChar.stats[hpMp];
     }
 
-    newResult.totalHealingDone += effectiveHealing;
-    newResult.effectResults.push({
+    result.totalHealingDone += effectiveHealing;
+    result.effectResults.push({
         effect: effect,
         effectiveAmount: effectiveHealing, 
         castById: caster.game.gameId
     });
 
-    return newResult;
+    return result;
 }
 
 function applyBuffOrDebuff(caster: GameChar, result: ActionResult, effect: Effect, isWeapon?: boolean): ActionResult {
-    const newResult: ActionResult = result;
-
-    if(!effectAlreadyApplied(
+    if(effectAlreadyApplied(
         result.newTargetChar.game.activeEffects, caster.game.gameId, result.action.name, effect.targetStat)
-    ) {
-        const directionMod: number = effect.type === EffectType.buff ? 1 : -1;
-        const bonus: number = getBonus(caster.game.stats, effect, isWeapon ?? false, 1);
-        let amount: number = 0;
+    ) return result;
+    
+    let char: GameChar = result.newTargetChar;
+    const directionMod: number = effect.type === EffectType.buff ? 1 : -1;
+    const bonus: number = getBonus(caster.game.stats, effect, isWeapon ?? false, 1);
+    let amount: number = 0;
 
-        if(result.dmgRollResult) amount = result.dmgRollResult.result * directionMod;
-        if(effect.flatAmount !== undefined) amount = (effect.flatAmount + bonus) * directionMod;
+    if(result.dmgRollResult) amount = result.dmgRollResult.result * directionMod;
+    if(effect.flatAmount !== undefined) amount = (effect.flatAmount + bonus) * directionMod;
 
-        if(!result.dmgRollResult && effect.flatAmount === undefined) console.log('omg i cant buff/debuff');
-        
-        const newActiveEffect: ActiveEffect = {
-            ...effect,
-            effectiveAmount: amount, 
-            durationElapsed: 0,
-            castById: caster.game.gameId,
-            actionName: result.action.name
-        }
-
-        newResult.newTargetChar.game.activeEffects.push(newActiveEffect);
-        newResult.newTargetChar = applyStatEffect(newResult.newTargetChar, effect.targetStat, amount);
-        newResult.totalStatEffects += amount;
-        newResult.effectResults.push({
-            effectiveAmount: amount, 
-            effect: effect,
-            castById: caster.game.gameId
-        });
+    if(!result.dmgRollResult && effect.flatAmount === undefined) console.log('omg i cant buff/debuff');
+    
+    const newActiveEffect: ActiveEffect = {
+        ...effect,
+        effectiveAmount: amount, 
+        durationElapsed: 0,
+        castById: caster.game.gameId,
+        actionName: result.action.name
     }
 
-    return newResult;
+    switch(effect.targetStat) {
+        case 'strength': char = applyAttrEffect(char, 'strength', amount); break;
+        case 'finesse': char = applyAttrEffect(char, 'finesse', amount); break;
+        case 'toughness': char = applyAttrEffect(char, 'toughness', amount); break;
+        case 'mind': char = applyAttrEffect(char, 'mind', amount); break;
+        case 'spirit': char = applyAttrEffect(char, 'spirit', amount); break;
+        default: char.game.stats = applyStatEffect(char.game.stats, effect.targetStat, amount); break;
+    }
+
+    result.newTargetChar = char;
+    result.newTargetChar.game.activeEffects.push(newActiveEffect);
+    result.totalStatEffects += amount;
+    result.effectResults.push({
+        effectiveAmount: amount, 
+        effect: effect,
+        castById: caster.game.gameId
+    });
+    
+
+    return result;
 }
 
 function applyHotOrDot(caster: GameChar, result: ActionResult, effect: Effect): ActionResult {
-    const newResult: ActionResult = result;
-    
-    if(!effectAlreadyApplied(
+    if(effectAlreadyApplied(
         result.newTargetChar.game.activeEffects, caster.game.gameId, result.action.name, effect.targetStat)
-    ) {
-            const newActiveEffect: ActiveEffect = {
-            ...effect, 
-            effectiveAmount: 0, 
-            durationElapsed: 0,
-            castById: caster.game.gameId,
-            actionName: result.action.name
-        }
-        
-        newResult.newTargetChar.game.activeEffects.push(newActiveEffect);
-        newResult.effectResults.push({
-            effectiveAmount: 0, 
-            effect: effect,
-            castById: caster.game.gameId
-        });    
-    }
+    ) return result;
 
-    return newResult;
+    const newActiveEffect: ActiveEffect = {
+        ...effect, 
+        effectiveAmount: 0, 
+        durationElapsed: 0,
+        castById: caster.game.gameId,
+        actionName: result.action.name
+    }
+        
+    result.newTargetChar.game.activeEffects.push(newActiveEffect);
+    result.effectResults.push({
+        effectiveAmount: 0, 
+        effect: effect,
+        castById: caster.game.gameId
+    });    
+
+    return result;
 }
 
 export function applyThreatEffect(caster: GameChar, result: ActionResult, effect: Effect): ActionResult {
+    const targetThreat: number = result.newTargetChar.game.meters.threat;
     let amount: number = 0, effectiveAmount = 0;
     let bonus: number = getBonus(caster.stats, effect, result.action.isWeapon, result.action.hands ?? 1);
-    let targetThreat: number = result.newTargetChar.game.meters.threat;
 
-    if(effect.roll) amount = rollDie(effect.roll).result;
+    if(result.dmgRollResult) amount = result.dmgRollResult.result;
     if(effect.flatAmount) amount = effect.flatAmount;
-    if(amount < 0) bonus = -bonus; //threat effects can be negative
 
-    amount += bonus;
-    effectiveAmount = (targetThreat + amount < 0) ? targetThreat : amount;
-    targetThreat += effectiveAmount;
+    amount += (amount < 0) ? -bonus : bonus;//threat effects can be negative
+    effectiveAmount = (targetThreat + amount < 0) ? -targetThreat : amount;
 
-    result.newTargetChar.game.meters.threat = targetThreat;
+    result.newTargetChar.game.meters.threat += effectiveAmount;
+
     result.effectResults.push({
         effectiveAmount: effectiveAmount, 
         effect: effect,
@@ -238,85 +253,44 @@ export function applyThreatEffect(caster: GameChar, result: ActionResult, effect
     return result;
 }
 
-export function applyStatEffect(targetChar: GameChar, targetStat: EffectTargetStat, effectAmount: number): GameChar {
-    const stats: Stats = targetChar.game.stats;
-
-    //'threat' effects will never hit this! They are not a buff or debuff
-    switch(targetStat) {
-        case 'ac': stats.ac += effectAmount; break;
-        case 'mac': stats.mac += effectAmount; break;
-        case 'mvt': if(stats.mvt + effectAmount > 0) {stats.mvt += effectAmount} else {stats.mvt = 0}
-            break;
-        case 'allAtkRolls': 
-            stats.dmgTypes.melee.atk += effectAmount;
-            stats.dmgTypes.ranged.atk += effectAmount;
-            stats.dmgTypes.magic.atk += effectAmount;
-            break;
-        case 'allDmgRolls': 
-            stats.dmgTypes.melee.dmg += effectAmount;
-            stats.dmgTypes.ranged.dmg += effectAmount;
-            stats.dmgTypes.magic.dmg += effectAmount;
-            break;
-        case 'allDr':
-            stats.dmgTypes.melee.dr += effectAmount;
-            stats.dmgTypes.ranged.dr += effectAmount;
-            stats.dmgTypes.magic.dr += effectAmount;
-        break;
-        case 'threatMultiplier': stats.threatMuliplier += effectAmount; break;
-        case 'meleeAtk': stats.dmgTypes.melee.atk += effectAmount; break;
-        case 'rangedAtk': stats.dmgTypes.ranged.atk += effectAmount; break;
-        case 'magicAtk': stats.dmgTypes.magic.atk += effectAmount; break;
-        case 'meleeDmg': stats.dmgTypes.melee.dmg += effectAmount; break;
-        case 'rangedDmg': stats.dmgTypes.ranged.dmg += effectAmount; break;
-        case 'magicDmg': stats.dmgTypes.magic.dmg += effectAmount; break;
-        case 'meleeDr': stats.dmgTypes.melee.dr += effectAmount; break;
-        case 'rangedDr': stats.dmgTypes.ranged.dr += effectAmount; break;
-        case 'magicDr': stats.dmgTypes.magic.dr += effectAmount; break;
-        case 'bonusHealingDone': stats.bonusHealingDone += effectAmount; break;
-        case 'bonusHealingRcvd': stats.bonusHealingRcvd += effectAmount; break;
-        case 'shadowDmg': stats.dmgTypes.shadow.dmg += effectAmount; break;
-        default: console.log('no targetStat!');
-    }
-
-    targetChar.game.stats = stats;
-
-    return targetChar;
-}
-
 export function hotTick(caster: GameChar, effect: Effect): {amount: number, rollResult?: RollResult} {
-    if(effect.type === EffectType.hot) {
-        const dmgMod: number = getBonus(caster.game.stats, effect, false, 1);
+    if(effect.type !== EffectType.hot) return {amount: 0}
 
-        if(effect.roll) {
-            const totalMod: number = Math.floor((effect.roll.mod + dmgMod) / effect.duration);
-            const healingRoll: RollResult = rollDie({...effect.roll, mod: totalMod});
-            return {amount: healingRoll.result, rollResult: healingRoll}
-        } else if(effect.flatAmount !== undefined) {
-            const totalHealingAmount: number = effect.flatAmount + dmgMod;
-            const tickAmount: number = Math.floor(totalHealingAmount / effect.duration)
-            return {amount: tickAmount}
-        } else {return {amount: 0}}
+    const dmgMod: number = getBonus(caster.game.stats, effect, false, 1);
 
+    if(effect.roll) {
+        const totalMod: number = Math.floor((effect.roll.mod + dmgMod) / effect.duration);
+        const healingRoll: RollResult = rollDie({...effect.roll, mod: totalMod});
+        return {amount: healingRoll.result, rollResult: healingRoll}
+    } else if(effect.flatAmount !== undefined) {
+        const totalHealingAmount: number = effect.flatAmount + dmgMod;
+        const tickAmount: number = Math.floor(totalHealingAmount / effect.duration);
+        return {amount: tickAmount}
     } else {return {amount: 0}}
 }
 
 export function dotTick(caster: GameChar, target: GameChar, effect: Effect): number {
-    if(effect.type === EffectType.dot) {
-        const dmgMod: number = getBonus(caster.game.stats, effect, false, 1);
-        const targetDr: number = target.game.stats.dmgTypes[effect.dmgType].dr;
+    if(effect.type !== EffectType.dot) return 0;
 
-        if(effect.roll) {
-            const totalMod: number = effect.roll.mod + dmgMod;
-            const damageRoll: RollResult = rollDie({...effect.roll, mod: totalMod});
-            let result: number = damageRoll.result - targetDr;
-            return result < 1 ? 1 : result;
-        } else if(effect.flatAmount !== undefined) {
-            const totalAmount: number = effect.flatAmount + dmgMod;
-            let tickAmount: number = Math.floor(totalAmount / effect.duration);
-            tickAmount -= targetDr;
-            return tickAmount < 1 ? 1 : tickAmount;
-        } else {return 0}
+    const dmgMod: number = getBonus(caster.game.stats, effect, false, 1);
+    const targetDr: number = target.game.stats.dmgTypes[effect.dmgType].dr;
+
+    if(effect.roll) {
+        const totalMod: number = effect.roll.mod + dmgMod;
+        const damageRoll: RollResult = rollDie({...effect.roll, mod: totalMod});
+        let result: number = damageRoll.result - targetDr;
+        return result < 1 ? 1 : result;
+    } else if(effect.flatAmount !== undefined) {
+        const totalAmount: number = effect.flatAmount + dmgMod;
+        let tickAmount: number = Math.floor(totalAmount / effect.duration);
+        tickAmount -= targetDr;
+        return tickAmount < 1 ? 1 : tickAmount;
     } else {return 0}
+
+}
+
+export function isPositiveEffect(effectType: EffectType): boolean {
+    return ['healing', 'buff', 'hot', 'threat'].includes(effectType)
 }
 
 export function isAoe(action: Action): boolean {

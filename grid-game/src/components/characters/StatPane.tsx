@@ -1,25 +1,22 @@
 import './statPane.css';
 
 import DmgTypeStatPane from '../shared/DmgTypeStatPane';
+import PassiveEffectPane from '../shared/PassiveEffectPane';
 
-import { Stats } from '../../types/types';
+import { charThreatString, randId } from '../../services/detailStrings';
+
+import { PassiveEffect, Stats } from '../../types/types';
 import { DamageType } from '../../types/enums';
 
-interface StatPaneInput {stats: Stats}
+interface StatPaneInput {stats: Stats, passives: PassiveEffect[]}
 
-export default function StatPane({stats}: StatPaneInput) {
+export default function StatPane({stats, passives}: StatPaneInput) {
 
     function listRow(label: string, value: string | number): JSX.Element {
         return <div className="list-row">
             <div className="list-label">{`${label}:`}</div>
             <div className="list-value">{value}</div>
         </div>
-    }
-    
-    function threatString(threat: number): string {
-        const diffValue: number = (threat - 1) * 100;
-        const operator: string = diffValue >= 0 ? '+' : '-';
-        return `${operator}${diffValue.toFixed(0)}%`
     }
 
   return (
@@ -29,10 +26,10 @@ export default function StatPane({stats}: StatPaneInput) {
             {listRow('MP', `${stats.mp} (+${stats.mpRegen})`)}
             {listRow('AC', stats.ac)}
             {listRow('MAC', stats.mac)}
-            {listRow('Initiative', stats.ac)}
+            {listRow('Initiative', stats.ini)}
             {listRow('Movement', stats.mvt)}
             {listRow('Healing Done/Rcvd', `${stats.bonusHealingDone}/${stats.bonusHealingRcvd}`)}
-            {listRow('Threat', threatString(stats.threatMuliplier))}
+            {listRow('Threat', charThreatString(stats.threatMultiplier))}
         </div>
         <div className="atk-bonus-list">
             <DmgTypeStatPane dmgType={DamageType.melee} baseBonuses={stats.dmgTypes.melee}/>
@@ -48,6 +45,9 @@ export default function StatPane({stats}: StatPaneInput) {
             <DmgTypeStatPane dmgType={DamageType.holy} baseBonuses={stats.dmgTypes.holy}/>
             <DmgTypeStatPane dmgType={DamageType.poison} baseBonuses={stats.dmgTypes.poison}/>
             <DmgTypeStatPane dmgType={DamageType.lightning} baseBonuses={stats.dmgTypes.lightning} />
+        </div>
+        <div className="passive-list">
+            {passives.map((p, index) => <PassiveEffectPane passive={p} index={index} key={randId()}/>)}
         </div>
     </div>
   )

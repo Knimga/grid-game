@@ -13,7 +13,9 @@ const schema = new Schema<DbClass>({
     },
     attributeFocus: Array,
     actions: Array,
-    armor: Array
+    armor: Array,
+    passives: Array,
+    availableInGame: Boolean
 });
 
 export default model<DbClass>('classes', schema);

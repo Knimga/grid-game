@@ -51,9 +51,9 @@ export enum DamageType {
 }
 
 export enum DamageTypeColor {
-    melee = '#c2c2c2',
+    melee = '#a9a9a9',
     ranged = '#c7c78d',
-    magic = '#a9d9d9',
+    magic = '#c1b4de',
     fire = 'firebrick',
     wind = 'lightblue',
     earth = 'darkgoldenrod',
@@ -67,7 +67,7 @@ export enum DamageTypeColor {
 export enum DamageTypeDarkColor {
     melee = '#202020',
     ranged = '#202020',
-    magic = 'darkslategray',
+    magic = '#8978ad',
     fire = '#300300',
     wind = '#165e80',
     earth = '#261e03',
@@ -108,6 +108,11 @@ export enum EffectTargetStat {
     ac = 'ac',
     mac = 'mac',
     mvt = 'mvt',
+    strength = 'strength',
+    finesse = 'finesse',
+    toughness = 'toughness',
+    mind = 'mind',
+    spirit = 'spirit',
     bonusHealingDone = 'bonusHealingDone',
     bonusHealingRcvd = 'bonusHealingRcvd',
     threatMuliplier = 'threatMultiplier',
@@ -143,5 +148,8 @@ export enum EffectTargetStat {
     holyDr = 'holyDr',
     poisonAtk = 'poisonAtk',
     poisonDmg = 'poisonDmg',
-    poisonDr = 'poisonDr'
+    poisonDr = 'poisonDr',
+    lightningAtk = 'lightningAtk',
+    lightningDmg = 'lightningDmg',
+    lightningDr = 'lightningDr'
 }

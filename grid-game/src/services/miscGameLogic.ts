@@ -1,6 +1,7 @@
 import { getInRangeIndices } from "./ranger";
 import { rand } from "./roller";
-import { hotTick, dotTick, applyStatEffect } from "./actions";
+import { hotTick, dotTick } from "./actions";
+import { applyStatEffect } from "./charCalc";
 import { dmgDoneAndTaken, healingDone } from './meters';
 
 import { GameChar, GameBoard, ActiveEffect } from "../types/types";
@@ -41,63 +42,64 @@ export function setNewRound(oldChars: GameChar[]): GameChar[] {
 
     for (let c = 0; c < newChars.length; c++) {
         let char: GameChar = newChars[c];
+        if(isDead(char)) continue;
+        
         char.game.round.actionTaken = false;
         char.game.round.movementTaken = 0;
+        char.game.stats.hp += char.game.stats.hpRegen;
+        char.game.stats.mp += char.game.stats.mpRegen;      
 
-        if(char.game.stats.hp > 0) {
-            char.game.stats.hp += char.game.stats.hpRegen;
-            char.game.stats.mp += char.game.stats.mpRegen;      
-    
-            const activeEffects: ActiveEffect[] = char.game.activeEffects;
-    
-            for (let e = 0; e < activeEffects.length; e++) {
-                activeEffects[e].durationElapsed++;
-    
-                if(activeEffects[e].type === 'hot') {
-                    const castByChar: GameChar | undefined = newChars.find(char => char.game.gameId === activeEffects[e].castById);
-                    if(castByChar) {
-                        const effectiveHealingTick: number = hotTick(castByChar, activeEffects[e]).amount;
-                        const bonusHealingTick: number = Math.floor(char.game.stats.bonusHealingRcvd / activeEffects[e].duration);
-                        const totalTick: number = effectiveHealingTick + bonusHealingTick;
-                        if(activeEffects[e].targetStat === 'hp') char.game.stats.hp += totalTick;
-                        if(activeEffects[e].targetStat === 'mp') char.game.stats.mp += totalTick;
-                        newChars = healingDone(newChars, activeEffects[e].castById, effectiveHealingTick);
-                    }
-                } else if(activeEffects[e].type === 'dot') {
-                    const castByChar: GameChar | undefined = newChars.find(
-                        char => char.game.gameId === activeEffects[e].castById
+        const activeEffects: ActiveEffect[] = char.game.activeEffects;
+
+        for (let e = 0; e < activeEffects.length; e++) {
+            activeEffects[e].durationElapsed++;
+
+            if(activeEffects[e].type === 'hot') {
+                const castByChar: GameChar | undefined = newChars.find(char => char.game.gameId === activeEffects[e].castById);
+                if(castByChar) {
+                    const effectiveHealingTick: number = hotTick(castByChar, activeEffects[e]).amount;
+                    const bonusHealingTick: number = Math.floor(char.game.stats.bonusHealingRcvd / activeEffects[e].duration);
+                    const totalTick: number = effectiveHealingTick + bonusHealingTick;
+                    if(activeEffects[e].targetStat === 'hp') char.game.stats.hp += totalTick;
+                    if(activeEffects[e].targetStat === 'mp') char.game.stats.mp += totalTick;
+                    newChars = healingDone(newChars, activeEffects[e].castById, effectiveHealingTick);
+                }
+            } 
+            
+            if(activeEffects[e].type === 'dot') {
+                const castByChar: GameChar | undefined = newChars.find(
+                    char => char.game.gameId === activeEffects[e].castById);
+
+                if(castByChar) {
+                    let damageTick: number = dotTick(castByChar, newChars[c], activeEffects[e]);
+                    if(activeEffects[e].targetStat === 'hp') char.game.stats.hp -= damageTick;
+                    if(activeEffects[e].targetStat === 'mp') char.game.stats.mp -= damageTick;
+                    if(char.game.stats.hp === 0) whoDied.push(char.name);
+                    newChars = dmgDoneAndTaken(
+                        newChars, activeEffects[e].castById, newChars[c].game.gameId, 
+                        damageTick, activeEffects[e].targetStat
                     );
-
-                    if(castByChar) {
-                        let damageTick: number = dotTick(castByChar, newChars[c], activeEffects[e]);
-                        if(activeEffects[e].targetStat === 'hp') char.game.stats.hp -= damageTick;
-                        if(activeEffects[e].targetStat === 'mp') char.game.stats.mp -= damageTick;
-                        if(char.game.stats.hp === 0) whoDied.push(char.name);
-                        newChars = dmgDoneAndTaken(
-                            newChars, activeEffects[e].castById, newChars[c].game.gameId, 
-                            damageTick, activeEffects[e].targetStat
-                        );
-                    }
                 }
             }
-    
-            const expiredEffects: ActiveEffect[] = char.game.activeEffects.filter(
-                effect => effect.durationElapsed === effect.duration
-            );
-    
-            for (let i = 0; i < expiredEffects.length; i++) {
-                if(['buff','debuff'].includes(expiredEffects[i].type)) {
-                    char = applyStatEffect(
-                        char, expiredEffects[i].targetStat, -expiredEffects[i].effectiveAmount
-                    )
-                }
-                const removeAtIndex: number = char.game.activeEffects.indexOf(expiredEffects[i]);
-                char.game.activeEffects.splice(removeAtIndex, 1);
-            }
-    
-            if(char.game.stats.hp > char.stats.hp) char.game.stats.hp = char.stats.hp;
-            if(char.game.stats.mp > char.stats.mp) char.game.stats.mp = char.stats.mp;
         }
+
+        const expiredEffects: ActiveEffect[] = char.game.activeEffects.filter(
+            effect => effect.durationElapsed === effect.duration
+        );
+
+        for (let i = 0; i < expiredEffects.length; i++) {
+            if(['buff','debuff'].includes(expiredEffects[i].type)) {
+                char.game.stats = applyStatEffect(
+                    char.game.stats, expiredEffects[i].targetStat, -expiredEffects[i].effectiveAmount
+                )
+            }
+            const removeAtIndex: number = char.game.activeEffects.indexOf(expiredEffects[i]);
+            char.game.activeEffects.splice(removeAtIndex, 1);
+        }
+
+        if(char.game.stats.hp > char.stats.hp) char.game.stats.hp = char.stats.hp;
+        if(char.game.stats.mp > char.stats.mp) char.game.stats.mp = char.stats.mp;
+        
 
     }
 

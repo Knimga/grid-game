@@ -1,7 +1,7 @@
 import './actionPane.css';
 
 import {Action, Stats } from '../../types/types';
-import { DamageTypeColor } from '../../types/enums';
+import { DamageTypeColor, Intent } from '../../types/enums';
 
 import { getAtkBonus }  from '../../services/charCalc';
 import { cap, actionDetailString } from '../../services/detailStrings';
@@ -72,7 +72,7 @@ export default function ActionPane({action, stats, isSelected, onClick, index}: 
                 {action.isWeapon ? '' : actionDetailItem('mpCost')}
                 {actionDetailItem('target')}
                 {action.target !== 'self' ? actionDetailItem('range') : ''}
-                {action.target !== 'self' && stats ? actionDetailItem('attack') : ''}
+                {action.target !== 'self' && action.intent === Intent.offense && stats ? actionDetailItem('attack') : ''}
             </div>
         </div>
         

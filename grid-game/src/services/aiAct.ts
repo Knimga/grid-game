@@ -72,21 +72,21 @@ export function randomSort(items: any[]): any[] {return items.sort((a, b) => 0.5
 
 export function meleeActionSort(actions: Action[]): Action[] {
     return actions.sort((a,b) => {
-        const preferenceMod: number = a.isWeapon ? 0.25 : 0;
+        const preferenceMod: number = a.isWeapon ? 0.35 : 0;
         return 0.5 - (Math.random() + preferenceMod)
     })
 }
 
 export function magicActionSort(actions: Action[]): Action[] {
     return actions.sort((a,b) => {
-        const preferenceMod: number = !a.isWeapon ? 0.25 : 0;
+        const preferenceMod: number = !a.isWeapon ? 0.35 : 0;
         return 0.5 - (Math.random() + preferenceMod)
     })
 }
 
 function rangedActionSort(actions: Action[]): Action[] {
     return actions.sort((a,b) => {
-        const preferenceMod: number = a.dmgType === DamageType.ranged ? 0.25 : 0;
+        const preferenceMod: number = a.dmgType === DamageType.ranged ? 0.35 : 0;
         return 0.5 - (Math.random() + preferenceMod)
     })
 }
@@ -124,9 +124,6 @@ export function findBestBurstPlacement(
     }
 
     if(!burstPlacements.length) return null;
-
-    //the below line is not necessary? burstPlacements already based on indicesWhereBurstHitsTarget
-    //burstPlacements = burstPlacements.filter(placement => placement.burstIndices.includes(targetCharIndex));
 
     const countOfPlayers: number[] = burstPlacements.map(placement => {
         return placement.burstIndices.filter(index => playerIndices.includes(index)).length

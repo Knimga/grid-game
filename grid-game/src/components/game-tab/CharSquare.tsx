@@ -48,6 +48,7 @@ export default function CharSquare({char, style, index, onClick, onMouseOver}: C
         style={squareStyle}
         onClick={() => onClick(index)} 
         onMouseOver={() => onMouseOver(index)}
+        title={char.game.gameId}
     >
         <div className="char-square-top">
             <div className="char-square-effects-row">            
@@ -55,7 +56,7 @@ export default function CharSquare({char, style, index, onClick, onMouseOver}: C
                     <div 
                         className="char-square-effect"
                         style={dmgTypeStyle(ae.dmgType)}
-                        title={`${ae.actionName}`}
+                        title={`${ae.actionName} - ${ae.duration - ae.durationElapsed} rounds left`}
                         key={Math.random()}
                     ><small>{effectInnerText(ae)}</small></div>
                 )}                

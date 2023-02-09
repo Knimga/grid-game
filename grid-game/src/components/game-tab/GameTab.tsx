@@ -27,10 +27,7 @@ import {TurnLog, RangeType } from '../../types/uiTypes';
 
 interface GameTabInput {
     startingBoard: GameBoard;
-    colorScheme: {
-        wall: string;
-        floor: string;
-    };
+    colorScheme: {wall: string; floor: string;};
     enterDoor: Function;
 }
 
@@ -100,7 +97,7 @@ export default function GameTab({startingBoard, enterDoor, colorScheme}: GameTab
         if(char.type === CharType.player) {console.log(`${char.name} is not enemy/beast`); endTurn(); return;}
 
         const plan: AiPlan = aiPlan(chars, char, board, adjMatrix, roundNumber);
-        console.log(plan);
+        //console.log(plan);
         const sleepLength: number = char.game.isVisible ? 1000 : 500;
 
         if(plan.newDest) setCharDest(plan.newDest);
@@ -154,7 +151,7 @@ export default function GameTab({startingBoard, enterDoor, colorScheme}: GameTab
                 await sleep(sleepLength);
     
                 const moveToIndex: number = moveTowardsDest(board, char, destIndex, adjMatrix);
-                if(moveToIndex === undefined) console.log(`moveToIndex is undefined!`)
+                if(moveToIndex === undefined) console.log(`moveToIndex is undefined! destIndex was ${destIndex}`);
                 moveTo(moveToIndex);
                 
                 await sleep(sleepLength);

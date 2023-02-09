@@ -14,7 +14,7 @@ interface AttributesInput {
 }
 
 export default function AttributesEditor({char, updatePb, updateColor}: AttributesInput) {
-    const pbMax: number = char.level * 4;
+    const pbMax: number = char.level * 3;
     const pbTotal: number = pointBuyTotal();
 
     function pointBuyTotal(): number {

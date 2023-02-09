@@ -63,6 +63,7 @@ export interface Character {
     class: Class;
     level: number;
     type: CharType;
+    xp: number;
     attributes: Attributes;
     pointBuy: Attributes;
     stats: Stats;
@@ -100,6 +101,7 @@ export interface Class {
     armor: Armor[];
     actions: Action[];
     passives: PassiveEffect[];
+    availableInGame: boolean;
 }
 
 export type AttributeFocus = [keyof Attributes, keyof Attributes];
@@ -130,7 +132,7 @@ export interface Stats {
     bonusHealingDone: number;
     bonusHealingRcvd: number;
     dmgTypes: DamageTypes;
-    threatMuliplier: number;
+    threatMultiplier: number;
 }
 
 export interface Affinities {

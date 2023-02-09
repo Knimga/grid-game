@@ -9,13 +9,13 @@ import NameInput from '../shared/NameInput';
 import ClickSwitch from '../shared/ClickSwitch';
 import NumStepper from '../shared/NumStepper';
 import AttrFocusSelector from './AttrFocusSelector';
-import PassiveEffectPane from './PassiveEffectPane';
+import PassiveEffectPane from '../shared/PassiveEffectPane';
 
-import { Class, Attributes, AttributeFocus, Action, Armor, PassiveEffect } from '../../types/types';
-import { ClassRole, AttributeEnum, ItemListType, DamageType, EffectTargetStat } from '../../types/enums';
+import { Class, Attributes, AttributeFocus, Action, Armor } from '../../types/types';
+import { ClassRole, AttributeEnum, ItemListType, } from '../../types/enums';
 import { InputOption } from '../../types/uiTypes';
 
-import {makeInputOptions, cap} from '../../services/detailStrings';
+import { makeInputOptions, cap, randId } from '../../services/detailStrings';
 
 interface ClassBuilderInput {
     charClass: Class,
@@ -29,6 +29,7 @@ export default function ClassBuilder({charClass, actions, armors, update, save}:
     const [updatesSaved, setUpdatesSaved] = useState<boolean>(true);
     const [selectedItemListType, setSelectedItemListType] = useState<ItemListType>(ItemListType.allWeapons);
     const classRoleOptions: InputOption[] = makeInputOptions(Object.keys(ClassRole));
+    const availabilityOptions: InputOption[] = makeInputOptions(['yes', 'no']);
     const attributes: AttributeEnum[] = Object.values(AttributeEnum);
 
     function updateClass(newClass: Class): void {update(newClass); setUpdatesSaved(false);}
@@ -38,6 +39,10 @@ export default function ClassBuilder({charClass, actions, armors, update, save}:
     function updateName(newName: string): void {updateClass({...charClass, name: newName})}
 
     function updateRole(newRole: ClassRole): void {updateClass({...charClass, role: newRole})}
+
+    function updateAvailability(newAvailability: string): void {
+        updateClass({...charClass, availableInGame: newAvailability === 'yes' ? true : false});
+    }
 
     function updateAttrFocus(newFocus: AttributeFocus): void {
         updateClass({...charClass, attributeFocus: newFocus})
@@ -96,14 +101,6 @@ export default function ClassBuilder({charClass, actions, armors, update, save}:
         addArmor: addArmor
     }
 
-    const passives: PassiveEffect[] = [
-        {
-            name: "Eagle Eye",
-            dmgType: DamageType.ranged,
-            effects:[{targetStat: EffectTargetStat.rangedAtk, amount: 1}]
-        }
-    ]
-
   return (
     <div className="class-builder-container">
         <div className="class-builder-main-edit">
@@ -113,6 +110,12 @@ export default function ClassBuilder({charClass, actions, armors, update, save}:
                     onClick={() => saveClass()}
                 />
                 <NameInput name={charClass.name} update={updateName} />
+                <ClickSwitch 
+                    label="Available in-game?"
+                    currentValue={charClass.availableInGame ? 'yes' : 'no'}
+                    options={availabilityOptions}
+                    update={updateAvailability}
+                />
                 <ClickSwitch 
                     label="Role" 
                     currentValue={charClass.role} 
@@ -142,11 +145,12 @@ export default function ClassBuilder({charClass, actions, armors, update, save}:
         </div>
         <div className="class-builder-passives-row">
             <span>Passives:</span>
-            {passives.map((p, index) => 
+            {charClass.passives.map((p, index) => 
                 <PassiveEffectPane 
                     passive={p} 
                     index={index} 
                     removePassiveEffect={removePassiveEffect}
+                    key={randId()}
                 />
             )}
         </div>

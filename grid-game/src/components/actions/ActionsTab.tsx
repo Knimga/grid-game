@@ -20,7 +20,9 @@ export default function ActionsTab() {
     useEffect(() => {
         fetch(urls.localRoot+urls.actions.getAll)
             .then(res => res.json())
-            .then((data) => {setActions(data); setSelectedAction(data[0]);})
+            .then((data) => {
+                setActions(data.sort((a: Action, b: Action) => a.name > b.name ? 1 : -1)); 
+                setSelectedAction(data[0]);})
             .catch((err) => console.log(err))
     },[]);
 

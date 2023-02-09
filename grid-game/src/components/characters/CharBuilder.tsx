@@ -88,7 +88,7 @@ export default function CharBuilder({char, classes, functions}: CharBuilderInput
 
     function classList(): JSX.Element {
         return <div className="class-list">
-            {classes.map(charClass => 
+            {classes.sort((a: Class, b: Class) => char.class.name === a.name ? -1 : 1).map(charClass => 
                 <ClassPane 
                     charClass={charClass}
                     stats={char.stats}
@@ -129,7 +129,7 @@ export default function CharBuilder({char, classes, functions}: CharBuilderInput
         <div className="central-section">
             <div className="central-section-padding">
                 <AttributesEditor char={char} updatePb={updatePointBuy} updateColor={updateColor} />
-                <StatPane stats={char.stats} />
+                <StatPane stats={char.stats} passives={char.class.passives} />
                 <div className="list-section">
                     <div className="list-section-padding">
                         <div className="list-column weapons">

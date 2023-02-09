@@ -65,7 +65,8 @@ export function packageClass(charClass: Class): DbClass {
         attributeFocus: charClass.attributeFocus,
         armor: charClass.armor.map(armor => armor._id),
         actions: charClass.actions.map(action => action._id),
-        passives: charClass.passives
+        passives: charClass.passives,
+        availableInGame: charClass.availableInGame
     }
 }
 
@@ -77,6 +78,7 @@ export function packageCharacter(char: Character): DbCharacter {
         color: char.color,
         class: char.class._id,
         level: char.level,
+        xp: char.xp,
         type: char.type,
         pointBuy: char.pointBuy
     }
@@ -105,7 +107,7 @@ export async function createOneCharacter(dbChar: DbCharacter): Promise<Character
         _id: dbChar._id.toString(),
         class: completedClass,
         attributes: attributes,
-        stats: createStats(attributes, armorACBonus, armorMACBonus, dbChar.level),
+        stats: createStats(attributes, armorACBonus, armorMACBonus, dbChar.level, completedClass.passives),
         actions: completedClass.actions,
         armor: completedClass.armor
     }

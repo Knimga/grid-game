@@ -85,6 +85,8 @@ export function randomMoveToIndex(board: GameBoard, mover: GameChar): number {
 export function pathfinder(
     board: GameBoard, startIndex: number, endIndex: number, adjMatrix: number[][]
 ): number[] {
+    if(startIndex === endIndex) return [];
+
     let queue: number[] = [startIndex];
     const visited: boolean[] = Array(board.gridWidth * board.gridHeight).fill(false);
     const previousIndices: number[] = Array(board.gridWidth * board.gridHeight).fill(null);
@@ -108,6 +110,7 @@ export function pathfinder(
     path = reverseArray(path);
 
     return (path.length > 1 && path[path.length - 1] === endIndex) ? path : [];
+    //path will include startIndex and endIndex!
 }
 
 export function newExploreDestination(board: GameBoard, currentPosition: number): number {

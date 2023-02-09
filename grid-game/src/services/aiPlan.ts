@@ -87,6 +87,10 @@ function findAiPlans(
     //the viablePlan is the first valid plan where dest is reachable this turn
     let viablePlan: AiPlan | null = null;
 
+    //console.log(`${actor.name} - ${actor.game.gameId}: findAiPlans:`);
+    //console.log(`sortedTargets: ${listLog(sortedTargets)}`);
+    //console.log(`sortedActions: ${listLog(sortedActions)}`);
+
     for (let t = 0; t < sortedTargets.length; t++) {
         const thisTarget: GameChar = sortedTargets[t];
         for (let a = 0; a < sortedActions.length; a++) {
@@ -98,9 +102,12 @@ function findAiPlans(
                 const thisInRangeDest: number | null = getInRangeDest(board, actor, thisAction, 
                     thisTarget.game.positionIndex, adjMatrix);
                 
-                if(!thisInRangeDest) break;
+                //console.log(`target ${thisTarget.name}, action ${thisAction.name} - inRangeDest = ${thisInRangeDest}`);
+
+                if(thisInRangeDest === null) break;
 
                 const canReachDestThisTurn: boolean = destReachableThisTurn(actor, board, adjMatrix, thisInRangeDest);
+                //console.log(`target ${thisTarget.name}, action ${thisAction.name} - ${canReachDestThisTurn ? 'CAN' : 'CANNOT'} reach dest this turn!`)
 
                 if(!preferredPlan) {
                     preferredPlan = {target: thisTarget, chosenAction: thisAction, newDest: thisInRangeDest}
@@ -117,11 +124,14 @@ function findAiPlans(
     return {preferred: preferredPlan, viable: viablePlan};
 }
 
+//function listLog(things: any[]): string {return things.map(t => t.name).join(', ')}
+
 function destReachableThisTurn(
     mover: GameChar, board: GameBoard, adjMatrix: number[][], destIndex: number
 ): boolean {
+    if(destIndex === mover.game.positionIndex) return true;
     const path: number[] = pathfinder(board, mover.game.positionIndex, destIndex, adjMatrix);
-    return path.length > getRemainingMvt(mover);
+    return path.filter(i => i !== mover.game.positionIndex).length <= getRemainingMvt(mover);
 }
 
 function isNullPlan(plan: AiPlan): boolean {

@@ -90,6 +90,7 @@ function action(actorName: string, actionResults: ActionResult[]): string[] {
                         break;
                     case 'hot': string += ` receives healing (${effectTargetStatString(effectResult.effect.targetStat)}) over time`; break;
                     case 'dot': string += ` receives ${effectResult.effect.dmgType} damage (${effectTargetStatString(effectResult.effect.targetStat)}) over time`; break;
+                    case 'threat': string += ` ${amount >= 0 ? 'gains' : 'loses'} ${amount} threat`; break;
                 }
     
                 if(e < actionResults[r].effectResults.length - 1) string += ',';

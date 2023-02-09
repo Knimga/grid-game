@@ -7,7 +7,7 @@
     padding: 1% 0;
 }
 
-.left-list, .atk-bonus-list, .ele-bonus-list {
+.left-list, .atk-bonus-list, .ele-bonus-list, .passive-list {
     display: flex; flex-direction: column;
     justify-content: center;
 }
@@ -15,6 +15,7 @@
 .left-list {width: 25%;}
 .atk-bonus-list {width: 15%;}
 .ele-bonus-list {width: 30%; flex-wrap: wrap;}
+.passive-list {width: 20%;}
 
 .list-row {width: 100%; display: flex;}
 

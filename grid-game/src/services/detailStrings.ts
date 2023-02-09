@@ -1,8 +1,10 @@
+import { getBonus } from './charCalc';
+
 import {Action, Armor, Attributes, Stats, Effect, Dungeon, Door} from '../types/types';
 import { InputOption } from '../types/uiTypes';
 import { EffectType, EffectTargetStat } from '../types/enums';
 
-import { getBonus } from './charCalc';
+
 
 export function attributeDetailString(attribute: keyof Attributes) {
     switch(attribute) {
@@ -35,26 +37,32 @@ export function effectDurationString(effect: Effect): string {
 
 export function actionDetailString(action: Action, stats: Stats | null): string {
     const strings: string[] = [];
-    const effects: Effect[] = action.effects;
+    const effects: Effect[] = action.effects.filter(e => !e.targetsSelf);
+    const selfEffects: Effect[] = action.effects.filter(e => e.targetsSelf);
 
-    for (let e = 0; e < effects.length; e++) {
-        switch(effects[e].type) {
-            case EffectType.damage: strings.push(dmgString(effects[e], stats, action.hands ?? 1)); break;
-            case EffectType.healing: strings.push(healString(effects[e], stats)); break;
-            case EffectType.buff: strings.push(buffOrDebuffString(effects[e], stats)); break;
-            case EffectType.debuff: strings.push(buffOrDebuffString(effects[e], stats)); break;
-            case EffectType.hot: strings.push(hotString(effects[e], stats)); break;
-            case EffectType.dot: strings.push(dotString(effects[e], stats)); break;
-            case EffectType.threat: strings.push(threatString(effects[e], stats)); break;
-            default: break;
-        }
-    }
+    for (let e = 0; e < effects.length; e++) strings.push(effectDetailString(effects[e], stats));
 
     strings[strings.length - 1] += aoeStringEnding(action);
-    strings[0] = strings[0][0].toUpperCase() + strings[0].substring(1);
+
+    for (let s = 0; s < selfEffects.length; s++) strings.push(effectDetailString(selfEffects[s], stats));
+
+    strings[0] = cap(strings[0]);
     if(strings.length > 1) strings[strings.length - 1] = 'and ' + strings[strings.length - 1];
     
     return strings.join(', ');
+}
+
+function effectDetailString(effect: Effect, stats: Stats | null, actionHands?: number): string {
+    switch(effect.type) {
+        case EffectType.damage: return dmgString(effect, stats, actionHands ?? 1);
+        case EffectType.healing: return healString(effect, stats);
+        case EffectType.buff: return buffOrDebuffString(effect, stats);
+        case EffectType.debuff: return buffOrDebuffString(effect, stats);
+        case EffectType.hot: return hotString(effect, stats);
+        case EffectType.dot: return dotString(effect, stats);
+        case EffectType.threat: return threatString(effect, stats);
+        default: console.log('omg'); return '';
+    }
 }
 
 function aoeStringEnding(action: Action): string {
@@ -65,7 +73,8 @@ function aoeStringEnding(action: Action): string {
             const burstAreaSize: number = (action.burstRadius * 2) + 1;
             return ` to targets in a ${burstAreaSize}x${burstAreaSize} area`
         }
-    } else if(action.target === 'line') {return ' to targets on a line'} 
+    }
+    if(action.target === 'line') return ' to targets on a line';
     return '';
 }
 
@@ -117,7 +126,7 @@ function threatString(effect: Effect, stats: Stats | null): string {
     const amount: string = effect.roll ? rollString(effect, stats, 1) : flatAmountString(effect, stats, 1, false, true);
     const amountIsPositive: boolean = effect.flatAmount !== undefined && effect.flatAmount >= 0;
     const qualifier: string = amountIsPositive ? 'increases' : 'decreases';
-    const pronoun: string = effect.targetsSelf ? 'your' : "your target's current threat";
+    const pronoun: string = effect.targetsSelf ? 'your' : '';
     const duration: string = effect.duration ? `for ${effect.duration} rounds` : '';
     return `${qualifier} ${pronoun} threat by ${amount} ${duration}`;
 }
@@ -152,9 +161,14 @@ export function effectTargetStatString(targetStat: EffectTargetStat | string): s
         case 'ac': return 'AC';
         case 'mac': return 'MAC';
         case 'mvt': return 'Mvt';
+        case 'strength': return 'Strength';
+        case 'finesse': return 'Finesse';
+        case 'toughness': return 'Toughness';
+        case 'mind': return 'Mind';
+        case 'spirit': return 'Spirit';
         case 'threat': return 'Threat';
-        case 'bonusHealingDone': return 'Heals Done';
-        case 'bonusHealingRcvd': return 'Heals Rcvd';
+        case 'bonusHealingDone': return 'Healing Done';
+        case 'bonusHealingRcvd': return 'Healing Rcvd';
         case 'allAtkRolls': return 'Atk Rolls';
         case 'allDmgRolls': return 'Dmg Rolls';
         case 'allDr': return 'DR';
@@ -167,7 +181,30 @@ export function effectTargetStatString(targetStat: EffectTargetStat | string): s
         case 'magicAtk': return 'Magic Atk';
         case 'magicDmg': return 'Magic Dmg'
         case 'magicDr': return 'Magic DR';
-        case 'shadowDmg': return 'Shadow Dmg';
+        case 'fireAtk': return 'Fire Atk';
+        case 'fireDmg': return 'Fire Dmg'
+        case 'fireDr': return 'Fire DR';
+        case 'windAtk': return 'Wind Atk';
+        case 'windDmg': return 'Wind Dmg'
+        case 'windDr': return 'Wind DR';
+        case 'earthAtk': return 'Earth Atk';
+        case 'earthDmg': return 'Earth Dmg'
+        case 'earthDr': return 'Earth DR';
+        case 'shadowAtk': return 'Shadow Atk';
+        case 'shadowDmg': return 'Shadow Dmg'
+        case 'shadowDr': return 'Shadow DR';
+        case 'waterAtk': return 'Water Atk';
+        case 'waterDmg': return 'Water Dmg'
+        case 'waterDr': return 'Water DR';
+        case 'holyAtk': return 'Holy Atk';
+        case 'holyDmg': return 'Holy Dmg'
+        case 'holyDr': return 'Holy DR';
+        case 'poisonAtk': return 'Poison Atk';
+        case 'poisonDmg': return 'Poison Dmg'
+        case 'poisonDr': return 'Poison DR';
+        case 'lightningAtk': return 'Lightning Atk';
+        case 'lightningDmg': return 'Lightning Dmg'
+        case 'lightningDr': return 'Lightning DR';
         default: return '[no targetStat]';
     }
 }
@@ -185,8 +222,23 @@ function effectTypeString(effectType: EffectType): string {
 }
 
 export function passiveEffectString(effect: {targetStat: EffectTargetStat, amount: number}): string {
-    const operator: string = effect.amount >= 0 ? '+' : '-';
+    const operator: string = effect.amount >= 0 ? '+' : '';
+    if(effect.targetStat === EffectTargetStat.threatMuliplier) {
+        return `${passiveEffectThreatString(effect.amount)} Threat`
+    }
     return `${operator}${effect.amount} ${effectTargetStatString(effect.targetStat)}`;
+}
+
+function passiveEffectThreatString(threatModifer: number): string {//for threat mods from effects
+    const value: number = threatModifer * 100;
+    const operator: string = threatModifer >= 0 ? '+' : '-';
+    return `${operator}${value}%`;
+}
+
+export function charThreatString(threatMuliplier: number): string {//for threatMult value on a char
+    const diffValue: number = (threatMuliplier - 1) * 100;
+    const operator: string = diffValue >= 0 ? '+' : '-';
+    return `${operator}${diffValue.toFixed(0)}%`
 }
 
 export function makeInputOptions(strings: string[]): InputOption[] {
