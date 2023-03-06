@@ -2,10 +2,10 @@ import './classPane.css';
 
 import { FaRegQuestionCircle } from "react-icons/fa";
 
-import AttributeBars from '../shared/AttributeBars';
+import AttributeBars from '../AttributeBars';
 
-import {Class, Stats, AttributeFocus} from '../../types/types';
-import {actionDetailString, armorDetailString} from '../../services/detailStrings';
+import {Class, Stats, AttributeFocus, Action} from '../../../types/types';
+import {actionDetailString, armorDetailString} from '../../../services/detailStrings';
 
 interface ClassPaneInput {
     charClass: Class,
@@ -16,6 +16,10 @@ interface ClassPaneInput {
 }
 
 export default function ClassPane({charClass, stats, isSelected, selectClass, isClassDisplay}: ClassPaneInput) {
+    const actions: Action[] = [
+        ...charClass.startingActions, 
+        ...charClass.startingWeapons.map(w => w.action)
+    ]
 
     function keyAttrList(keyAttributes: AttributeFocus): string {
         if(keyAttributes.length) {
@@ -26,11 +30,15 @@ export default function ClassPane({charClass, stats, isSelected, selectClass, is
     }
 
   return (
-    <div className={`class-pane ${isSelected ? 'selected-class' : ''}`} onClick={() => selectClass(charClass)}>
+    <div 
+        className={`class-pane ${isSelected ? 'selected-class' : ''}`} 
+        onClick={() => selectClass(charClass)}
+        key={charClass._id}
+    >
         <div className="class-pane-padding">
             <div className="class-pane-header-row">
                 <strong>{charClass.name}</strong>
-                <FaRegQuestionCircle className="class-tooltip" title="tooltip time!!" />
+                <FaRegQuestionCircle className="class-tooltip" title={charClass.desc} />
             </div>
             <div className="class-pane-body">
                 <div className="class-pane-attributes">
@@ -47,10 +55,10 @@ export default function ClassPane({charClass, stats, isSelected, selectClass, is
                 </div>
                 <div className="class-pane-attacks-powers">
                     {
-                        charClass.actions.length ?
+                        actions.length ?
                         <div className="list-grouping">
                             <div className="list-name">Actions</div>
-                            {charClass.actions.map(action => 
+                            {actions.map(action => 
                                 <span 
                                     className="list-item" 
                                     title={actionDetailString(action, stats)}
@@ -61,10 +69,10 @@ export default function ClassPane({charClass, stats, isSelected, selectClass, is
                         :''
                     }
                     {
-                        charClass.armor.length ?
+                        charClass.startingArmor.length ?
                         <div className="list-grouping">
                             <div className="list-name">Armor</div>
-                            {charClass.armor.map(armor => 
+                            {charClass.startingArmor.map(armor => 
                                 <span 
                                     className="list-item" 
                                     key={armor._id}

@@ -1,70 +1,78 @@
-import {Character, GameChar, Class, Stats, Attributes, Affinities, Armor, Effect, PassiveEffect } from '../types/types';
-import { ClassRole, CharType, DamageType, EffectType, EffectTargetStat, AttributeEnum } from '../types/enums';
+import {
+    Character, GameChar, Class, Stats, Attributes, Affinities, Armor, Weapon, Effect, 
+    Passive, Action, Talent, PassiveEffect, InventoryItem
+} from '../types/types';
+
+import { ClassRole, CharType, DamageType, EffectType, EffectTargetStat, TargetStatType } from '../types/enums';
 
 function fl(n: number): number {return Math.floor(n)}
 
-const attrKeys: string[] = Object.keys(AttributeEnum);
+const notPureStatKeys: string[] = ['strength', 'finesse', 'toughness', 'mind', 'spirit', 'fireAff', 
+    'windAff', 'earthAff', 'shadowAff', 'waterAff', 'holyAff', 'poisonAff', 'lightningAff'];
+
+export const baseClassAttrPointBuy: number = 4;
+export const attrPointsPerLevel: number = 3;
+export const levelsPerTalentTier: number = 2;
 
 export function statCalc(character: Character): Character {
     const char: Character = {...character};
-    const armorACBonus: number = getACBonus(char.armor);
-    const armorMACBonus: number = getMACBonus(char.armor);
-    const attributes: Attributes = createAttributes(char.pointBuy, char.class, char.level);
+    const armorACBonus: number = getACBonus(char.inventory);
+    const armorMACBonus: number = getMACBonus(char.inventory);
+    const allPassives: PassiveEffect[] = getCharPassiveEffects(char.class, char.inventory, char.selectedTalents);
+    const attributes: Attributes = createAttributes(char.pointBuy, char.class, char.level, allPassives);
+    const affinities: Affinities = createAffinities(attributes, allPassives);
 
    return {
-       ...char,
-       attributes: attributes,
-       stats: createStats(attributes, armorACBonus, armorMACBonus, char.level, char.class.passives),
-       actions: char.class.actions,
-       armor: char.class.armor
+        ...char,
+        actions: getCharActions(char),
+        attributes: attributes,
+        stats: createStats(attributes, affinities, armorACBonus, armorMACBonus, 
+            char.level, allPassives)
    }
 }
 
-export function createAttributes(pointBuy: Attributes, charClass: Class, level: number): Attributes {
-    const passives: PassiveEffect[] = charClass.passives;
-    const attributes: Attributes = {
+export function createAttributes(
+    pointBuy: Attributes, charClass: Class, level: number, passives: PassiveEffect[]
+): Attributes {
+    let attributes: Attributes = {
         strength: pointBuy.strength + charClass.attributes.strength,
         finesse: pointBuy.finesse + charClass.attributes.finesse,
         toughness: pointBuy.toughness + charClass.attributes.toughness,
         mind: pointBuy.mind + charClass.attributes.mind,
         spirit: pointBuy.spirit + charClass.attributes.spirit
     }
-    charClass.attributeFocus.forEach(attr => attributes[attr] += level);
 
-    for (let p = 0; p < passives.length; p++) {
-        for (let i = 0; i < passives[p].effects.length; i++) {
-            switch(passives[p].effects[i].targetStat) {
-                case 'strength': attributes.strength += passives[p].effects[i].amount; break;
-                case 'finesse': attributes.finesse += passives[p].effects[i].amount; break;
-                case 'toughness': attributes.toughness += passives[p].effects[i].amount; break;
-                case 'mind': attributes.mind += passives[p].effects[i].amount; break;
-                case 'spirit': attributes.spirit += passives[p].effects[i].amount; break;
-                default: break;
-            }
-        }
-    }
+    attributes[charClass.attributeFocus[0]] += level;
+    attributes[charClass.attributeFocus[1]] += level;
+
+    attributes = applyAttrPassives(attributes, passives);
 
     return attributes;
 }
 
+export function applyAttrPassives(
+    attributes: Attributes, passiveEffects: PassiveEffect[]
+): Attributes {
+    for (let i = 0; i < passiveEffects.length; i++) {
+        switch(passiveEffects[i].targetStat) {
+            case 'strength': attributes.strength += passiveEffects[i].amount; break;
+            case 'finesse': attributes.finesse += passiveEffects[i].amount; break;
+            case 'toughness': attributes.toughness += passiveEffects[i].amount; break;
+            case 'mind': attributes.mind += passiveEffects[i].amount; break;
+            case 'spirit': attributes.spirit += passiveEffects[i].amount; break;
+            default: break;
+        }
+    }
+    return attributes;
+}
+
 export function createStats(
-    attributes: Attributes, armorACBonus: number, armorMACBonus: number, level: number,
-    passives: PassiveEffect[]
+    attributes: Attributes, affinities: Affinities, armorACBonus: number, armorMACBonus: number, level: number,
+    passiveEffects: PassiveEffect[]
 ): Stats {
 
     const str = attributes.strength, fin = attributes.finesse, tns = attributes.toughness;
     const min = attributes.mind, spt = attributes.spirit;
-       
-    const affinities: Affinities = {
-        fire: fl(str / 4),
-        wind: fl(fin / 4),
-        earth: fl(tns / 4),
-        shadow: fl(min / 4),
-        water: fl(spt / 4),
-        holy: fl((str + spt) / 8),
-        poison: fl((fin + tns) / 8),
-        lightning: fl((fin + min) / 8)
-    }
 
     let stats: Stats = {
         hp: 10 + fl(1.5 * tns) + fl(str / 4) + fl(1.5 * level),
@@ -73,11 +81,11 @@ export function createStats(
         mpRegen: 1 + fl(spt / 4),
         ac: 10 + fl(fin / 4) + armorACBonus,
         mac: 10 + fl(spt / 4) + fl(min / 4) + fl(fin / 4) + armorMACBonus,
-        ini: fl(fin / 2) + fl(min / 2),
+        ini: fl(fin / 3) + fl(min / 3),
         mvt: 3 + fl(str / 6) + fl(fin / 6),
         bonusHealingDone: fl(spt / 5),
         bonusHealingRcvd: fl(spt / 3),
-        threatMultiplier: 1 + (str / 150) + (min / 150),
+        threatMultiplier: +(1 + (str / 150) + (min / 150) + (fin / 200)).toFixed(2),
         dmgTypes: {
             melee: {
                 atk: fl(0.75 * str) + fl(fin / 2),
@@ -137,37 +145,171 @@ export function createStats(
         }
     }
 
-    for (let p = 0; p < passives.length; p++) {
-        for (let e = 0; e < passives[p].effects.length; e++) {
-            if(!attrKeys.includes(passives[p].effects[e].targetStat)) {
-                stats = applyStatEffect(stats, passives[p].effects[e].targetStat, passives[p].effects[e].amount)
-            }
+    for (let p = 0; p < passiveEffects.length; p++) {
+        if(!notPureStatKeys.includes(passiveEffects[p].targetStat)) {
+            stats = applyStatEffect(stats, passiveEffects[p].targetStat, passiveEffects[p].amount)
         }
     }
 
     return stats;
 }
 
-export function getACBonus(armor: Armor[]): number {
+export function createAffinities(attributes: Attributes, passives: PassiveEffect[]): Affinities {
+    const affinities: Affinities = {
+        fire: fl(attributes.strength / 4),
+        wind: fl(attributes.finesse / 4),
+        earth: fl(attributes.toughness / 4),
+        shadow: fl(attributes.mind / 4),
+        water: fl(attributes.spirit / 4),
+        holy: fl((attributes.strength + attributes.spirit) / 8),
+        poison: fl((attributes.toughness + attributes.mind) / 8),
+        lightning: fl((attributes.finesse + attributes.mind) / 8)
+    };
+
+    const affinityEffects: PassiveEffect[] = passives.filter(
+        p => p.targetStatType === TargetStatType.affinity)
+
+    for (let i = 0; i < affinityEffects.length; i++) {
+        switch(affinityEffects[i].targetStat) {
+            case 'fireAff': affinities.fire += affinityEffects[i].amount; break;
+            case 'windAff': affinities.wind += affinityEffects[i].amount; break;
+            case 'earthAff': affinities.earth += affinityEffects[i].amount; break;
+            case 'shadowAff': affinities.shadow += affinityEffects[i].amount; break;
+            case 'waterAff': affinities.water += affinityEffects[i].amount; break;
+            case 'holyAff': affinities.holy += affinityEffects[i].amount; break;
+            case 'poisonAff': affinities.poison += affinityEffects[i].amount; break;
+            case 'lightningAff': affinities.lightning += affinityEffects[i].amount; break;
+            default: break;
+        }
+    }
+
+    return affinities;
+}
+
+export function getACBonus(inventory: InventoryItem[]): number {
     let armorACBonus: number = 0;
-    for (let i = 0; i < armor.length; i++) armorACBonus += armor[i].ac;
+    for (let i = 0; i < inventory.length; i++) {
+        const armor: Armor | null = inventory[i].armor;
+        if(armor) armorACBonus += armor.ac;
+    }   
     return armorACBonus;
 }
 
-export function getMACBonus(armor: Armor[]): number {
+export function getMACBonus(inventory: InventoryItem[]): number {
     let armorMACBonus: number = 0;
-    for (let i = 0; i < armor.length; i++) armorMACBonus += armor[i].mac;
+    for (let i = 0; i < inventory.length; i++) {
+        const armor: Armor | null = inventory[i].armor;
+        if(armor) armorMACBonus += armor.mac;
+    }   
     return armorMACBonus;
 }
 
+export function getCharActions(char: Character | GameChar): Action[] {
+    const classActions: Action[] = char.class.startingActions;
+    const talentActions: Action[] = getTalentActions(char.class.talents, char.selectedTalents);
+    const gearActions: Action[] = getGearActions(char.inventory);
+
+    return [...classActions, ...gearActions, ...talentActions];
+}
+
+export function getCharPassiveEffects(
+    charClass: Class, inventory: InventoryItem[], selectedTalents: string[]
+): PassiveEffect[] {
+    const classPassives: PassiveEffect[] = charClass.passives.map(p => p.effects).flat(1);
+    const talentPassives: PassiveEffect[] = getTalentPassiveEffects(charClass.talents, selectedTalents);
+    const gearPassives: PassiveEffect[] = getGearPassiveEffects(inventory);
+
+    return [...classPassives, ...gearPassives, ...talentPassives];
+}
+
+function getTalentPassiveEffects(classTalents: Talent[][], selectedTalents: string[]): PassiveEffect[] {
+    let passives: PassiveEffect[] = [];
+    for (let tier = 0; tier < selectedTalents.length; tier++) {
+        const talentId: string = selectedTalents[tier];
+        for (let t = 0; t < classTalents[tier].length; t++) {
+            const thisTalent = classTalents[tier][t];
+            if(thisTalent.passive && thisTalent.passive._id.toString() === talentId) {
+                passives = [...passives, ...thisTalent.passive.effects]
+            }
+        }
+    }
+    return passives;
+}
+
+function getTalentActions(classTalents: Talent[][], selectedTalents: string[]): Action[] {
+    const talentActions: Action[] = [];
+    for (let tier = 0; tier < selectedTalents.length; tier++) {
+        const talentId: string = selectedTalents[tier];
+        for (let t = 0; t < classTalents[tier].length; t++) {
+            const thisTalent: Talent = classTalents[tier][t];
+            if(thisTalent.action && thisTalent.action._id.toString() === talentId) {
+                talentActions.push(thisTalent.action)
+            }
+        }
+    }
+    return talentActions;
+}
+
+function getGearPassiveEffects(inventory: InventoryItem[]): PassiveEffect[] {
+    let gearPassiveEffects: PassiveEffect[] = [];
+    for (let i = 0; i < inventory.length; i++) {
+        const armor: Armor | null = inventory[i].armor;
+        const weapon: Weapon | null = inventory[i].weapon;
+        if(armor) gearPassiveEffects = [...gearPassiveEffects, ...armor.passives];
+        if(weapon) gearPassiveEffects = [...gearPassiveEffects, ...weapon.passives];
+    }
+    return gearPassiveEffects;
+}
+
+function getGearActions(inventory: InventoryItem[]): Action[] {
+    let gearActions: Action[] = [];
+    for (let i = 0; i < inventory.length; i++) {
+        const thisItem: InventoryItem = inventory[i];
+        if(thisItem.weapon) {
+            gearActions.push(thisItem.weapon.action);
+            gearActions = [...gearActions, ...thisItem.weapon.otherActions];
+        }
+        if(thisItem.armor) gearActions = [...gearActions, ...thisItem.armor.actions];
+    }
+    return gearActions;
+}
+
+export function getCharWeapons(inventory: InventoryItem[]): Weapon[] {
+    const weapons: Weapon[] = [];
+    for (let i = 0; i < inventory.length; i++) {
+        const thisItem: InventoryItem = inventory[i];
+        if(thisItem.weapon) weapons.push(thisItem.weapon);
+    }
+    return weapons;
+}
+
+export function newInventory(charClass: Class): InventoryItem[] {
+    const inventory: InventoryItem[] = [];
+    const sharedInvProps = {isStackable: false, qty: 1, isEquipped: true}
+
+    for (let i = 0; i < charClass.startingWeapons.length; i++) {
+        const thisWeapon: Weapon = charClass.startingWeapons[i];
+        inventory.push({...sharedInvProps, weapon: thisWeapon, armor: null, item: null});
+    }
+
+    for (let i = 0; i < charClass.startingArmor.length; i++) {
+        const thisArmor: Armor = charClass.startingArmor[i];
+        inventory.push({...sharedInvProps, weapon: null, armor: thisArmor, item: null});
+    }
+
+    return inventory;
+}
+
+//used for both Characters and GameChars
+//'threat' effects will never hit this - they occur only in-game and are not a buff/debuff
 export function applyStatEffect(stats: Stats, targetStat: EffectTargetStat, effectAmount: number): Stats {
-    //'threat' effects will never hit this! They are not a buff or debuff
     switch(targetStat) {
         case 'ac': stats.ac += effectAmount; break;
         case 'mac': stats.mac += effectAmount; break;
         case 'mvt': if(stats.mvt + effectAmount > 0) {stats.mvt += effectAmount} else {stats.mvt = 0} break;
-        case 'hpRegen': stats.hpRegen += effectAmount; break;
-        case 'mpRegen': stats.mpRegen += effectAmount; break;
+        case 'hpRegen': stats.hpRegen = neverNegative(stats.hpRegen + effectAmount); break;
+        case 'mpRegen': stats.mpRegen = neverNegative(stats.mpRegen + effectAmount); break;
+        case 'initiative': stats.ini += effectAmount; break;
         case 'allAtkRolls': 
             stats.dmgTypes.melee.atk += effectAmount;
             stats.dmgTypes.ranged.atk += effectAmount;
@@ -182,8 +324,9 @@ export function applyStatEffect(stats: Stats, targetStat: EffectTargetStat, effe
             stats.dmgTypes.melee.dr += effectAmount;
             stats.dmgTypes.ranged.dr += effectAmount;
             stats.dmgTypes.magic.dr += effectAmount;
-        break;
-        case 'threatMultiplier': stats.threatMultiplier += effectAmount; break;
+            break;
+        case 'threatMultiplier': stats.threatMultiplier = neverNegative(
+            stats.threatMultiplier + (effectAmount / 100)); break;
         case 'meleeAtk': stats.dmgTypes.melee.atk += effectAmount; break;
         case 'meleeDmg': stats.dmgTypes.melee.dmg += effectAmount; break;
         case 'meleeDr': stats.dmgTypes.melee.dr += effectAmount; break;
@@ -219,10 +362,44 @@ export function applyStatEffect(stats: Stats, targetStat: EffectTargetStat, effe
         case 'lightningDr': stats.dmgTypes.lightning.dr += effectAmount; break;
         case 'bonusHealingDone': stats.bonusHealingDone += effectAmount; break;
         case 'bonusHealingRcvd': stats.bonusHealingRcvd += effectAmount; break;
-        default: console.log('no targetStat!');
+        default: console.log(`cannot applyStatEffect to ${targetStat}!`);
     }
 
     return stats;
+}
+
+//only affects GameChars!
+export function applyAttrEffect(char: GameChar, attrKey: keyof Attributes, amount: number): GameChar {
+    const originalHp: number = char.game.stats.hp, originalMp: number = char.game.stats.mp;
+
+    const attributes: Attributes = char.game.attributes;
+    attributes[attrKey] += amount;
+
+    const allPassives: PassiveEffect[] = getCharPassiveEffects(char.class, char.inventory, char.selectedTalents);
+    const affinities: Affinities = createAffinities(attributes, allPassives);
+    
+    char.game.stats = createStats(attributes, affinities, getACBonus(char.inventory), 
+        getMACBonus(char.inventory), char.level, allPassives);
+    char.game.stats.hp = originalHp;
+    char.game.stats.mp = originalMp;
+
+    return char;
+}
+
+//only affects GameChars!
+export function applyAffinityEffect(char: GameChar, attrKey: keyof Affinities, amount: number): GameChar {
+    const originalHp: number = char.game.stats.hp, originalMp: number = char.game.stats.mp;
+
+    const allPassives: PassiveEffect[] = getCharPassiveEffects(char.class, char.inventory, char.selectedTalents);
+    const affinities: Affinities = createAffinities(char.attributes, allPassives);
+    affinities[attrKey] += amount;
+
+    char.game.stats = createStats(char.attributes, affinities, getACBonus(char.inventory), 
+        getMACBonus(char.inventory), char.level, allPassives);
+    char.game.stats.hp = originalHp;
+    char.game.stats.mp = originalMp;
+
+    return char;
 }
 
 export function getBonus(stats: Stats, effect: Effect, isWeapon: boolean, hands: number): number {
@@ -264,11 +441,11 @@ export function getThreatBonus(stats: Stats, dmgType: DamageType): number {
 }
 
 export function isElemental(dmgType: DamageType): boolean {
-    const magicTypes: DamageType[] = [
+    const elementalTypes: DamageType[] = [
         DamageType.fire, DamageType.wind, DamageType.earth, DamageType.shadow, DamageType.water, 
         DamageType.holy, DamageType.poison
     ];
-    return magicTypes.includes(dmgType);
+    return elementalTypes.includes(dmgType);
 }
 
 export function isMagic(dmgType: DamageType): boolean {
@@ -282,19 +459,6 @@ export function isMagic(dmgType: DamageType): boolean {
 export function neverNegative(n: number): number {return n < 0 ? 0 : n}
 export function never0(n: number): number {return n < 1 ? 1 : n}
 
-//only affects game data!
-export function applyAttrEffect(char: GameChar, attrKey: keyof Attributes, amount: number): GameChar {
-    const originalHp: number = char.game.stats.hp, originalMp: number = char.game.stats.mp;
-
-    char.game.attributes[attrKey] += amount;
-    char.game.stats = createStats(char.game.attributes, getACBonus(char.armor), getMACBonus(char.armor), 
-        char.level, char.class.passives);
-    char.game.stats.hp = originalHp;
-    char.game.stats.mp = originalMp;
-
-    return char;
-}
-
 export function blankChar(classData: Class[]): Character {
     const attributes: Attributes = {
         strength: 0,
@@ -304,7 +468,10 @@ export function blankChar(classData: Class[]): Character {
         spirit: 0
     };
 
-    return {
+    const classPassiveEffects: PassiveEffect[] = classData[0].passives.map(p => p.effects).flat(1);
+    const affinities: Affinities = createAffinities(attributes, classPassiveEffects);
+
+    const char: Character = {
         _id: '',
         color: '#ffffff',
         name: '(click to name me)',
@@ -314,10 +481,13 @@ export function blankChar(classData: Class[]): Character {
         type: CharType.player,
         attributes:attributes,
         pointBuy: attributes,
-        stats: createStats(attributes, 0, 0, 1, []),
+        stats: createStats(attributes, affinities, 0, 0, 1, []),
         actions: [],
-        armor: []
+        selectedTalents: [],
+        inventory: []
     }
+
+    return {...char, actions: getCharActions(char)}
 }
 
 export function blankClass(): Class {
@@ -325,6 +495,7 @@ export function blankClass(): Class {
         _id: '',
         name: "(click to name me)",
         role: ClassRole.melee,
+        desc: '',
         attributes: {
             strength: 0,
             finesse: 0,
@@ -333,9 +504,32 @@ export function blankClass(): Class {
             spirit: 0
         },
         attributeFocus: ['strength','toughness'],
-        armor: [],
-        actions: [],
+        armorProfs: [],
+        weaponProfs: [],
+        startingWeapons: [],
+        startingArmor: [],
+        startingActions: [],
         passives: [],
-        availableInGame: true
+        availableInGame: true,
+        talents: blankClassTalents()
     }
+}
+
+export function blankClassPassive(): Passive {
+    return {
+        _id: '',
+        name: 'New Passive',
+        dmgType: DamageType.magic,
+        effects: [
+            {
+                targetStat: EffectTargetStat.ac,
+                amount: 1,
+                targetStatType: TargetStatType.stat
+            }
+        ]
+    }
+}
+
+function blankClassTalents(): any[][] {
+    return Array(Math.ceil(20 / (levelsPerTalentTier + 1))).fill([])
 }

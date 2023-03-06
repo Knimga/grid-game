@@ -36,7 +36,7 @@ export default function DoorPane({door, index, inputOptions, doorToBoardMap, upd
     <div className="pane door-pane">
         <small>{door.id}</small>
         <small>{doorNameString(door.name)}</small>
-        <NameInput name={door.name[2]} update={updateName} />
+        <NameInput name={door.name[2]} update={updateName} label="Door Name" />
         <Dropdown 
             label={"Leads To"} 
             options={filteredOptions}

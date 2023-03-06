@@ -11,6 +11,8 @@ import ActionsRoute from './routes/Actions';
 import ClassesRoute from './routes/Classes';
 import ArmorRoute from './routes/Armors';
 import PartiesRoute from './routes/Parties';
+import WeaponsRoute from './routes/Weapons';
+import PassivesRoute from './routes/Passives';
 
 const port: number = Number(process.env.PORT) || 4000;
 const dbUrl: string = config.db;
@@ -26,6 +28,8 @@ app.use('/actions', ActionsRoute);
 app.use('/classes', ClassesRoute);
 app.use('/armors', ArmorRoute);
 app.use('/parties', PartiesRoute);
+app.use('/weapons', WeaponsRoute);
+app.use('/passives', PassivesRoute);
 
 mongoose.connect(dbUrl).then(
     () => {console.log('Connected to Mongo!')},

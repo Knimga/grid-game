@@ -89,7 +89,9 @@ export default function GameController() {
             chars[i].game.isTurn = false;
             chars[i].game.round.actionTaken = false;
             chars[i].game.round.movementTaken = 0;
-            chars[i].game.meters.threat = 0;
+            chars[i].game.meters = {
+                threat: 0, dmgDone: 0, dmgTaken: 0, healingDone: 0, statEffectsDone: 0
+            }
         }
         return chars;
     }

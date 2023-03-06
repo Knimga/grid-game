@@ -1,21 +1,25 @@
-import {useState} from 'react';
+import {useState, useEffect} from 'react';
 import { FaSave } from "react-icons/fa";
 
 import './charBuilder.css';
 
 import NumStepper from '../shared/NumStepper';
-import ClassPane from '../shared/ClassPane';
+import ClassPane from '../shared/panes/ClassPane';
 import NameInput from '../shared/NameInput';
 import ClickSwitch from '../shared/ClickSwitch';
 import AttributesEditor from './AttributesEditor';
 import StatPane from './StatPane';
-import ArmorPane from '../shared/ArmorPane';
-import ActionPane from '../shared/ActionPane';
+import TalentTierPane from '../shared/panes/TalentTierPane';
 
-import { statCalc } from '../../services/charCalc';
-import { makeInputOptions } from '../../services/detailStrings';
+import ArmorPane from '../shared/panes/ArmorPane';
+import ActionPane from '../shared/panes/ActionPane';
+import WeaponPane from '../shared/panes/WeaponPane';
 
-import {Character, Class, Attributes, Action} from '../../types/types';
+import { statCalc, getCharActions, getCharWeapons, newInventory } from '../../services/charCalc';
+import { makeInputOptions, randId } from '../../services/detailStrings';
+import urls from '../../urls';
+
+import {Character, Class, Attributes, Talent, Weapon} from '../../types/types';
 import { CharType } from '../../types/enums';
 import {InputOption} from '../../types/uiTypes';
 
@@ -27,35 +31,34 @@ interface CharBuilderInput {
 
 export default function CharBuilder({char, classes, functions}: CharBuilderInput) {
     const [updatesSaved, setUpdatesSaved] = useState<boolean>(true);
-    const weapons: Action[] = char.actions.filter(action => action.isWeapon);
-    const abilities: Action[] = char.actions.filter(action => !action.isWeapon);
+    const [talents, setTalents] = useState<Talent[][]>([]);
+    const charWeapons: Weapon[] = getCharWeapons(char.inventory);
     const charTypeOptions: InputOption[] = makeInputOptions(Object.keys(CharType));
 
+    useEffect(() => {
+        if(!char.class._id) return;
+        fetch(urls.localRoot+urls.classes.getTalentsByClassId(char.class._id))
+            .then(res => res.json())
+            .then((data) => setTalents(data))
+            .catch((err) => console.log(err))
+    },[char.class._id]);
+
     function updateName(newName: string): void {
-        if(newName !== char.name) {
-            const newChar: Character = {...char};
-            newChar.name = newName;
-            updateChar(newChar);
-        }
+        if(newName !== char.name) updateChar({...char, name: newName});
     }
 
     function updateLevel(newLevel: number): void {
-        if(newLevel !== char.level) {
-            let newChar: Character = {...char};
-            newChar.level = newLevel;
-            newChar = statCalc(newChar);
-            updateChar(newChar);
-        }
+        if(newLevel !== char.level) updateChar(statCalc({...char, level: newLevel}));
     }
 
     function updateClass(newClass: Class): void {
         if(newClass !== char.class) {
-            let newChar: Character = {...char};
-            newChar.class = newClass;
-            newChar.actions = newClass.actions;
-            newChar.armor = newClass.armor;
-            newChar = statCalc(newChar);
-            updateChar(newChar);
+            updateChar(statCalc({
+                ...char, 
+                class: newClass, 
+                selectedTalents: [],
+                inventory: newInventory(newClass)
+            }))
         }
     }
 
@@ -68,10 +71,11 @@ export default function CharBuilder({char, classes, functions}: CharBuilderInput
 
     function updateCharType(newType: CharType): void {updateChar({...char, type: newType})}
 
-    function updateColor(color: string): void {
-        let newChar: Character = {...char};
-        newChar.color = color;
-        updateChar(newChar);
+    function updateColor(color: string): void {updateChar({...char, color: color})}
+
+    function selectTalent(tierIndex: number, talentId: string): void {
+        char.selectedTalents[tierIndex] = talentId;
+        updateChar(statCalc({...char, actions: getCharActions(char)}));
     }
 
     function updateChar(newChar: Character): void {
@@ -108,23 +112,21 @@ export default function CharBuilder({char, classes, functions}: CharBuilderInput
                 className={`char-save-button ${!updatesSaved ? 'not-saved' : ''}`} 
                 onClick={() => save()}
             />
-            <div className="left-column-padding">
-                <NameInput name={char.name} update={updateName} />
-                <span className="class-name">{char.class.name}</span>
-                <div className="level-input-row">
-                    <label>Level:</label>
-                    <NumStepper number={char.level} min={1} max={20} update={updateLevel} />
-                </div>
-                <ClickSwitch 
-                    label="Type" 
-                    currentValue={char.type} 
-                    options={charTypeOptions} 
-                    update={updateCharType}
-                    centerAlignLabel={true}
-                    leftAlignValue={true}
-                />
-                {classList()}
+            <NameInput name={char.name} update={updateName} label="Name" />
+            <span className="class-name">{char.class.name}</span>
+            <div className="level-input-row">
+                <label>Level:</label>
+                <NumStepper number={char.level} min={1} max={20} update={updateLevel} />
             </div>
+            <ClickSwitch 
+                label="Type" 
+                currentValue={char.type} 
+                options={charTypeOptions} 
+                update={updateCharType}
+                centerAlignLabel={true}
+                leftAlignValue={true}
+            />
+            {classList()}
         </div>
         <div className="central-section">
             <div className="central-section-padding">
@@ -132,22 +134,22 @@ export default function CharBuilder({char, classes, functions}: CharBuilderInput
                 <StatPane stats={char.stats} passives={char.class.passives} />
                 <div className="list-section">
                     <div className="list-section-padding">
-                        <div className="list-column weapons">
+                        <div className="list-column">
                             <span className="list-column-label">Weapons</span>
                             <div className="list">
-                                {weapons.map(weapon =>
-                                    <ActionPane
-                                        action={weapon}
+                                {charWeapons.map(weapon =>
+                                    <WeaponPane
+                                        weapon={weapon}
                                         stats={char.stats}
                                         key={weapon._id}
                                     />
                                 )}
                             </div>
                         </div>
-                        <div className="list-column abilities">
+                        <div className="list-column">
                             <span className="list-column-label">Abilities</span>
                             <div className="list">
-                                {abilities.map(ability => 
+                                {char.actions.filter(a => !a.isWeapon).map(ability => 
                                     <ActionPane
                                         action={ability}
                                         stats={char.stats}
@@ -156,15 +158,28 @@ export default function CharBuilder({char, classes, functions}: CharBuilderInput
                                 )}
                             </div>
                         </div>
-                        <div className="list-column armor" >
+                        <div className="list-column" >
                             <span className="list-column-label">Armor</span>
                             <div className="list">
-                                {char.class.armor.map(armor => 
+                                {char.class.startingArmor.map(armor => 
                                     <ArmorPane armor={armor} key={armor._id} />    
                                 )}
                             </div>
                         </div>
                     </div>
+                </div>
+                <div className="char-talents">
+                    {talents.map((talentTier, tierIndex) => 
+                        <TalentTierPane
+                            tierIndex={tierIndex}
+                            charLevel={char.level}
+                            talents={talentTier}
+                            selectedTalentId={char.selectedTalents[tierIndex] || ''}
+                            selectTalent={selectTalent}
+                            stats={null}
+                            key={randId()}
+                        />
+                    )}
                 </div>
             </div>
         </div>

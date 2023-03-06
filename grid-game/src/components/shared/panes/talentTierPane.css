@@ -1,0 +1,38 @@
+.talent-tier-pane {
+    width: 95%; height: 90px;
+    display: flex;
+    justify-content: center; align-items: center;
+    background-color: #202020;
+    border-radius: 10px;
+    cursor: pointer;
+}
+.talent-tier-pane > * {margin: 1% 2%;}
+.talent-tier-pane:hover {background-color: #303030;}
+
+.talent-tier-header-column {
+    width: 15%;
+    display: flex; flex-direction: column;
+    justify-content: space-around;
+    
+}
+.talent-tier-header-column > button {
+    width: 80%;
+}
+
+.talent-row {
+    width: 85%;
+    display: flex;
+    justify-content: center;
+    /*overflow-x: scroll;*/
+}
+.talent-row > * {margin: 0 3%;}
+
+.talent-tier-box-header {white-space: nowrap;}
+.talent-tier-box-header:hover {color: lightgray;}
+
+.talent-pane-container {display: flex; align-items: center;}
+
+.talent-tier-selected {
+    outline: 0.5px solid lightblue;
+    background-color: #303030;
+}

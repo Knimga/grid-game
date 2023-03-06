@@ -5,14 +5,19 @@ import './nameInput.css';
 
 interface NameInputInputlol {
     name: string;
-    update: Function
+    label: string;
+    update: Function;
+    fontSize?: number;
+    nameTextColor?: string;
 }
 
-export default function NameInput({name, update}: NameInputInputlol) {
+export default function NameInput({name, label, fontSize, update, nameTextColor}: NameInputInputlol) {
     const [editModeOn, setEditModeOn] = useState<boolean>(false);
     let currentName: string = name;
 
-    function click() {setEditModeOn(true)}
+    function nameDisplayStyle(): Object {
+        return {fontSize: `${fontSize || 125}%`, color: nameTextColor || ''}
+    }
 
     function updateName(): void {
         update(currentName);
@@ -31,13 +36,18 @@ export default function NameInput({name, update}: NameInputInputlol) {
                 <button className="name-change-confirm-button" onClick={() => updateName()}><FaCheck /></button>
             </div>
         } else {
-            return <div className="name-display" onClick={() => click()}>{name}</div>
+            return <div 
+                className="name-display" 
+                onClick={() => setEditModeOn(true)} 
+                style={nameDisplayStyle()}
+            >{name}</div>
         }
     }
 
   return (
     <div className="name-wrapper">
         {nameElement()}
+        <small className="name-label">{label}</small>
     </div>
   )
 }

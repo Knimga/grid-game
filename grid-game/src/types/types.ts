@@ -1,6 +1,6 @@
 import { 
     CharType, ClassRole, Intent, DamageType, TargetingType, 
-    EffectType, EffectTargetStat 
+    EffectType, EffectTargetStat, TargetStatType, WeaponType, ArmorType
 } from "./enums";
 
 export interface Dungeon {
@@ -60,7 +60,7 @@ export interface Character {
     _id: string;
     color: string;
     name: string;
-    class: Class;
+    class: Class; //class now gives attributes, stats, actions, inventory
     level: number;
     type: CharType;
     xp: number;
@@ -68,7 +68,8 @@ export interface Character {
     pointBuy: Attributes;
     stats: Stats;
     actions: Action[];
-    armor: Armor[];
+    selectedTalents: string[]; //index corresponds to class talentTierIndex
+    inventory: InventoryItem[];
 }
 
 export interface GameChar extends Character {
@@ -96,20 +97,37 @@ export interface Class {
     _id?: string;
     name: string;
     role: ClassRole;
+    desc: string;
     attributes: Attributes;
     attributeFocus: AttributeFocus;
-    armor: Armor[];
-    actions: Action[];
-    passives: PassiveEffect[];
+    armorProfs: ArmorType[];
+    weaponProfs: WeaponType[];
+    startingWeapons: Weapon[];
+    startingArmor: Armor[];
+    startingActions: Action[];
+    passives: Passive[];
     availableInGame: boolean;
+    talents: Talent[][];
+}
+
+export interface Talent {
+    passive: Passive | null;
+    action: Action | null;
 }
 
 export type AttributeFocus = [keyof Attributes, keyof Attributes];
 
-export interface PassiveEffect {
+export interface Passive {
+    _id: string;
     name: string;
     dmgType: DamageType;
-    effects: {targetStat: EffectTargetStat; amount: number;}[]
+    effects: PassiveEffect[]
+}
+
+export interface PassiveEffect {
+    targetStat: EffectTargetStat; 
+    targetStatType: TargetStatType; //this currently isn't used... keep it for future stuff?
+    amount: number;
 }
 
 export interface Attributes {
@@ -162,30 +180,24 @@ export interface DamageTypes {
 
 export interface Bonuses {atk: number; dmg: number; dr: number;}
 
-export interface Armor {
-    _id: string,
-    name: string;
-    ac: number;
-    mac: number;
-}
-
 export interface Action {
-    _id: string,
-    name: string,
-    intent: Intent,
-    range: number,
-    isWeapon: boolean,
-    mpCost: number,
-    effects: Effect[],
-    dmgType: DamageType,
-    target: TargetingType,
-    burstRadius?: number,
-    hands?: number
+    _id: string;
+    name: string;
+    intent: Intent;
+    range: number;
+    isWeapon: boolean;
+    mpCost: number;
+    effects: Effect[];
+    dmgType: DamageType;
+    target: TargetingType;
+    burstRadius?: number;
+    hands?: number;
 }
 
 export interface Effect {
     type: EffectType;
     duration: number;
+    targetStatType: TargetStatType; //this currently isn't used... keep it for future stuff?
     targetStat: EffectTargetStat;
     dmgType: DamageType;
     targetsSelf: boolean;
@@ -198,6 +210,41 @@ export interface ActiveEffect extends Effect {
     effectiveAmount: number,
     castById: string,
     actionName: string
+}
+
+export interface Weapon {
+    _id?: string;
+    name: string;
+    type: WeaponType;
+    hands: number;
+    action: Action;
+    otherActions: Action[];
+    attrReqs: AttributeReq[];
+    passives: PassiveEffect[];
+    isStartingWeapon: boolean;
+}
+ 
+export interface Armor {
+    _id?: string,
+    name: string;
+    type: ArmorType;
+    ac: number;
+    mac: number;
+    attrReqs: AttributeReq[];
+    passives: PassiveEffect[];
+    actions: Action[];
+    isStartingArmor: boolean;
+}
+
+export interface AttributeReq {attr: keyof Attributes; minAttrValue: number;}
+
+export interface InventoryItem {
+    isStackable: boolean;
+    qty: number;
+    isEquipped: boolean;
+    weapon: Weapon | null;
+    armor: Armor | null;
+    item: any | null;
 }
 
 export interface Roll {

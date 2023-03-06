@@ -51,7 +51,7 @@ export default function CharSquare({char, style, index, onClick, onMouseOver}: C
         title={char.game.gameId}
     >
         <div className="char-square-top">
-            <div className="char-square-effects-row">            
+            <div className="char-square-effects-row">         
                 {uniqueActiveEffects.map(ae => 
                     <div 
                         className="char-square-effect"
@@ -63,8 +63,8 @@ export default function CharSquare({char, style, index, onClick, onMouseOver}: C
             </div>
             
         </div>
+        {char.game.isBoss ? <FaSkull className="skull-icon" /> : ''}   
         <div className="char-square-bottom">
-            {char.game.isBoss ? <FaSkull className="skull-icon" /> : ''}
             <div className='char-square-name-row'>
                 <span className="char-square-name">{char.name}</span>
             </div>          

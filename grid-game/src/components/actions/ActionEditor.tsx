@@ -14,21 +14,20 @@ import { makeInputOptions } from '../../services/detailStrings';
 import { blankEffect } from '../../services/actions';
 
 import { Action, Effect } from '../../types/types';
-import { Intent, DamageType, TargetingType, DamageTypeDarkColor } from '../../types/enums';
+import { Intent, DamageType, TargetingType, DamageTypeColor, DamageTypeDarkColor } from '../../types/enums';
 import {InputOption} from '../../types/uiTypes';
 
 interface ActionEditorInput {
     action: Action,
     update: Function,
-    save: Function
+    save?: Function
 }
 
 export default function ActionEditor({action, update, save}: ActionEditorInput) {
     const [updatesSaved, setUpdatesSaved] = useState<boolean>(true);
 
     const minRange: number = [TargetingType.self,TargetingType.burst].includes(action.target) ? 0 : 1;
-    const maxRange: number = (action.isWeapon && action.dmgType !== DamageType.ranged) ? 2 : 10;
-    const minMpCost: number = action.isWeapon ? 0 : 1;
+    const maxRange: number = 10;
 
     const dmgTypeOptions: InputOption[] = makeInputOptions(Object.values(DamageType));
     const offDefOptions: InputOption[] = makeInputOptions(Object.keys(Intent));
@@ -41,11 +40,12 @@ export default function ActionEditor({action, update, save}: ActionEditorInput) 
     );
 
     function updateAction(newAction: Action): void {
-        setUpdatesSaved(false); update(newAction);
+        if(save) setUpdatesSaved(false);
+        update(newAction);
     }
 
     function saveAction(): void {
-        setUpdatesSaved(true); save(action);
+        if(save) {setUpdatesSaved(true); save(action);}
     }
 
     function updateName(newName: string): void {
@@ -113,12 +113,17 @@ export default function ActionEditor({action, update, save}: ActionEditorInput) 
 
   return (
     <div className="action-editor-container">
-        <FaSave 
+        {save ? <FaSave 
             className={`action-save-button ${!updatesSaved ? 'not-saved' : ''}`} 
             onClick={() => saveAction()}
-        />
+        /> : ''}
         <div className="container-padding">
-            <NameInput name={action.name} update={updateName} />
+            <NameInput 
+                name={action.name} 
+                update={updateName} 
+                label="Action Name" 
+                nameTextColor={DamageTypeColor[action.dmgType]}
+            />
             <Dropdown 
                 label="Damage Type"
                 selectedOpt={action.dmgType}
@@ -154,7 +159,7 @@ export default function ActionEditor({action, update, save}: ActionEditorInput) 
             <div className="action-field-row">
                 <small className="action-field-label">MP Cost:</small>
                 <div className="action-field-value">
-                    <NumStepper number={action.mpCost} min={minMpCost} max={30} update={updateMpCost} />
+                    <NumStepper number={action.mpCost} min={0} max={30} update={updateMpCost} />
                 </div>
             </div>
             

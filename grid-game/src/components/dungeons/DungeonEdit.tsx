@@ -193,7 +193,7 @@ export default function DungeonEdit(
             />
         </div>
         <div className="dungeon-board-edit-tools">
-            <NameInput name={selectedBoard.name} update={updateBoardName} />
+            <NameInput name={selectedBoard.name} update={updateBoardName} label="Board Name" />
             <DimensionEdit 
                 width={selectedBoard.gridWidth} 
                 height={selectedBoard.gridHeight}

@@ -4,6 +4,7 @@ import { DbClass } from "../dbTypes";
 const schema = new Schema<DbClass>({
     name: String,
     role: String,
+    desc: String,
     attributes: {
         strength: Number,
         finesse: Number,
@@ -12,10 +13,14 @@ const schema = new Schema<DbClass>({
         spirit: Number
     },
     attributeFocus: Array,
-    actions: Array,
-    armor: Array,
+    weaponProfs: Array,
+    armorProfs: Array,
+    startingActions: Array,
+    startingArmor: Array,
+    startingWeapons: Array,
     passives: Array,
-    availableInGame: Boolean
+    availableInGame: Boolean,
+    talents: Array
 });
 
 export default model<DbClass>('classes', schema);

@@ -1,16 +1,17 @@
 import './effectEditor.css';
 
 import { Effect } from '../../types/types';
-import { EffectType, DamageType, Intent, EffectTargetStat, DamageTypeDarkColor } from '../../types/enums';
+import { EffectType, DamageType, Intent, EffectTargetStat, DamageTypeDarkColor, TargetStatType } from '../../types/enums';
 import {InputOption} from '../../types/uiTypes';
 
-import { FaTrashAlt } from "react-icons/fa";
+import { FaTrashAlt } from "react-icons/fa"; 
 
 import Dropdown from '../shared/Dropdown';
 import NumStepper from '../shared/NumStepper';
 import ClickSwitch from '../shared/ClickSwitch';
 
-import {makeInputOptions} from '../../services/detailStrings';
+import { getTargetStatType } from '../../services/effects';
+import {makeInputOptions, cap} from '../../services/detailStrings';
 
 interface EffectEditorInput {
     effect: Effect,
@@ -38,6 +39,7 @@ export default function EffectEditor(
     const effectTypeOptions: InputOption[] = makeInputOptions([...offensiveEffectTypes, ...defensiveEffectTypes]);
     const dmgTypeOptions: InputOption[] = makeInputOptions(Object.keys(DamageType));
     const targetStatOptions: InputOption[] = makeInputOptions(allowedTargetStats);
+    const targetStatTypeOptions: InputOption[] = [{enumValue: effect.targetStatType, displayValue: cap(effect.targetStatType)}];
     const affectsOptions: InputOption[] = makeInputOptions(['target', 'self']);
     const effectDmgOptions: InputOption[] = makeInputOptions(['roll','flatAmount']);
     const dieTypeOptions: InputOption[] = makeInputOptions(['4','6','8','10','12','20']);
@@ -49,7 +51,7 @@ export default function EffectEditor(
     }
 
     function updateEffectType(newType: EffectType): void {
-        if([EffectType.damage,EffectType.healing].includes(newType)) effect.duration = 0;
+        if([EffectType.damage,EffectType.healing,EffectType.threat].includes(newType)) effect.duration = 0;
         if([EffectType.dot,EffectType.hot].includes(newType)) {
             if(effect.duration > 1) effect.duration = 1;
             if(effect.flatAmount && effect.flatAmount < effect.duration) {effect.flatAmount = effect.duration}
@@ -60,7 +62,8 @@ export default function EffectEditor(
     function updateDamageType(newType: DamageType): void {update({...effect, dmgType: newType}, index)}
 
     function updateTargetStat(newTargetStat: EffectTargetStat): void {
-        update({...effect, targetStat: newTargetStat}, index)
+        const newTargetStatType: TargetStatType = getTargetStatType(newTargetStat);
+        update({...effect, targetStat: newTargetStat, targetStatType: newTargetStatType}, index);
     }
 
     function updateTargetSelf(newAffectsValue: string): void {
@@ -152,6 +155,12 @@ export default function EffectEditor(
             selectedOpt={effect.targetStat}
             options={targetStatOptions}
             update={updateTargetStat}
+        />
+        <ClickSwitch 
+            label="Target Stat Type"
+            currentValue={effect.targetStatType}
+            options={targetStatTypeOptions}
+            update={() => {}}
         />
         <ClickSwitch 
             label="Affects"

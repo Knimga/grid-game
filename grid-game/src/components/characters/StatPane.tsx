@@ -1,14 +1,14 @@
 import './statPane.css';
 
-import DmgTypeStatPane from '../shared/DmgTypeStatPane';
-import PassiveEffectPane from '../shared/PassiveEffectPane';
+import DmgTypeStatPane from '../shared/panes/DmgTypeStatPane';
+import PassivePane from '../shared/panes/PassivePane';
 
 import { charThreatString, randId } from '../../services/detailStrings';
 
-import { PassiveEffect, Stats } from '../../types/types';
+import { Passive, Stats } from '../../types/types';
 import { DamageType } from '../../types/enums';
 
-interface StatPaneInput {stats: Stats, passives: PassiveEffect[]}
+interface StatPaneInput {stats: Stats, passives: Passive[]}
 
 export default function StatPane({stats, passives}: StatPaneInput) {
 
@@ -47,7 +47,7 @@ export default function StatPane({stats, passives}: StatPaneInput) {
             <DmgTypeStatPane dmgType={DamageType.lightning} baseBonuses={stats.dmgTypes.lightning} />
         </div>
         <div className="passive-list">
-            {passives.map((p, index) => <PassiveEffectPane passive={p} index={index} key={randId()}/>)}
+            {passives.map(passive => <PassivePane passive={passive} key={randId()}/>)}
         </div>
     </div>
   )

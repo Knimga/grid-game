@@ -1,0 +1,30 @@
+.action-pane {
+    width: 225px; 
+    display: flex; 
+    align-items: center; justify-content: space-between;
+    background-color: #181818;
+    margin: 1% 0; padding: 2%;
+    font-size: 75%;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.action-pane:hover {outline: 0.5px solid gray; background-color: #303030;}
+
+.action-detail-desc-column {
+    width: 55%;
+    display: flex; flex-direction: column;
+    justify-content: flex-start; align-items: flex-start;
+    white-space: wrap;
+}
+
+.action-detail-items-column {
+    width: 45%;
+    display: flex; flex-direction: column;
+    justify-content: center; align-items: flex-end;
+}
+
+.action-pane-selected {
+    outline: 0.5px solid lightblue;
+    background-color: #303030;
+}

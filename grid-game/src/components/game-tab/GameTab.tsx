@@ -94,10 +94,13 @@ export default function GameTab({startingBoard, enterDoor, colorScheme}: GameTab
     }
 
     async function aiTurn(char: GameChar) {
-        if(char.type === CharType.player) {console.log(`${char.name} is not enemy/beast`); endTurn(); return;}
+        if(char.type === CharType.player) {
+            console.log(`${char.name} is not enemy/beast`); endTurn(); return;
+        }
 
         const plan: AiPlan = aiPlan(chars, char, board, adjMatrix, roundNumber);
-        //console.log(plan);
+        console.log(`${char.name} (${char.game.gameId}) plan:`);
+        console.log(plan);
         const sleepLength: number = char.game.isVisible ? 1000 : 500;
 
         if(plan.newDest) setCharDest(plan.newDest);

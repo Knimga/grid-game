@@ -128,26 +128,20 @@ export function newExploreDestination(board: GameBoard, currentPosition: number)
     const newQuadrant: Coord = getNewQuadrant(currentQuadrant);
     const allCoords: Coord[] = getAllCoordsInQuadrant(newQuadrant, thirdOfWidth, thirdOfHeight);
 
-    let allIndices: number[] = allCoords.map(coord => coordToIndex(coord, board.gridWidth));
-    const charIndices: number[] = board.chars.map(char => char.game.positionIndex);
+    const allIndices: number[] = allCoords.map(coord => coordToIndex(coord, board.gridWidth));
+    const cantMoveToIndices: number[] = getCantMoveToIndices(board);
 
-    allIndices = allIndices.filter(index => {
-        return !board.walls.includes(index) && !charIndices.includes(index)
-    });
-
-    const randomIndex: number = Math.floor(Math.random() * allIndices.length);
-    return allIndices[randomIndex];
+    const canMoveToIndices: number[] = allIndices.filter(
+        index => {return !cantMoveToIndices.includes(index)});
+    
+    const randomIndex: number = Math.floor(Math.random() * canMoveToIndices.length);
+    return canMoveToIndices[randomIndex];
 }
 
 export function getAdjacencyMatrix(board: GameBoard): number[][] {
     const matrix: number[][] = [];
     const indexLength: number = board.gridWidth * board.gridHeight;
-    const blockedIndices: number[] = [
-        ...board.walls,
-        ...board.chars.map(char => char.game.positionIndex),
-        ...board.doors.map(door => door.position)
-    ];
-    if(board.portal) blockedIndices.push(board.portal);
+    const blockedIndices: number[] = getCantMoveToIndices(board);
 
     for (let i = 0; i < indexLength; i++) {
         const thisCoord: Coord = indexToCoord(i, board.gridWidth);
@@ -160,7 +154,20 @@ export function getAdjacencyMatrix(board: GameBoard): number[][] {
 
         matrix[i] = adjIndices;
     }
+
     return matrix;
+}
+
+export function getCantMoveToIndices(board: GameBoard): number[] {
+    const cantMoveToIndices: number[] = [
+        ...board.walls,
+        ...board.doors.map(d => d.position),
+        ...board.chars.map(char => char.game.positionIndex)
+    ];
+
+    if(board.portal) cantMoveToIndices.push(board.portal);
+
+    return cantMoveToIndices;
 }
 
 function reverseArray(array: any[]): any[] {

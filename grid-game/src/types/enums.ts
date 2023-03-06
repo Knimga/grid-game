@@ -8,9 +8,11 @@ export enum ItemListType {
     weapons = 'weapons',
     abilities = 'abilities',
     armor = 'armor',
+    passives = 'passives',
     allAbilities = 'allAbilities',
     allWeapons = 'allWeapons',
-    allArmors = 'allArmors'
+    allArmors = 'allArmors',
+    allPassives = 'allPassives'
 }
 
 export enum AttributeEnum {
@@ -67,7 +69,7 @@ export enum DamageTypeColor {
 export enum DamageTypeDarkColor {
     melee = '#202020',
     ranged = '#202020',
-    magic = '#8978ad',
+    magic = '#60547a',
     fire = '#300300',
     wind = '#165e80',
     earth = '#261e03',
@@ -100,6 +102,13 @@ export enum EffectType {
     threat = 'threat'
 }
 
+export enum TargetStatType {
+    stat = 'stat',
+    threat = 'threat',
+    attribute = 'attribute',
+    affinity = 'affinity'
+}
+
 export enum EffectTargetStat {
     hp = 'hp',
     hpRegen = 'hpRegen',
@@ -108,6 +117,8 @@ export enum EffectTargetStat {
     ac = 'ac',
     mac = 'mac',
     mvt = 'mvt',
+    initiative = 'initiative',
+    threat = 'threat',
     strength = 'strength',
     finesse = 'finesse',
     toughness = 'toughness',
@@ -115,7 +126,7 @@ export enum EffectTargetStat {
     spirit = 'spirit',
     bonusHealingDone = 'bonusHealingDone',
     bonusHealingRcvd = 'bonusHealingRcvd',
-    threatMuliplier = 'threatMultiplier',
+    threatMultiplier = 'threatMultiplier',
     allAtkRolls = 'allAtkRolls',
     allDmgRolls = 'allDmgRolls',
     allDr = 'allDr',
@@ -131,25 +142,50 @@ export enum EffectTargetStat {
     fireAtk = 'fireAtk',
     fireDmg = 'fireDmg',
     fireDr = 'fireDr',
+    fireAff = 'fireAff',
     windAtk = 'windAtk',
     windDmg = 'windDmg',
     windDr = 'windDr',
+    windAff = 'windAff',
     earthAtk = 'earthAtk',
     earthDmg = 'earthDmg',
     earthDr = 'earthDr',
+    earthAff = 'earthAff',
     shadowAtk = 'shadowAtk',
     shadowDmg = 'shadowDmg',
     shadowDr = 'shadowDr',
+    shadowAff = 'shadowAff',
     waterAtk = 'waterAtk',
     waterDmg = 'waterDmg',
     waterDr = 'waterDr',
+    waterAff = 'waterAff',
     holyAtk = 'holyAtk',
     holyDmg = 'holyDmg',
     holyDr = 'holyDr',
+    holyAff = 'holyAff',
     poisonAtk = 'poisonAtk',
     poisonDmg = 'poisonDmg',
     poisonDr = 'poisonDr',
+    poisonAff = 'poisonAff',
     lightningAtk = 'lightningAtk',
     lightningDmg = 'lightningDmg',
-    lightningDr = 'lightningDr'
+    lightningDr = 'lightningDr',
+    lightningAff = 'lightningAff'
+}
+
+export enum WeaponType {
+    simpleMelee = 'simpleMelee',
+    simpleRanged = 'simpleRanged',
+    martialMelee = 'martialMelee',
+    martialRanged = 'martialRanged',
+    magicalMelee = 'magicalMelee',
+    magicalRanged = 'magicalRanged'
+}
+
+export enum ArmorType {
+    cloth = 'cloth',
+    light = 'light',
+    medium = 'medium',
+    heavy = 'heavy',
+    shield = 'shield'
 }

@@ -1,0 +1,13 @@
+.passive-editor-pane {
+    width: 200px; height: 70px;
+    display: flex; flex-direction: column;
+    justify-content: space-around; align-items: center;
+    background-color: #252525; color: lightgray;
+    border-radius: 10px;
+    margin: 1% 0;
+    padding: 1%;
+}
+
+.numstepper-row {
+    display: flex; justify-content: center;
+}

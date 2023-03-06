@@ -1,5 +1,5 @@
 .action-editor-container {
-    width: 25%; height: 100%;
+    width: 375px; 
     display: flex; flex-direction: column;
     align-items: center;
     background-color: #181818;
@@ -12,7 +12,7 @@
     align-items: center;
     padding: 3%;
 }
-.container-padding > * {margin: 2% 0;}
+.container-padding > * {margin: 1% 0;}
 
 .action-save-button {
     align-self: flex-start;
@@ -59,7 +59,7 @@
 .effect-editor-header > button:hover {background-color: #404040; color: white;}
 
 .effect-editor-list {
-    width: 100%; height: 100%;
+    width: 100%; height: 300px;
     background-color: #202020;
     border-radius: 10px;
     padding: 2%;

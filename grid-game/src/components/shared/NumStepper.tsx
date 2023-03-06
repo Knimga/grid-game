@@ -7,17 +7,18 @@ interface NumStepperInput {
     min: number;
     max: number;
     update: Function;
+    index?: number;
     attr?: keyof Attributes;
 }
 
-export default function NumStepper({number, min, max, update, attr}: NumStepperInput) {
+export default function NumStepper({number, min, max, update, index, attr}: NumStepperInput) {
+    
     function increment(amount: number): void {
         const newNumber: number = number + amount;
-        if(newNumber >= min && newNumber <= max) {
-            if(attr) {
-                update(attr, newNumber)
-            } else {update(newNumber)}
-        }
+        if(newNumber < min || newNumber > max) return;
+        if(attr) {update(attr, newNumber); return;}
+        if(index !== undefined) {update(newNumber, index); return;}
+        update(newNumber);
     }
 
     return (

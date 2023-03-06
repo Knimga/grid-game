@@ -13,7 +13,6 @@ const urls = {
     },
     characters: {
         getAll: 'characters/getAll',
-        create: 'characters/create',
         save: 'characters/save',
         delete: (_id: string) => `characters/delete/${_id}`,
         getBoardChars: 'characters/getBoardChars'
@@ -37,17 +36,23 @@ const urls = {
     classes: {
         getAll: 'classes/getAll',
         save: 'classes/save',
-        create: 'classes/create'
+        getTalentsByClassId: (_id: string) => `classes/getTalentsByClassId/${_id}`
     },
     actions: {
         getAll: 'actions/getAll',
-        save: 'actions/save',
-        create: 'actions/create'
+        save: 'actions/save'
     },
     armors: {
         getAll: 'armors/getAll',
-        save: 'armors/save',
-        create: 'armors/create'
+        save: 'armors/save'
+    },
+    weapons: {
+        getAll: 'weapons/getAll',
+        save: 'weapons/save'
+    },
+    passives: {
+        getAll: 'passives/getAll',
+        save: 'passives/save'
     }
 }
 

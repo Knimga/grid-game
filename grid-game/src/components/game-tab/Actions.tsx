@@ -3,7 +3,7 @@ import {useState} from 'react';
 
 import {Button} from '@mui/material';
 
-import ActionPane from '../shared/ActionPane';
+import ActionPane from '../shared/panes/ActionPane';
 import CharStatBlock from '../shared/CharStatBlock';
 
 import {getRemainingMvt} from '../../services/aiMove';
@@ -46,16 +46,15 @@ export default function Actions({char, enableDoorButton, actionFunctions}: Actio
 
     function clickActionPane(id: string) {
         const action = char.actions.find(action => action._id === id);
-        if(action) {
-            if(actionRemaining && char.game.stats.mp >= action.mpCost) {
-                if(id === selectedId) {
-                    setSelectedId(null);
-                    actionFunctions.selectAction(action, true);
-                } else {
-                    setSelectedId(id);
-                    actionFunctions.selectAction(action);
-                }
-            }  
+        if(!action) return;
+        if(actionRemaining && char.game.stats.mp >= action.mpCost) {
+            if(id === selectedId) {
+                setSelectedId(null);
+                actionFunctions.selectAction(action, true);
+            } else {
+                setSelectedId(id);
+                actionFunctions.selectAction(action);
+            }
         }  
     }
 
@@ -64,116 +63,109 @@ export default function Actions({char, enableDoorButton, actionFunctions}: Actio
     function clickMove(): void {setSelectedId(null); actionFunctions.showMovement();}
 
     function playerNameHeader(char: GameChar): JSX.Element {
-        if(char.type === CharType.player) {
-            return <div className="char-name-bar" style={{backgroundColor: char.color}}>
-                <strong>{char.name}</strong>
-                <small>{char.class.name}</small>
-            </div>
-        } else {return <></>}
+        if(char.type !== CharType.player) return <></>;
+        return <div className="char-name-bar" style={{backgroundColor: char.color}}>
+            <strong>{char.name}</strong>
+            <small>{char.class.name}</small>
+        </div>
     }
 
     function enemyTurnDisplay(): JSX.Element {
-        if(char.type !== CharType.player) {
-            return <div className="actions-column">
-                <strong className="enemy-turn-text">Enemy's turn...</strong>
-            </div>
-        } else {return <></>}
+        if(char.type === CharType.player) return <></>;
+        return <div className="actions-column">
+            <strong className="enemy-turn-text">Enemy's turn...</strong>
+        </div>
     }
 
     function weaponsList(): JSX.Element {
-        if(selectedCategory === ActionCategory.weapons) {
-            return <div className="action-list">
-                {weapons.map((action, index) => 
-                    <ActionPane
-                        action={action}
-                        stats={char.game.stats}
-                        onClick={() => clickActionPane(action._id)}
-                        isSelected={selectedId === action._id && actionRemaining ? true : false}
-                        index={index}
-                        key={action.name}
-                    />
-                )}
-            </div>
-        } else {return <></>}
+        if(selectedCategory !== ActionCategory.weapons) return <></>;
+        return <div className="action-list">
+            {weapons.map((action, index) => 
+                <ActionPane
+                    action={action}
+                    stats={char.game.stats}
+                    onClick={() => clickActionPane(action._id)}
+                    isSelected={selectedId === action._id && actionRemaining ? true : false}
+                    index={index}
+                    key={action.name}
+                />
+            )}
+        </div>
     }
 
     function abilitiesList(): JSX.Element {
-        if(selectedCategory === ActionCategory.abilities) {
-            return <div className="action-list">
-                {abilities.map((action, index) => 
-                    <ActionPane
-                        action={action}
-                        stats={char.game.stats}
-                        onClick={() => clickActionPane(action._id)}
-                        isSelected={selectedId === action._id && actionRemaining ? true : false}
-                        index={index}
-                        key={action._id}
-                    />
-                )}
-            </div>
-        } else {return <></>}
+        if(selectedCategory !== ActionCategory.abilities) return <></>;
+        return <div className="action-list">
+            {abilities.map((action, index) => 
+                <ActionPane
+                    action={action}
+                    stats={char.game.stats}
+                    onClick={() => clickActionPane(action._id)}
+                    isSelected={selectedId === action._id && actionRemaining ? true : false}
+                    index={index}
+                    key={action._id}
+                />
+            )}
+        </div>
     }
 
     function statsBlock(): JSX.Element {
-        if(selectedCategory === ActionCategory.stats) {
-            return <CharStatBlock char={char}/>
-        } else {return <></>}
+        if(selectedCategory !== ActionCategory.stats) return <></>; 
+        return <CharStatBlock char={char}/>;
     }
 
     function playerTurnDisplay(): JSX.Element {
-        if(char.type === CharType.player) {
-            return <div className="actions-column">
-                <div className="char-bars-container">
-                    <div className="char-stats-hp-bar-container">
-                        <div className="char-stats-hp-bar" style={hpBarStyle}></div>
-                    </div>
-                    <div className="char-stats-mp-bar-container">
-                        <div className="char-stats-mp-bar" style={mpBarStyle}></div>
-                    </div>
-                    <small>{`HP: ${char.game.stats.hp}/${char.stats.hp} (+${char.game.stats.hpRegen})`}</small>
-                    <small>{`MP: ${char.game.stats.mp}/${char.stats.mp} (+${char.game.stats.mpRegen})`}</small>
+        if(char.type !== CharType.player) return <></>;
+        return <div className="actions-column">
+            <div className="char-bars-container">
+                <div className="char-stats-hp-bar-container">
+                    <div className="char-stats-hp-bar" style={hpBarStyle}></div>
                 </div>
+                <div className="char-stats-mp-bar-container">
+                    <div className="char-stats-mp-bar" style={mpBarStyle}></div>
+                </div>
+                <small>{`HP: ${char.game.stats.hp}/${char.stats.hp} (+${char.game.stats.hpRegen})`}</small>
+                <small>{`MP: ${char.game.stats.mp}/${char.stats.mp} (+${char.game.stats.mpRegen})`}</small>
+            </div>
+            <Button 
+                variant="contained"
+                disabled={!remainingMvt}
+                onClick={() => clickMove()}
+            >{`Move (${char ? getRemainingMvt(char) : 0}/${char ? char.game.stats.mvt : 0})`}</Button>
+            <div className='action-container'>
+                <strong className={actionRemaining ? '' : 'disabled'}>
+                    {`Actions ${actionRemaining ? 1 : 0}/1`}
+                </strong>
+                <div className="action-type-toggle-button-row">
+                    <button 
+                        className={`action-type-button  ${selectedCategory === ActionCategory.weapons ? 'action-type-selected' : ''}`} 
+                        onClick={() => setActionCategory(ActionCategory.weapons)}
+                    >Weapons</button>
+                    <button 
+                        className={`action-type-button  ${selectedCategory === ActionCategory.abilities ? 'action-type-selected' : ''}`} 
+                        onClick={() => setActionCategory(ActionCategory.abilities)}
+                    >Abilities</button>
+                    <button 
+                        className={`action-type-button  ${selectedCategory === ActionCategory.stats ? 'action-type-selected' : ''}`}
+                        onClick={() => setActionCategory(ActionCategory.stats)}
+                    >Stats</button>
+                </div>
+                {weaponsList()}
+                {abilitiesList()}
+                {statsBlock()}
+            </div>
+            <div className="flex-row-centered">
+                {enableDoorButton ? 
+                    <Button variant="contained" onClick={() => actionFunctions.clickEnterDoor()}>
+                        Enter Door
+                    </Button>
+                : ''}
                 <Button 
-                    variant="contained"
-                    disabled={!remainingMvt}
-                    onClick={() => clickMove()}
-                >{`Move (${char ? getRemainingMvt(char) : 0}/${char ? char.game.stats.mvt : 0})`}</Button>
-                <div className='action-container'>
-                    <strong className={actionRemaining ? '' : 'disabled'}>
-                        {`Actions ${actionRemaining ? 1 : 0}/1`}
-                    </strong>
-                    <div className="action-type-toggle-button-row">
-                        <button 
-                            className={`action-type-button  ${selectedCategory === ActionCategory.weapons ? 'action-type-selected' : ''}`} 
-                            onClick={() => setActionCategory(ActionCategory.weapons)}
-                        >Weapons</button>
-                        <button 
-                            className={`action-type-button  ${selectedCategory === ActionCategory.abilities ? 'action-type-selected' : ''}`} 
-                            onClick={() => setActionCategory(ActionCategory.abilities)}
-                        >Abilities</button>
-                        <button 
-                            className={`action-type-button  ${selectedCategory === ActionCategory.stats ? 'action-type-selected' : ''}`}
-                            onClick={() => setActionCategory(ActionCategory.stats)}
-                        >Stats</button>
-                    </div>
-                    {weaponsList()}
-                    {abilitiesList()}
-                    {statsBlock()}
-                </div>
-                <div className="flex-row-centered">
-                    {enableDoorButton ? 
-                        <Button variant="contained" onClick={() => actionFunctions.clickEnterDoor()}>
-                            Enter Door
-                        </Button>
-                    : ''}
-                    <Button 
-                        variant="contained" 
-                        onClick={() => endTurn()}
-                    >End Turn</Button>
-                </div>
-                
-            </div> 
-        } else {return <></>}
+                    variant="contained" 
+                    onClick={() => endTurn()}
+                >End Turn</Button>
+            </div>
+        </div> 
     }
 
   return (

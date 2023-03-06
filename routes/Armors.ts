@@ -13,20 +13,13 @@ router.route('/getAll').get((req,res) => {
 });
 
 router.route('/save').post(async (req,res) => {  
-    let armor: Armor = req.body;
-    armor = new ArmorsModel(armor);
+    const armor: Armor = new ArmorsModel(req.body);
 
     ArmorsModel.findOneAndUpdate({_id: armor._id}, armor, {upsert: true, new: true}, 
         (err, savedAction: Armor) => {
             if(err) return res.status(500).send(err);
             return res.status(200).send(savedAction);
     }).lean();
-});
-
-router.route('/create').post(async (req,res) => {
-    const armor = new ArmorsModel(req.body);
-    await armor.save();
-    res.status(200).send();
 });
 
 export default router;

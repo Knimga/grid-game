@@ -1,0 +1,22 @@
+.pill {
+    width: 90px; height: 13px;
+    display: flex; align-items: center;
+    border-radius: 10px;
+    outline: 0.5px solid #151515;
+    font-size: 75%;
+}
+.pill-label, .pill-value {
+    height: 100%;
+    display: flex; justify-content: center;
+    align-items: center;
+}
+.pill-label {
+    border-radius: 10px 0 0 10px;
+    background-color: #303030; width: 55%;
+}
+.pill-value {
+    width: 45%;
+    border-radius: 0 10px 10px 0;
+    background-color: #a6a6a6; color: black;
+    font-weight: bold;
+}

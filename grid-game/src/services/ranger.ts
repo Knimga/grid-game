@@ -1,3 +1,5 @@
+import { getCantMoveToIndices } from './aiMove';
+
 import {GameBoard, Board, Action} from '../types/types';
 import {RangeType} from '../types/uiTypes';
 
@@ -14,12 +16,7 @@ export function getInRangeIndices(
     let inRangeIndices: number[] = getSeenIndices(gameBoard, position, range);
 
     if(rangeType === RangeType.mvt) {
-        const cantMoveTo: number[] = [
-            ...gameBoard.chars.map(char => char.game.positionIndex),
-            ...gameBoard.doors.map(door => door.position)
-        ];
-        if(gameBoard.portal) cantMoveTo.push(gameBoard.portal);
-
+        const cantMoveTo: number[] = getCantMoveToIndices(gameBoard);
         inRangeIndices = inRangeIndices.filter(index => {return !cantMoveTo.includes(index)});
     }
 

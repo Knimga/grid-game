@@ -1,5 +1,6 @@
 body {
-  background-color: #252b57;
+  background-color: #32334a;
+  /*background-color: #252b57;*/
   color: lightgray;
 }
 
@@ -9,8 +10,12 @@ select {
   height: 30px;
 }
 
+.app-container {
+  width: 1500px; height: 950px;
+}
+
 .tab-container {
-  width: 1500px; max-width: 1500px; height: 950px;
+  width: 1500px; height: 950px;
   display: flex; flex-direction: column;
 }
 

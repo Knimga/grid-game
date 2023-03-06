@@ -1,8 +1,19 @@
 .class-builder-container {
-    width: 50%; height: 100%;
-    outline: 0.5px solid gray;
+    width: 1200px; height: 100%;
+    display: flex;
+    align-items: center;
+}
+
+.class-builder-editor {
+    width: 750px; height: 100%;
     display: flex; flex-direction: column;
-    align-items: center; justify-content: space-between;
+    align-items: center;
+    outline: 0.5px solid gray;
+}
+
+.class-builder-pane-list {
+    width: 300px; height: 100%;
+    display: flex; justify-content: center;
 }
 
 .class-builder-main-edit {
@@ -11,11 +22,10 @@
 }
 
 .class-builder-passives-row {
-    width: 90%; height: 75px;
+    width: 95%; min-height: 85px;
     display: flex; align-items: center;
     flex-wrap: wrap;
-    border-top: 0.5px solid gray;
-    border-bottom: 0.5px solid gray;
+    margin: 1% 0;
 }
 .class-builder-passives-row > * {margin: 0 2%;}
 
@@ -30,12 +40,12 @@
 .class-builder-column {
     width: 50%; height: 100%;
     display: flex; flex-direction: column;
-    align-items: center;
+    align-items: center; justify-content: center;
 }
 .class-builder-column > * {margin-bottom: 2%;}
 
 .class-builder-attr-column {
-    width: 75%; height: 200px;
+    width: 100%; height: 200px;
     align-self: flex-start;
     display: flex; flex-direction: column;
     justify-content: center; align-items: center;
@@ -43,12 +53,13 @@
 .class-builder-attr-column > small {margin-top: 3%; color: gray;}
 
 .class-builder-actions-armors {
-    width: 100%; height: 65%;
+    width: 100%; height: 200px;
     display: flex;
+    overflow-y: scroll;
 }
 
 .class-builder-attr-row {
-    width: 100%;
+    width: 60%;
     display: flex;
 }
 
@@ -63,20 +74,33 @@
 .class-builder-list-header {width: 90%; text-align: left;}
 
 .class-builder-list-box {
-    width: 300px; max-height: 100%;
-    display: flex; flex-direction: column;
-    overflow-y: scroll;
+    display: flex; 
     background-color: #202020;
     border-radius: 10px;
+    cursor: pointer;
 }
 .class-builder-list-box > * {margin: 1% 2%;}
+.class-builder-list-box:hover {background-color: #303030;}
 
-.list-box-header {font-size: 75%;color: gray;}
+.list-box-column {
+    flex-direction: column;
+    width: 300px; max-height: 100%; min-height: 40%;
+    overflow-y: scroll;
+}
+.list-box-row {
+    width: 100%; max-height: 100%;
+    overflow-x: scroll;
+}
+
+.inner-list-box-row {display: flex;}
+.inner-list-box-row > * {margin: 0 3%;}
+
+.list-box-header {font-size: 75%; color: gray;}
 
 .class-builder-list-box-row {
     width: 95%;
     display: flex; 
-    justify-content: space-between; align-items: center;
+    justify-content: center; align-items: center;
 }
 
 .class-item-sort-button-row {
@@ -90,3 +114,12 @@
     margin-left: 1%;
 }
 .clickable-icons:hover {color: lightgray;}
+
+.class-builder-talents {
+    width: 100%; height: 30%;
+    display: flex; flex-direction: column;
+    align-items: center;
+    border-top: 0.5px solid gray;
+    overflow-y: scroll;
+}
+.class-builder-talents > div {margin: 2px 0;}

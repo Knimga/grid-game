@@ -1,0 +1,29 @@
+.armor-pane {
+    width: 225px;
+    display: flex;
+    background-color: #181818;
+    border-radius: 10px;
+    margin: 2% 0; padding: 4%;
+    font-size: 75%;
+    cursor: pointer;
+}
+.armor-pane:hover {outline: 0.5px solid gray; background-color: #303030;}
+
+.armor-label, .armor-details {
+    height: 100%;
+    display: flex; flex-direction: column;
+    justify-content: center;
+}
+
+.armor-label {width: 60%}
+.armor-label > small {color: gray; font-style: italic;}
+
+.armor-details {width: 40%;}
+
+.armor-type {color: gray; font-style: italic;}
+
+.selected-armor {outline: 0.5px solid lightblue;}
+
+.passives-column {display: flex; flex-direction: column;}
+
+.armor-action-tooltip:hover {text-decoration: underline;}

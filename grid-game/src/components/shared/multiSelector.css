@@ -1,0 +1,28 @@
+.multi-selector-container, .multi-selector-label, 
+.multi-select-column, .multi-select-box {display: flex;}
+
+.multi-selector-container {width: 100%;}
+
+.multi-selector-label {
+    width: 40%;
+    justify-content: flex-end;
+    align-items: center;
+}
+
+.multi-select-column {
+    width: 50%;
+    flex-direction: column;
+    align-items: center;
+    font-size: 90%;
+}
+
+.multi-select-box {
+    width: 50%;
+    flex-direction: column; align-items: center;
+    background-color: #202020; border-radius: 10px;
+}
+
+.multi-select-item {cursor: pointer; margin-bottom: -2%;}
+.multi-select-item:hover {color: white;}
+
+.gray {color: gray;}

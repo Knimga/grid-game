@@ -2,7 +2,7 @@
     width: 100%; height: 28%;
     display: flex; 
     background-color: #202020;
-    font-size: 85%;
+    
     border-radius: 10px;
     padding: 1% 0;
 }
@@ -12,9 +12,9 @@
     justify-content: center;
 }
 
-.left-list {width: 25%;}
-.atk-bonus-list {width: 15%;}
-.ele-bonus-list {width: 30%; flex-wrap: wrap;}
+.left-list {width: 25%; font-size: 85%;}
+.atk-bonus-list {width: 15%; font-size: 85%;}
+.ele-bonus-list {width: 30%; flex-wrap: wrap; font-size: 85%;}
 .passive-list {width: 20%;}
 
 .list-row {width: 100%; display: flex;}

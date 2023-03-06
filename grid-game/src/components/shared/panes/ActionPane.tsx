@@ -1,17 +1,19 @@
 import './actionPane.css';
 
-import {Action, Stats } from '../../types/types';
-import { DamageTypeColor, Intent } from '../../types/enums';
+import KeyValuePill from '../KeyValuePill';
 
-import { getAtkBonus }  from '../../services/charCalc';
-import { cap, actionDetailString } from '../../services/detailStrings';
+import {Action, Stats } from '../../../types/types';
+import { DamageTypeColor, Intent } from '../../../types/enums';
+
+import { getAtkBonus }  from '../../../services/charCalc';
+import { cap, actionDetailString } from '../../../services/detailStrings';
 
 interface ActionPaneInput {
-    action: Action,
-    stats: Stats | null,
-    isSelected?: boolean,
-    onClick?: Function,
-    index?: number
+    action: Action;
+    stats: Stats | null;
+    isSelected?: boolean;
+    onClick?: Function;
+    index?: number;
 }
 
 export default function ActionPane({action, stats, isSelected, onClick, index}: ActionPaneInput) {
@@ -22,10 +24,7 @@ export default function ActionPane({action, stats, isSelected, onClick, index}: 
     function actionDetailItem(prop: string) {
         const value: string = actionDetailItemValue(prop);
         const label: string = prop === 'mpCost' ? 'MP Cost' : cap(prop);
-        return <div className="action-detail-item">
-            <div className="action-detail-label">{label}</div>
-            <div className="action-detail-value">{value}</div>
-        </div>
+        return <KeyValuePill label={label} value={value} />
     }
 
     function actionDetailItemValue(prop: string): string {
@@ -59,23 +58,20 @@ export default function ActionPane({action, stats, isSelected, onClick, index}: 
         key={action._id}
         onClick={() => click()}
     >
-        <div className="action-pane-header-row">
-            <div className="action-detail-desc-column">
-                <div>
-                    <strong style={{color: hasEnoughMp ? DamageTypeColor[action.dmgType] : 'gray'}}>
-                        {action.name}
-                    </strong>
-                </div>
-                <small>{actionDetailString(action, stats)}</small>
+        <div className="action-detail-desc-column">
+            <div>
+                <strong style={{color: hasEnoughMp ? DamageTypeColor[action.dmgType] : 'gray'}}>
+                    {action.name}
+                </strong>
             </div>
-            <div className="action-detail-items-column">
-                {action.isWeapon ? '' : actionDetailItem('mpCost')}
-                {actionDetailItem('target')}
-                {action.target !== 'self' ? actionDetailItem('range') : ''}
-                {action.target !== 'self' && action.intent === Intent.offense && stats ? actionDetailItem('attack') : ''}
-            </div>
+            <small>{actionDetailString(action, stats)}</small>
         </div>
-        
+        <div className="action-detail-items-column">
+            {action.isWeapon ? '' : actionDetailItem('mpCost')}
+            {actionDetailItem('target')}
+            {action.target !== 'self' ? actionDetailItem('range') : ''}
+            {action.target !== 'self' && action.intent === Intent.offense && stats ? actionDetailItem('attack') : ''}
+        </div>
     </div>
   )
 }

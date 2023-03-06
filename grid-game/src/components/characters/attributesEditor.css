@@ -1,5 +1,5 @@
 .attributes-container {
-    height: 20%;
+    height: 150px;
     display: flex; justify-content: space-around; align-items: center;
 }
 
@@ -11,7 +11,7 @@
 }
 
 .attr-column {
-    height: 100%; width: 8%;
+    height: 150px; width: 8%;
     display: flex; flex-direction: column; 
     justify-content: space-between; align-items: center;
 }
@@ -27,3 +27,4 @@
 .pb-label {height: 26px; margin-top: 3px;}
 
 .red {color: darkred;}
+.green {color: lightgreen;}

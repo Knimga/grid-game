@@ -17,14 +17,3 @@
 
 .off-aoe-range {background-color: #d44e4e;}
 .def-aoe-range {background-color: #3991d4;}
-
-.charbar-container {
-    width: 100%; height: 25%;
-    display: flex; flex-direction: column;
-    background-color: #303030;
-}
-
-.hpbar {height: 65%; background-color: darkred;}
-
-.mpbar {height: 35%; background-color: dodgerblue;}
-

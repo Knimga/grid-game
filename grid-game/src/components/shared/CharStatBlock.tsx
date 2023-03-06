@@ -1,7 +1,7 @@
 import './charStatBlock.css';
 
 import AttributeBars from "./AttributeBars";
-import DmgTypeStatPane from "./DmgTypeStatPane";
+import DmgTypeStatPane from "./panes/DmgTypeStatPane";
 
 import { GameChar, DamageTypes } from "../../types/types";
 import { DamageType } from '../../types/enums';

@@ -2,10 +2,10 @@ import { useState, useEffect } from 'react';
 
 import { Button } from '@mui/material';
 
-import ClassPane from '../shared/ClassPane';
+import ClassPane from '../shared/panes/ClassPane';
 import ClassBuilder from './ClassBuilder';
 
-import {Class, Action, Armor} from '../../types/types';
+import {Class, Action, Armor, Weapon, Passive} from '../../types/types';
 
 import { blankClass } from '../../services/charCalc';
 
@@ -16,29 +16,31 @@ export default function ClassTab() {
     const [selectedClass, setSelectedClass] = useState<Class>();
     const [actions, setActions] = useState<Action[]>([]);
     const [armors, setArmors] = useState<Armor[]>([]);
+    const [weapons, setWeapons] = useState<Weapon[]>([]);
+    const [passives, setPassives] = useState<Passive[]>([]);
 
     useEffect(() => {
         fetch(urls.localRoot+urls.classes.getAll)
             .then(res => res.json())
             .then((data) => setClasses(data.sort((a: Class, b: Class) => a.name > b.name ? 1 : -1)))
-            .catch((err) => console.log(err))
-    },[]);
-
-    useEffect(() => {
+            .catch((err) => console.log(err));
         fetch(urls.localRoot+urls.actions.getAll)
             .then(res => res.json())
             .then((data) => setActions(data))
-            .catch((err) => console.log(err))
-    },[]);
-
-    useEffect(() => {
+            .catch((err) => console.log(err));
         fetch(urls.localRoot+urls.armors.getAll)
             .then(res => res.json())
             .then((data) => setArmors(data))
-            .catch((err) => console.log(err))
+            .catch((err) => console.log(err));
+        fetch(urls.localRoot+urls.weapons.getAll)
+            .then(res => res.json())
+            .then((data) => setWeapons(data))
+            .catch((err) => console.log(err));
+        fetch(urls.localRoot+urls.passives.getAll)
+            .then(res => res.json())
+            .then((data) => setPassives(data))
+            .catch((err) => console.log(err));
     },[]);
-
-
 
     function updateClass(newClass: Class): void {
         const newClasses: Class[] = [...classes];
@@ -93,7 +95,7 @@ export default function ClassTab() {
                             charClass={charClass}
                             key={charClass._id}
                             stats={null}
-                            isSelected={false}
+                            isSelected={selectedClass?._id === charClass._id}
                             selectClass={setSelectedClass}
                             isClassDisplay={true}
                         />
@@ -105,13 +107,12 @@ export default function ClassTab() {
                     charClass={selectedClass} 
                     actions={actions} 
                     armors={armors} 
+                    weapons={weapons}
+                    passives={passives}
                     update={updateClass} 
                     save={saveClass}
                 /> 
             : ''}
-            {selectedClass ? <div className="actions-effects-editor-container">
-                
-            </div> : ''}
         </div>
     </div>
   )

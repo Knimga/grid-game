@@ -9,7 +9,7 @@ import {
     canBuffSelf
 } from "./aiAct";
 
-import { canSeePlayers, visiblePlayers } from "./los";
+import { canSeePlayers } from "./los";
 import { isDead } from "./miscGameLogic";
 import { effectAlreadyApplied } from "./actions";
 
@@ -87,9 +87,9 @@ function findAiPlans(
     //the viablePlan is the first valid plan where dest is reachable this turn
     let viablePlan: AiPlan | null = null;
 
-    //console.log(`${actor.name} - ${actor.game.gameId}: findAiPlans:`);
-    //console.log(`sortedTargets: ${listLog(sortedTargets)}`);
-    //console.log(`sortedActions: ${listLog(sortedActions)}`);
+    console.log(`${actor.name} - ${actor.game.gameId}: findAiPlans:`);
+    console.log(`sortedTargets: ${listLog(sortedTargets)}`);
+    console.log(`sortedActions: ${listLog(sortedActions)}`);
 
     for (let t = 0; t < sortedTargets.length; t++) {
         const thisTarget: GameChar = sortedTargets[t];
@@ -102,12 +102,12 @@ function findAiPlans(
                 const thisInRangeDest: number | null = getInRangeDest(board, actor, thisAction, 
                     thisTarget.game.positionIndex, adjMatrix);
                 
-                //console.log(`target ${thisTarget.name}, action ${thisAction.name} - inRangeDest = ${thisInRangeDest}`);
+                console.log(`target ${thisTarget.name}, action ${thisAction.name} - inRangeDest = ${thisInRangeDest}`);
 
                 if(thisInRangeDest === null) break;
 
                 const canReachDestThisTurn: boolean = destReachableThisTurn(actor, board, adjMatrix, thisInRangeDest);
-                //console.log(`target ${thisTarget.name}, action ${thisAction.name} - ${canReachDestThisTurn ? 'CAN' : 'CANNOT'} reach dest this turn!`)
+                console.log(`target ${thisTarget.name}, action ${thisAction.name} - ${canReachDestThisTurn ? 'CAN' : 'CANNOT'} reach dest this turn!`)
 
                 if(!preferredPlan) {
                     preferredPlan = {target: thisTarget, chosenAction: thisAction, newDest: thisInRangeDest}
@@ -124,7 +124,7 @@ function findAiPlans(
     return {preferred: preferredPlan, viable: viablePlan};
 }
 
-//function listLog(things: any[]): string {return things.map(t => t.name).join(', ')}
+function listLog(things: any[]): string {return things.map(t => t.name).join(', ')}
 
 function destReachableThisTurn(
     mover: GameChar, board: GameBoard, adjMatrix: number[][], destIndex: number
@@ -140,7 +140,8 @@ function isNullPlan(plan: AiPlan): boolean {
 
 function isExploreMode(actor: GameChar, chars: GameChar[], board: GameBoard): boolean {
     if(actor.type === CharType.beast) return !canSeePlayers(board, actor.game.positionIndex);
-    return visiblePlayers(chars).length ? false : true;
+    const enemyChars: GameChar[] = chars.filter(c => c.type === CharType.enemy);
+    return !enemyChars.some(c => canSeePlayers(board, c.game.positionIndex));
 }
 
 function explorationPlan(char: GameChar, board: GameBoard, roundNumber: number): AiPlan {
@@ -148,19 +149,24 @@ function explorationPlan(char: GameChar, board: GameBoard, roundNumber: number):
     let target: GameChar | null = null;
     let chosenAction: Action | null = null;
 
+    if(char.type === CharType.beast) {
+        return {chosenAction: chosenAction, target: target, newDest: randomMoveToIndex(board, char)}
+    }
+
     if(roundNumber === 1 && hasBuff(char)) {
         chosenAction = randomSortedBuffActions(char)[0];
         target = char;
     }
 
-    if(char.type === CharType.beast) {
-        return {chosenAction: chosenAction, target: target, newDest: randomMoveToIndex(board, char)}
+    if(char.game.destinationIndex !== undefined && char.game.positionIndex !== char.game.destinationIndex) {
+        return {chosenAction: chosenAction, target: target, newDest: char.game.destinationIndex}
     }
 
-    if(!char.game.destinationIndex || char.game.positionIndex === char.game.destinationIndex) {
-        const newExploreDest: number = newExploreDestination(board, char.game.positionIndex);
-        newDest = newExploreDest;
-    }
+    //if(!char.game.destinationIndex || char.game.positionIndex === char.game.destinationIndex) {
+    const newExploreDest: number = newExploreDestination(board, char.game.positionIndex);
+    console.log(`newExploreDest = ${newExploreDest}`);
+    newDest = newExploreDest;
+    //}
 
     return {chosenAction: chosenAction, target: target, newDest: newDest}
 }

@@ -1,38 +1,46 @@
-.passive-effect-pane {
-    min-width: 150px; height: 50px;
+.passive-pane {
+    min-width: 130px; min-height: 40px;
     display: flex;
     align-items: center;
     background-color: #181818; color: lightgray;
     border-radius: 10px;
     margin: 1% 0;
+    flex-shrink: 0;
 }
 
-.passive-effect-body {
+.passive-pane:hover {outline: 0.5px solid gray; background-color: #252525;}
+
+.passive-body {
     width: 100%; height: 100%;
     display: flex; flex-direction: column;
     align-items: center;
 }
 
-.passive-effect-icon-container {
+.passive-icon-container {
     width: 25%; height: 85%;
     display: flex; justify-content: center;
     align-items: center;
     border-left: 0.5px solid #505050;
 }
 
-.passive-effect-label {
+.passive-label {
     font-size: 90%; font-weight: bold;
     width: 90%;
     display: flex; justify-content: center;
     border-bottom: 0.5px solid #505050;
 }
 
-.passive-effect-values {
+.passive-values {
     font-size: 80%;
     width: 100%; 
     display: flex; flex-direction: column;
     align-items: center;
 }
-.passive-effect-values > small {
+.passive-values > small {
     width: 100%; text-align: center;
+}
+
+.passive-pane-selected {
+    outline: 0.5px solid lightblue;
+    background-color: #303030;
 }

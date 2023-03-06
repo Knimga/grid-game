@@ -1,9 +1,9 @@
 import './dmgTypeStatPane.css';
 
-import { Bonuses } from "../../types/types";
-import { DamageType, DamageTypeColor } from '../../types/enums';
+import { Bonuses } from "../../../types/types";
+import { DamageType, DamageTypeColor } from '../../../types/enums';
 
-import { cap } from "../../services/detailStrings";
+import { cap } from "../../../services/detailStrings";
 
 interface DmgTypeStatPaneInput {
     dmgType: DamageType;

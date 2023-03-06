@@ -14,12 +14,12 @@ export function getLos(board: GameBoard, fromPositions: number[]): number[] {
 }
 
 export function visiblePlayers(chars: GameChar[]): number[] {
-    return chars.filter(char => char.type === 'player' && char.game.isVisible)
+    return chars.filter(char => char.type === CharType.player && char.game.isVisible)
         .map(char => char.game.positionIndex)
 }
 
 export function canSeePlayers(board: GameBoard, fromPosition: number): boolean {
-    const playerPositions: number[] = board.chars.filter(char => char.type === 'player')
+    const playerPositions: number[] = board.chars.filter(char => char.type === CharType.player)
         .map(char => char.game.positionIndex);
     const los: number[] = getLos(board, [fromPosition]);
     return los.some(i => playerPositions.includes(i));

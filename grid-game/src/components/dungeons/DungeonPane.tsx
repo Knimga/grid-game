@@ -48,7 +48,7 @@ export default function DungeonPane({dungeon, updatesSaved, update, save, addBoa
             className={`save-button ${updatesSaved ? '' : 'unsaved'}`} 
             onClick={() => save()}
         />
-        <NameInput name={dungeon.name} update={updateName} />
+        <NameInput name={dungeon.name} update={updateName} label="Dungeon Name" />
         <div className="space-around-flex-row">
             <ColorPicker label={"Wall Color"} color={dungeon.wallColor} update={updateWallColor} />
             <ColorPicker label={"Floor Color"} color={dungeon.floorColor} update={updateFloorColor} />
